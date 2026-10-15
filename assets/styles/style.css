@@ -1,0 +1,2227 @@
+@define-color app_bg #171218;
+@define-color app_surface #211a22;
+@define-color app_surface_alt #2a222b;
+@define-color app_surface_high #332a34;
+@define-color app_fg #f7edf5;
+@define-color app_fg_dim #cbbbc8;
+@define-color app_fg_disabled #8f808e;
+@define-color app_popover #2e2530;
+@define-color app_accent #e2a3d9;
+@define-color app_accent_hover #d68ecb;
+@define-color app_on_accent #351c31;
+
+@define-color mu_primary #cfbcff;
+@define-color mu_on_primary #381e72;
+@define-color mu_primary_container #4f378b;
+@define-color mu_on_primary_container #eaddff;
+@define-color mu_secondary_container #3b3550;
+@define-color mu_surface #17131f;
+@define-color mu_surface_container #221d2c;
+@define-color mu_surface_high #2d2738;
+@define-color mu_text #e8e0f0;
+@define-color mu_text_dim #b3a9c2;
+@define-color mu_track #4a4360;
+
+.window {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.title {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: @app_fg;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.card-border {
+    border-radius: 14px;
+    background-image: linear-gradient(to bottom,
+        alpha(@app_fg, 0.06), alpha(@app_fg, 0.02));
+    transition: background-image 0.2s ease, border-color 0.2s ease,
+        box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+}
+
+.card-border:hover {
+    box-shadow: 0 10px 28px alpha(@app_accent, 0.30);
+    transform: translateY(-4px);
+    border-color: @app_accent;
+    background-image: linear-gradient(to bottom,
+        alpha(@app_accent, 0.14), alpha(@app_fg, 0.03));
+}
+
+.card-border:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px alpha(@app_accent, 0.25);
+}
+
+.thumbnail {
+    border-radius: 9px;
+    margin: 6px;
+    box-shadow: 0 3px 10px alpha(black, 0.35);
+    transition: box-shadow 0.25s ease;
+}
+
+.card-border:hover .thumbnail {
+    box-shadow: 0 8px 20px alpha(black, 0.55);
+}
+
+.gl-header {
+    margin-bottom: 4px;
+}
+
+.gl-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: @app_fg;
+}
+
+flowbox.game-library > flowboxchild,
+flowbox.game-library > flowboxchild:hover,
+flowbox.game-library > flowboxchild:focus,
+flowbox.game-library > flowboxchild:focus-visible,
+flowbox.game-library > flowboxchild:selected {
+    background: none;
+    outline: none;
+    box-shadow: none;
+    border: none;
+}
+
+.game-card {
+    border-radius: 18px;
+    border: 1px solid alpha(@app_fg, 0.07);
+    background-color: alpha(@app_fg, 0.035);
+    transition: background-color 260ms ease, border-color 260ms ease, opacity 260ms ease,
+        transform 420ms cubic-bezier(0.2, 0.9, 0.3, 1.12);
+}
+
+.game-card:hover,
+.game-card.settings-active {
+    transform: translateY(-6px);
+    background-color: alpha(@app_fg, 0.07);
+    border-color: alpha(@app_accent, 0.55);
+}
+
+.game-card:active {
+    transform: translateY(-2px) scale(0.97);
+}
+
+.game-card.enabled-card {
+    background-color: alpha(@app_fg, 0.05);
+    border-color: alpha(@app_fg, 0.12);
+}
+
+.game-card.enabled-card:hover,
+.game-card.enabled-card.settings-active {
+    background-color: alpha(@app_fg, 0.08);
+    border-color: alpha(@app_accent, 0.6);
+}
+
+.game-card.disabled-card {
+    opacity: 0.72;
+}
+
+.game-card.disabled-card:hover,
+.game-card.disabled-card.settings-active {
+    opacity: 1;
+}
+
+.game-cover {
+    transform: scale(1);
+    filter: grayscale(0) brightness(1);
+    transition: transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1), filter 360ms ease;
+}
+
+.game-card:hover .game-cover,
+.game-card.settings-active .game-cover {
+    transform: scale(1.06);
+}
+
+.game-card.disabled-card .game-cover {
+    filter: grayscale(0.85) brightness(0.8);
+}
+
+.game-card.disabled-card:hover .game-cover,
+.game-card.disabled-card.settings-active .game-cover {
+    filter: grayscale(0) brightness(1);
+}
+
+.gc-badge {
+    margin: 10px;
+    padding: 4px 10px 4px 8px;
+    border-radius: 8px;
+    background-color: alpha(black, 0.6);
+}
+
+.gc-badge-dot {
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: 999px;
+    background-color: rgb(74, 222, 128);
+    animation-name: rb-pulse;
+    animation-duration: 1600ms;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+}
+
+.gc-badge-text {
+    font-size: 10px;
+    font-weight: 700;
+    color: white;
+}
+
+@keyframes gc-badge-in { from { opacity: 0; transform: translateY(-8px) scale(0.8); } to { opacity: 1; transform: translateY(0px) scale(1); } }
+.game-card.is-running .gc-badge {
+    animation-name: gc-badge-in;
+    animation-duration: 440ms;
+    animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.game-card-info {
+    padding: 10px 12px;
+}
+
+.game-cover-frame {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 12px alpha(black, 0.3);
+}
+
+.game-card-title {
+    font-weight: 700;
+    font-size: 12px;
+    color: @app_fg;
+    transition: color 220ms ease;
+}
+
+.game-card:hover .game-card-title {
+    color: @app_fg;
+}
+
+.settings-hover-blocked .game-card:not(.settings-active):hover {
+    transform: translateY(0);
+    background-color: alpha(@app_fg, 0.035);
+    border-color: alpha(@app_fg, 0.07);
+}
+
+.settings-hover-blocked .game-card.enabled-card:not(.settings-active):hover {
+    background-color: alpha(@app_fg, 0.05);
+    border-color: alpha(@app_fg, 0.12);
+}
+
+.settings-hover-blocked .game-card.disabled-card:not(.settings-active):hover {
+    opacity: 0.72;
+}
+
+.settings-hover-blocked .game-card:not(.settings-active):hover .game-cover {
+    transform: scale(1);
+}
+
+.settings-hover-blocked .game-card.disabled-card:not(.settings-active) .game-cover,
+.settings-hover-blocked .game-card.disabled-card:not(.settings-active):hover .game-cover {
+    filter: grayscale(0.85) brightness(0.8);
+}
+
+.settings-hover-blocked .game-card:not(.settings-active):hover .game-card-status {
+    background-color: alpha(@app_fg, 0.08);
+}
+
+.settings-hover-blocked .game-card:not(.settings-active):hover .game-card-status.game-card-status-unset {
+    background-color: alpha(@app_fg, 0.06);
+}
+
+.settings-hover-blocked .game-card.settings-active,
+.settings-hover-blocked .game-card.settings-active:hover {
+    transform: translateY(-6px);
+    background-color: alpha(@app_fg, 0.07);
+    border-color: alpha(@app_accent, 0.55);
+}
+
+.settings-hover-blocked .game-card.enabled-card.settings-active,
+.settings-hover-blocked .game-card.enabled-card.settings-active:hover {
+    background-color: alpha(@app_fg, 0.08);
+    border-color: alpha(@app_accent, 0.6);
+}
+
+.settings-hover-blocked .game-card.disabled-card.settings-active,
+.settings-hover-blocked .game-card.disabled-card.settings-active:hover {
+    opacity: 1;
+}
+
+.settings-hover-blocked .game-card.settings-active .game-cover,
+.settings-hover-blocked .game-card.settings-active:hover .game-cover {
+    transform: scale(1.06);
+    filter: grayscale(0) brightness(1);
+}
+
+@keyframes card-in { from { opacity: 0; transform: translateY(28px) scale(0.92); } to { opacity: 1; transform: translateY(0px) scale(1); } }
+@keyframes card-in-dim { from { opacity: 0; transform: translateY(28px) scale(0.92); } to { opacity: 0.72; transform: translateY(0px) scale(1); } }
+
+.appear-0, .appear-1, .appear-2, .appear-3, .appear-4, .appear-5,
+.appear-6, .appear-7, .appear-8, .appear-9, .appear-10 {
+    animation-name: card-in;
+    animation-duration: 640ms;
+    animation-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
+    animation-fill-mode: backwards;
+}
+.disabled-card.appear-0, .disabled-card.appear-1, .disabled-card.appear-2,
+.disabled-card.appear-3, .disabled-card.appear-4, .disabled-card.appear-5,
+.disabled-card.appear-6, .disabled-card.appear-7, .disabled-card.appear-8,
+.disabled-card.appear-9, .disabled-card.appear-10 {
+    animation-name: card-in-dim;
+}
+.appear-1 { animation-delay: 50ms; }
+.appear-2 { animation-delay: 100ms; }
+.appear-3 { animation-delay: 150ms; }
+.appear-4 { animation-delay: 200ms; }
+.appear-5 { animation-delay: 250ms; }
+.appear-6 { animation-delay: 300ms; }
+.appear-7 { animation-delay: 350ms; }
+.appear-8 { animation-delay: 400ms; }
+.appear-9 { animation-delay: 450ms; }
+.appear-10 { animation-delay: 500ms; }
+
+.settings-label {
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.settings-button {
+    min-width: 34px;
+    min-height: 34px;
+    margin: 8px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    outline: none;
+    background-image: none;
+    background-color: alpha(black, 0.5);
+    color: white;
+    box-shadow: none;
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 180ms ease, background-color 220ms ease, color 220ms ease,
+        border-radius 280ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card-border:hover .settings-button,
+.game-card:hover .settings-button,
+.game-card.settings-active .settings-button,
+.game-card .settings-button:focus-visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.settings-hover-blocked .game-card:not(.settings-active) .settings-button {
+    opacity: 0;
+    transform: scale(0.5);
+    pointer-events: none;
+}
+
+.settings-hover-blocked .game-card.settings-active .settings-button,
+.settings-hover-blocked .game-card.settings-active .settings-button:hover,
+.settings-hover-blocked .game-card.settings-active .settings-button.settings-open {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.game-card .settings-button:hover {
+    background-color: alpha(black, 0.72);
+    transform: scale(1.1);
+}
+
+.game-card .settings-button:active {
+    transform: scale(0.86);
+}
+
+.game-card .settings-button.settings-open {
+    background-color: @app_accent;
+    color: @app_on_accent;
+    border-radius: 10px;
+}
+
+.settings-button image {
+    transition: transform 560ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.settings-button:hover image {
+    transform: rotate(60deg);
+}
+
+.settings-button:active image {
+    transform: rotate(90deg) scale(0.85);
+}
+
+.settings-button.settings-open image {
+    transform: rotate(180deg);
+}
+
+.settings-main-dim {
+    background-color: alpha(black, 0.42);
+}
+
+.game-settings-window {
+    color: @app_fg;
+    background-color: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+@keyframes gs-window-in {
+    from { opacity: 0; transform: translateY(-10px) scale(0.94); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.game-settings-surface {
+    color: @app_fg;
+    border-radius: 16px;
+    border: none;
+    background-color: mix(@app_bg, @app_accent, 0.07);
+    box-shadow: 0 18px 42px alpha(black, 0.42);
+    animation-name: gs-window-in;
+    animation-duration: 260ms;
+    animation-timing-function: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+.popover-heading {
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 2px;
+}
+
+.runner-downloading {
+    color: @app_accent;
+}
+
+.download-progress {
+    margin-top: 2px;
+}
+
+.game-settings-surface .gs-heading {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 2px;
+}
+
+.game-settings-surface .caption {
+    opacity: 1;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background-color: alpha(@app_accent, 0.16);
+    color: @app_accent;
+    font-weight: 700;
+}
+
+.game-settings-surface .settings-label {
+    margin-top: 4px;
+    font-weight: 700;
+    color: alpha(@app_fg, 0.6);
+}
+
+.game-settings-surface button {
+    min-height: 36px;
+    padding: 0 14px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    background-color: alpha(@app_accent, 0.14);
+    color: @app_fg;
+    font-weight: 600;
+    transition: background-color 180ms ease, color 180ms ease, border-radius 220ms ease,
+        transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.game-settings-surface button:hover {
+    background-color: alpha(@app_accent, 0.26);
+}
+
+.game-settings-surface button:active {
+    border-radius: 16px;
+    transform: scale(0.96);
+}
+
+.game-settings-surface button:disabled {
+    opacity: 0.5;
+}
+
+.game-settings-surface button.destructive-action {
+    background-color: alpha(#ff5555, 0.12);
+    color: #ff6b6b;
+}
+
+.game-settings-surface button.destructive-action:hover {
+    background-color: #ff5555;
+    color: white;
+}
+
+.game-settings-surface entry {
+    min-height: 36px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    background-color: alpha(@app_fg, 0.07);
+    transition: background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.game-settings-surface entry:focus-within {
+    background-color: alpha(@app_accent, 0.10);
+    box-shadow: inset 0 0 0 2px @app_accent;
+}
+
+.game-settings-surface progressbar trough {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: alpha(@app_fg, 0.10);
+}
+
+.game-settings-surface progressbar progress {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: @app_accent;
+}
+
+.running-bar {
+    min-height: 52px;
+    padding: 6px 8px 6px 14px;
+    border-radius: 16px;
+    border: 1px solid alpha(@app_fg, 0.06);
+    background-color: mix(@app_bg, @app_accent, 0.12);
+    box-shadow: 0 10px 30px alpha(black, 0.35);
+    opacity: 0;
+    transform: translateY(28px) scale(0.96);
+    transition: opacity 260ms ease, transform 480ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.running-bar.rb-in {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+}
+
+.rb-caption {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: alpha(@app_fg, 0.55);
+}
+
+.rb-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: @app_fg;
+}
+
+.rb-time {
+    font-size: 11px;
+    font-weight: 700;
+    font-feature-settings: "tnum";
+    padding: 4px 10px;
+    border-radius: 8px;
+    background-color: alpha(@app_accent, 0.16);
+    color: @app_accent;
+}
+
+.running-stop {
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    background-color: alpha(#ff5555, 0.16);
+    color: #ff6b6b;
+    font-weight: 700;
+    transition: background-color 180ms ease, color 180ms ease, border-radius 220ms ease,
+        transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.running-stop:hover {
+    background-color: #ff5555;
+    color: white;
+}
+
+.running-stop:active {
+    border-radius: 18px;
+    transform: scale(0.94);
+}
+
+.running-dot {
+    min-width: 8px;
+    min-height: 8px;
+    border-radius: 999px;
+    background-color: rgb(74, 222, 128);
+    animation-name: rb-pulse;
+    animation-duration: 1600ms;
+    animation-timing-function: ease-out;
+    animation-iteration-count: infinite;
+}
+
+@keyframes rb-pulse {
+    from { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.55); }
+    to   { box-shadow: 0 0 0 7px rgba(74, 222, 128, 0); }
+}
+
+.running-name {
+    font-weight: bold;
+    font-size: 10px;
+}
+
+.running-status {
+    font-size: 9px;
+    opacity: 0.6;
+}
+
+.pw-header {
+    margin: 14px 0 6px 0;
+}
+
+.pw-subtitle {
+    opacity: 0.55;
+}
+
+.pw-wrap {
+    padding: 7px 18px;
+}
+
+.pw-card {
+    padding: 16px;
+    border-radius: 16px;
+    background-color: alpha(@app_fg, 0.035);
+    border: 1px solid alpha(@app_fg, 0.07);
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 450ms ease, transform 420ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        background-color 200ms ease, border-color 200ms ease;
+}
+
+.pw-card.pw-in {
+    opacity: 1;
+    transform: translateY(0px);
+}
+
+.pw-card:hover {
+    background-color: alpha(@app_fg, 0.07);
+    border-color: alpha(@app_accent, 0.55);
+}
+
+.printwork-cover {
+    min-width: 220px;
+    min-height: 300px;
+    max-width: 220px;
+    max-height: 300px;
+    border-radius: 10px;
+
+    box-shadow: 0 8px 20px alpha(black, 0.45);
+    transition: transform 380ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pw-card:hover .printwork-cover {
+    transform: scale(1.025);
+}
+
+.pw-chip {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: alpha(@app_fg, 0.08);
+    transition: background-color 200ms ease;
+}
+
+.pw-card:hover .pw-chip {
+    background-color: alpha(@app_accent, 0.22);
+}
+
+.pw-badge {
+    padding: 1px 10px;
+    border-radius: 999px;
+    color: #ff5555;
+    background-color: rgba(255, 85, 85, 0.12);
+    border: 1px solid rgba(255, 85, 85, 0.45);
+}
+
+.pw-desc {
+    opacity: 0.8;
+}
+
+.pw-read {
+    padding: 4px 22px;
+    border-radius: 999px;
+    background: none;
+    border: 1px solid alpha(@app_fg, 0.25);
+    box-shadow: none;
+    transition: background-color 180ms ease, color 180ms ease,
+        border-color 180ms ease, box-shadow 180ms ease, transform 160ms ease;
+}
+
+.pw-read:hover {
+    background-color: @app_accent;
+    color: @app_on_accent;
+    border-color: @app_accent;
+}
+
+.pw-read:active {
+    background-color: alpha(@app_accent, 0.75);
+    transform: scale(0.95);
+}
+
+
+.pw-dialog {
+    background-color: @app_bg;
+    background-image: none;
+    color: @app_fg;
+}
+
+.pw-dialog button {
+    min-width: 72px;
+    min-height: 36px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    background: none;
+    background-image: none;
+    background-color: alpha(@app_fg, 0.16);
+    color: @app_fg;
+    box-shadow: inset 0 0 0 1px alpha(@app_fg, 0.20);
+    text-shadow: none;
+    font-weight: 600;
+    transition: background-color 150ms ease, color 150ms ease, transform 160ms ease;
+}
+
+.pw-dialog button:hover {
+    background-color: alpha(@app_fg, 0.24);
+}
+
+.pw-dialog button:active {
+    background-color: alpha(@app_fg, 0.32);
+    transform: scale(0.96);
+}
+
+.pw-dialog button:disabled {
+    opacity: 0.5;
+}
+
+
+.pw-dialog button.dlg-accent,
+.pw-dialog button.suggested-action {
+    background-color: @app_accent;
+    color: @app_on_accent;
+    box-shadow: inset 0 0 0 1px alpha(@app_fg, 0.20);
+}
+
+.pw-dialog button.dlg-accent:hover,
+.pw-dialog button.dlg-accent:active,
+.pw-dialog button.suggested-action:hover,
+.pw-dialog button.suggested-action:active {
+    background-color: @app_accent_hover;
+    color: @app_on_accent;
+}
+
+.pw-dialog button.dlg-danger,
+.pw-dialog button.destructive-action {
+    background-color: #d63a3a;
+    color: #ffffff;
+    box-shadow: none;
+}
+
+.pw-dialog button.dlg-danger:hover,
+.pw-dialog button.destructive-action:hover {
+    background-color: #c22f2f;
+    color: #ffffff;
+}
+
+.pw-dialog button.dlg-danger:active,
+.pw-dialog button.destructive-action:active {
+    background-color: #a82626;
+    color: #ffffff;
+}
+
+.pw-dialog progressbar trough {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: alpha(@app_fg, 0.10);
+}
+
+.pw-dialog progressbar progress {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: @app_accent;
+}
+
+.tab-switcher {
+    padding: 4px;
+    border-radius: 999px;
+    background-color: alpha(@app_fg, 0.06);
+    border: 1px solid alpha(@app_fg, 0.08);
+    color: @app_fg;
+}
+
+.tab-switcher button {
+    min-height: 30px;
+    padding: 5px 24px;
+    margin: 0 2px;
+    border-radius: 999px;
+    border: 0;
+    outline: none;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    color: @app_fg;
+    text-shadow: none;
+    font-weight: bold;
+    opacity: 0.72;
+    transition: background-color 0.18s ease, color 0.18s ease,
+        opacity 0.18s ease, transform 0.14s ease;
+}
+
+.tab-switcher button:hover,
+.tab-switcher button:focus-visible {
+    background-color: alpha(@app_fg, 0.07);
+    background-image: none;
+    color: @app_fg;
+    opacity: 1;
+}
+
+.tab-switcher button:checked,
+.tab-switcher button:checked:hover,
+.tab-switcher button:checked:active,
+.tab-switcher button:checked:focus,
+.tab-switcher button:focus {
+    background-color: transparent;
+    background-image: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    color: @app_fg;
+}
+
+.tab-switcher button.tab-active,
+.tab-switcher button.tab-active:hover,
+.tab-switcher button.tab-active:checked,
+.tab-switcher button.tab-active:checked:hover,
+.tab-switcher button.tab-active:focus {
+    background-color: @app_accent;
+    background-image: none;
+    color: @app_on_accent;
+    opacity: 1;
+    box-shadow: none;
+}
+
+.tab-switcher button.tab-active:hover {
+    background-color: @app_accent_hover;
+}
+
+.tab-switcher button.tab-active:active {
+    background-color: @app_accent_hover;
+    background-image: none;
+    color: @app_on_accent;
+    transform: scale(0.95);
+}
+
+.tab-switcher button:active {
+    background-color: alpha(@app_fg, 0.12);
+    background-image: none;
+    color: @app_fg;
+    transform: scale(0.95);
+}
+
+.pw-delete {
+    padding: 4px 8px;
+    min-height: 0;
+    border-radius: 999px;
+    background: none;
+    border: 1px solid alpha(@app_fg, 0.18);
+    box-shadow: none;
+    opacity: 0.6;
+    transition: opacity 180ms ease, color 180ms ease,
+        background-color 180ms ease, border-color 180ms ease, transform 160ms ease;
+}
+
+.pw-delete:active {
+    transform: scale(0.9);
+}
+
+.pw-delete:hover {
+    opacity: 1;
+    color: #ff5555;
+    background-color: rgba(255, 85, 85, 0.12);
+    border-color: rgba(255, 85, 85, 0.55);
+}
+
+.pv-window {
+    background-color: #000000;
+}
+
+.pv-bar {
+    padding: 14px 24px;
+    transition: opacity 250ms ease;
+}
+
+.pv-top {
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0));
+    padding-bottom: 36px;
+}
+
+.pv-bottom {
+    background-image: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0));
+    padding-top: 40px;
+}
+
+.pv-title {
+    color: white;
+    font-weight: bold;
+}
+
+.pv-pages {
+    color: white;
+    font-weight: bold;
+}
+
+.pv-hint {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.pv-nav {
+    min-width: 52px;
+    min-height: 52px;
+    padding: 0;
+    margin: 0 20px;
+    border-radius: 999px;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+    transition: opacity 250ms ease, background-color 150ms ease, border-color 150ms ease,
+        transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pv-nav:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.45);
+    transform: scale(1.08);
+}
+
+.pv-nav:active {
+    transform: scale(0.92);
+}
+
+.pv-nav:disabled {
+    opacity: 0.2;
+}
+
+.pv-nav-small {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border-radius: 999px;
+    color: white;
+    background: rgba(255, 255, 255, 0.12);
+    border: none;
+    box-shadow: none;
+    transition: background-color 150ms ease, transform 160ms ease;
+}
+
+.pv-nav-small:hover {
+    background: rgba(255, 85, 85, 0.75);
+}
+
+.pv-nav-small:active {
+    transform: scale(0.88);
+}
+
+.pv-bar.pv-hidden,
+.pv-nav.pv-hidden {
+    opacity: 0;
+}
+
+scale.pv-scale trough {
+    min-height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+}
+
+scale.pv-scale highlight {
+    border-radius: 999px;
+    background: @app_accent;
+}
+
+scale.pv-scale slider {
+    min-width: 16px;
+    min-height: 16px;
+    margin: -6px;
+    border-radius: 999px;
+    background: white;
+    border: none;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+.pv-counter {
+    margin: 12px 16px;
+    padding: 3px 12px;
+    border-radius: 999px;
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 300ms ease;
+}
+
+.pv-counter.pv-counter-on {
+    opacity: 1;
+}
+
+.pv-toast {
+    padding: 9px 20px;
+    border-radius: 999px;
+    color: white;
+    background: rgba(25, 25, 25, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    opacity: 0;
+    transition: opacity 250ms ease;
+}
+
+.pv-toast.pv-toast-on {
+    opacity: 1;
+}
+
+.pv-error {
+    color: white;
+    font-weight: bold;
+}
+
+.launcher-window {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.launcher-header {
+    min-height: 54px;
+    padding: 0 10px;
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.gl-page,
+.pw-wrap,
+.pw-page,
+.pw-header,
+.pw-scroll,
+.launcher-bg {
+    background-color: @app_bg;
+    background-image: none;
+    color: @app_fg;
+}
+
+window.launcher-window,
+window.launcher-window.background,
+window.launcher-window.csd {
+    background-color: @app_bg;
+    background-image: none;
+    color: @app_fg;
+}
+
+.gl-page scrolledwindow,
+.gl-page viewport,
+.gl-page flowbox,
+.pw-list,
+.pw-list > row,
+.pw-list scrolledwindow {
+    background-color: transparent;
+    background-image: none;
+    color: @app_fg;
+}
+
+popover > contents {
+    background-color: @app_popover;
+    background-image: none;
+    color: @app_fg;
+    border: 1px solid alpha(@app_fg, 0.10);
+}
+
+popover listview,
+popover list,
+popover scrolledwindow {
+    background-color: transparent;
+    background-image: none;
+    color: @app_fg;
+}
+
+popover listview > row:hover,
+popover list > row:hover,
+popover modelbutton:hover {
+    background-color: alpha(@app_accent, 0.12);
+}
+
+popover listview > row:selected,
+popover list > row:selected {
+    background-color: alpha(@app_accent, 0.22);
+    color: @app_fg;
+}
+
+window.dialog,
+window.messagedialog,
+window.dialog.message {
+    background-color: @app_bg;
+    background-image: none;
+    color: @app_fg;
+}
+
+.launcher-settings-button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    border: none;
+    background: none;
+    background-image: none;
+    color: @app_fg_dim;
+    box-shadow: none;
+    transition: background-color 180ms ease, color 180ms ease,
+        border-radius 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 180ms ease;
+}
+
+.launcher-settings-button:hover {
+    background-color: alpha(@app_accent, 0.14);
+    color: @app_accent;
+}
+
+.launcher-settings-button:active {
+    background-color: alpha(@app_accent, 0.24);
+    color: @app_accent;
+    border-radius: 15px;
+    transform: scale(0.92);
+}
+
+.launcher-settings-glyph {
+    color: @app_fg_dim;
+    font-size: 21px;
+    line-height: 1;
+    transition: color 180ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.launcher-settings-button:hover .launcher-settings-glyph {
+    color: @app_accent;
+    transform: rotate(35deg);
+}
+
+.launcher-settings-button:active .launcher-settings-glyph {
+    color: @app_accent;
+    transform: rotate(70deg) scale(0.9);
+}
+
+.launcher-settings-window {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.settings-shell {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.settings-sidebar {
+    min-width: 92px;
+    padding: 12px 8px 12px 8px;
+    background-color: @app_surface;
+    border-right: 1px solid alpha(@app_fg, 0.07);
+}
+
+.settings-sidebar-title {
+    margin: 0 8px 10px 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: @app_fg;
+}
+
+.settings-nav-button {
+    min-height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+    border: none;
+    background-color: transparent;
+    background-image: none;
+    color: @app_fg_dim;
+    box-shadow: none;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.settings-nav-button:hover,
+.settings-nav-button:focus-visible {
+    background-color: alpha(@app_fg, 0.07);
+    color: @app_fg;
+}
+
+.settings-nav-button:active {
+    background-color: alpha(@app_fg, 0.12);
+}
+
+.settings-nav-button.settings-nav-active,
+.settings-nav-button.settings-nav-active:hover {
+    background-color: alpha(@app_accent, 0.2);
+    color: @app_fg;
+    font-weight: 700;
+}
+
+.settings-content {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.settings-page {
+    color: @app_fg;
+}
+
+.settings-page-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: @app_fg;
+}
+
+.settings-section-title {
+    margin: 0 4px;
+    color: @app_fg_dim;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.settings-note {
+    margin: 0 4px;
+    color: @app_fg_dim;
+    font-size: 10px;
+    opacity: 0.85;
+}
+
+.settings-card {
+    background-color: @app_surface;
+    border: 1px solid alpha(@app_fg, 0.07);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.settings-row {
+    min-height: 40px;
+    padding: 9px 14px;
+}
+
+.settings-row-title {
+    color: @app_fg;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.settings-row-desc {
+    color: @app_fg_dim;
+    font-size: 10px;
+}
+
+.settings-row-sep {
+    min-height: 1px;
+    border: none;
+    background-color: alpha(@app_fg, 0.07);
+}
+
+.theme-mode-selector {
+    padding: 3px;
+    border-radius: 11px;
+    background-color: alpha(@app_fg, 0.06);
+    border: 1px solid alpha(@app_fg, 0.07);
+}
+
+.theme-mode-pill {
+    padding: 0;
+    border-radius: 8px;
+    background-color: mix(@app_surface_high, @app_accent, 0.35);
+    box-shadow: inset 0 0 0 1px alpha(@app_accent, 0.35);
+}
+
+.theme-mode-button {
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background-color: transparent;
+    background-image: none;
+    color: @app_fg_dim;
+    box-shadow: none;
+    outline: none;
+    font-weight: 700;
+    transition: color 160ms ease;
+}
+
+.theme-mode-button:hover {
+    color: @app_fg;
+}
+
+.theme-mode-button:checked,
+.theme-mode-button:checked:hover,
+.theme-mode-button:checked:active,
+.theme-mode-button:focus,
+.theme-mode-button:active {
+    background-color: transparent;
+    background-image: none;
+    border-color: transparent;
+    box-shadow: none;
+    outline: none;
+    color: @app_fg;
+}
+
+.theme-mode-button.theme-mode-active {
+    color: @app_fg;
+    font-weight: 800;
+}
+
+.theme-system-switch {
+    min-width: 42px;
+    min-height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background-color: alpha(@app_fg, 0.18);
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    transition: background-color 160ms ease;
+}
+
+.theme-system-switch:checked {
+    background-color: @app_accent;
+}
+
+.theme-system-switch slider {
+    min-width: 18px;
+    min-height: 18px;
+    margin: 3px;
+    border: none;
+    border-radius: 999px;
+    background-color: @app_fg_dim;
+    background-image: none;
+    box-shadow: none;
+}
+
+.theme-system-switch:checked slider {
+    background-color: @app_on_accent;
+}
+
+.theme-system-switch label,
+.theme-system-switch image {
+    color: transparent;
+}
+
+.accent-preset-box {
+    padding: 2px;
+}
+
+.accent-swatch {
+    min-width: 26px;
+    min-height: 26px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+    transition: border-color 140ms ease;
+}
+
+.accent-swatch:hover {
+    border-color: alpha(@app_fg, 0.28);
+}
+
+.accent-swatch:checked {
+    border-color: @app_fg;
+}
+
+.accent-dot {
+    min-width: 20px;
+    min-height: 20px;
+    border-radius: 999px;
+}
+
+.accent-dot-pink { background-color: #d96bc8; }
+.accent-dot-rose { background-color: #e97fae; }
+.accent-dot-purple { background-color: #9b87f5; }
+.accent-dot-blue { background-color: #62a0ea; }
+.accent-dot-cyan { background-color: #5cc8c8; }
+.accent-dot-green { background-color: #78c98a; }
+.accent-dot-orange { background-color: #e99a5a; }
+.accent-dot-yellow { background-color: #d9bc66; }
+
+.theme-accent-picker {
+    min-width: 40px;
+    min-height: 28px;
+    padding: 0;
+    border-radius: 8px;
+    border: 1px solid alpha(@app_fg, 0.12);
+    background-color: alpha(@app_fg, 0.06);
+    box-shadow: none;
+}
+
+.theme-accent-picker:hover {
+    border-color: alpha(@app_accent, 0.45);
+}
+
+.theme-accent-picker > button,
+.theme-accent-picker > button:hover,
+.theme-accent-picker > button:checked,
+.theme-accent-picker > button:active {
+    min-width: 0;
+    min-height: 0;
+    padding: 5px 8px;
+    border: none;
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    outline: none;
+}
+
+.settings-nav-glyph {
+    font-size: 15px;
+    color: inherit;
+}
+
+.theme-color-hex {
+    min-height: 32px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    background-image: none;
+    background-color: alpha(@app_fg, 0.08);
+    color: @app_fg;
+    font-family: monospace;
+}
+
+.theme-color-hex:focus-within {
+    background-color: alpha(@app_accent, 0.12);
+    box-shadow: inset 0 0 0 2px @app_accent;
+}
+
+.mu-page {
+    background-image: linear-gradient(165deg, @mu_surface_high, @mu_surface 62%);
+    transition: background-image 600ms ease;
+}
+
+.mu-root { background-color: @mu_surface; }
+
+.mu-enter {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 520ms ease, transform 640ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.mu-enter.mu-in { opacity: 1; transform: translateY(0px); }
+
+.mu-chip {
+    padding: 6px 16px;
+    border-radius: 999px;
+    background-color: @mu_secondary_container;
+    color: @mu_on_primary_container;
+    transition: background-color 500ms ease, color 500ms ease;
+}
+.mu-chip-small { padding: 3px 12px; }
+.mu-chip-text { color: @mu_on_primary_container; font-weight: bold; }
+
+.mu-art-wrap {
+    transform: scale(0.92);
+    transition: transform 560ms cubic-bezier(0.2, 0.9, 0.3, 1.15);
+}
+.mu-art-wrap.mu-playing { transform: scale(1); }
+
+.mu-art-wrap.mu-playing .mu-art {
+    box-shadow: 0 0 64px alpha(@mu_primary, 0.45), 0 0 22px rgba(0, 0, 0, 0.35);
+}
+
+@keyframes mu-swap-a { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0px); } }
+@keyframes mu-swap-b { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0px); } }
+.mu-swap-a, .mu-swap-b {
+    animation-duration: 460ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: backwards;
+}
+.mu-swap-a { animation-name: mu-swap-a; }
+.mu-swap-b { animation-name: mu-swap-b; }
+
+@keyframes mu-artswap-a { from { opacity: 0; transform: scale(0.93); } to { opacity: 1; transform: scale(1); } }
+@keyframes mu-artswap-b { from { opacity: 0; transform: scale(0.93); } to { opacity: 1; transform: scale(1); } }
+.mu-artswap-a, .mu-artswap-b {
+    animation-duration: 560ms;
+    animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+    animation-fill-mode: backwards;
+}
+.mu-artswap-a { animation-name: mu-artswap-a; }
+.mu-artswap-b { animation-name: mu-artswap-b; }
+
+@keyframes mu-pop-a { from { transform: scale(0.6); } to { transform: scale(1); } }
+@keyframes mu-pop-b { from { transform: scale(0.6); } to { transform: scale(1); } }
+.mu-pop-a, .mu-pop-b {
+    animation-duration: 300ms;
+    animation-timing-function: cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+.mu-pop-a { animation-name: mu-pop-a; }
+.mu-pop-b { animation-name: mu-pop-b; }
+
+.mu-art {
+    border-radius: 34px;
+    background-color: @mu_primary_container;
+    box-shadow: 0 0 56px alpha(@mu_primary, 0.34), 0 0 22px rgba(0, 0, 0, 0.35);
+    transition: background-color 500ms ease, box-shadow 500ms ease;
+}
+.mu-art picture { border-radius: 34px; }
+
+.mu-title { color: @mu_text; font-weight: 800; font-size: 26px; transition: color 500ms ease; }
+.mu-artist { color: @mu_text_dim; transition: color 500ms ease; }
+.mu-time { color: @mu_text_dim; font-weight: bold; transition: color 500ms ease; }
+.mu-card-title { color: @mu_text; font-weight: 800; font-size: 18px; }
+
+.mu-icon-btn, .mu-toggle, .mu-play {
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    outline: none;
+    padding: 0;
+    transition: background-color 220ms ease, color 220ms ease, box-shadow 220ms ease;
+}
+
+.mu-icon-btn {
+    min-width: 46px;
+    min-height: 46px;
+    border-radius: 999px;
+    background-color: transparent;
+    color: @mu_text_dim;
+}
+.mu-icon-btn:hover { background-color: alpha(@mu_primary, 0.14); color: @mu_primary; }
+.mu-icon-btn:active { background-color: alpha(@mu_primary, 0.26); }
+.mu-icon-btn image, .mu-toggle image { transition: transform 200ms cubic-bezier(0.2, 0.9, 0.3, 1.3); }
+.mu-icon-btn:hover image { transform: scale(1.12); }
+.mu-icon-btn:active image { transform: scale(0.85); }
+
+.mu-small { min-width: 38px; min-height: 38px; }
+.mu-like.mu-liked { color: @mu_primary; }
+
+.mu-toggle {
+    min-width: 46px;
+    min-height: 46px;
+    border-radius: 999px;
+    background-color: transparent;
+    color: @mu_text_dim;
+}
+.mu-toggle:hover { background-color: alpha(@mu_primary, 0.14); }
+.mu-toggle.mu-active { background-color: @mu_primary_container; color: @mu_on_primary_container; }
+
+.mu-play-holder {
+    min-width: 76px;
+    min-height: 76px;
+}
+
+.mu-play-glow {
+    min-width: 76px;
+    min-height: 76px;
+    border-radius: 38px;
+    background-color: transparent;
+    box-shadow: 0 0 26px alpha(@mu_primary, 0.34);
+    transition: box-shadow 220ms ease;
+}
+
+.mu-play-holder.mu-play-playing .mu-play-glow {
+    box-shadow: 0 0 28px alpha(@mu_primary, 0.40);
+}
+
+.mu-play-holder.mu-play-hover .mu-play-glow {
+    box-shadow: 0 0 34px alpha(@mu_primary, 0.52);
+}
+
+.mu-play {
+    min-width: 76px;
+    min-height: 76px;
+    border-radius: 38px;
+    background-color: @mu_primary;
+    color: @mu_on_primary;
+    box-shadow: none;
+    overflow: hidden;
+    transition: background-color 180ms ease, color 180ms ease,
+        border-radius 420ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+.mu-play.mu-playing {
+    border-radius: 26px;
+}
+
+.mu-play:active {
+    background-color: @mu_primary_container;
+    color: @mu_on_primary_container;
+    box-shadow: none;
+}
+
+.mu-play-icons {
+    transition: transform 260ms cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+.mu-play:hover .mu-play-icons { transform: scale(1.08); }
+.mu-play:active .mu-play-icons { transform: scale(0.84); }
+
+.mu-ico-play, .mu-play.mu-playing .mu-ico-pause {
+    transition: opacity 180ms ease 70ms, transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1.1) 40ms;
+}
+.mu-ico-pause, .mu-play.mu-playing .mu-ico-play {
+    transition: opacity 110ms ease, transform 300ms cubic-bezier(0.4, 0, 0.8, 0.4);
+}
+.mu-ico-play { opacity: 1; transform: rotate(0deg) scale(1); }
+.mu-ico-pause { opacity: 0; transform: rotate(-90deg) scale(0.3); }
+.mu-play.mu-playing .mu-ico-play { opacity: 0; transform: rotate(90deg) scale(0.3); }
+.mu-play.mu-playing .mu-ico-pause { opacity: 1; transform: rotate(0deg) scale(1); }
+
+.mu-ripple-ring {
+    opacity: 0;
+    border-radius: 999px;
+    border: 3px solid alpha(@mu_primary, 0.6);
+}
+@keyframes mu-rip-a { from { opacity: 0.7; transform: scale(0.9); } to { opacity: 0; transform: scale(1.65); } }
+@keyframes mu-rip-b { from { opacity: 0.7; transform: scale(0.9); } to { opacity: 0; transform: scale(1.65); } }
+.mu-rip-a, .mu-rip-b {
+    animation-duration: 620ms;
+    animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+    animation-fill-mode: both;
+}
+.mu-rip-a { animation-name: mu-rip-a; }
+.mu-rip-b { animation-name: mu-rip-b; }
+
+.mu-ring {
+    opacity: 0;
+    border-radius: 999px;
+    border: 3px solid alpha(@mu_on_primary, 0.16);
+    border-top-color: @mu_on_primary;
+    transition: opacity 240ms ease;
+}
+.mu-ring.mu-ring-on { opacity: 1; }
+.mu-ring.mu-ring-spin {
+    animation-name: mu-spin;
+    animation-duration: 900ms;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+}
+@keyframes mu-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+scale.mu-progress trough {
+    min-height: 10px;
+    border-radius: 999px;
+    background-color: @mu_track;
+    transition: background-color 500ms ease;
+}
+scale.mu-progress highlight {
+    border-radius: 999px;
+    background-color: @mu_primary;
+    transition: background-color 500ms ease;
+}
+scale.mu-progress slider {
+    min-width: 6px;
+    min-height: 30px;
+    margin: -10px 0;
+    border-radius: 3px;
+    background-color: @mu_primary;
+    border: none;
+    box-shadow: none;
+    transition: background-color 500ms ease;
+}
+
+scale.mu-volume trough {
+    min-height: 6px;
+    border-radius: 999px;
+    background-color: @mu_track;
+}
+scale.mu-volume highlight {
+    border-radius: 999px;
+    background-color: @mu_text_dim;
+    transition: background-color 200ms ease;
+}
+scale.mu-volume:hover highlight { background-color: @mu_primary; }
+scale.mu-volume slider {
+    min-width: 6px;
+    min-height: 22px;
+    margin: -8px 0;
+    border-radius: 3px;
+    background-color: @mu_text;
+    border: none;
+    box-shadow: none;
+    transition: background-color 200ms ease;
+}
+scale.mu-volume slider:active { background-color: @mu_primary; }
+
+.mu-player-page {
+    max-width: 680px;
+    min-width: 360px;
+}
+
+.mu-player-page > * {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.mu-art-placeholder {
+    border-radius: 34px;
+    background-color: @mu_primary_container;
+    color: @mu_on_primary_container;
+    box-shadow: 0 0 56px alpha(@mu_primary, 0.34), 0 0 22px rgba(0, 0, 0, 0.35);
+    transition: background-color 500ms ease, box-shadow 500ms ease, opacity 260ms ease;
+}
+
+.mu-album {
+    color: @mu_text_dim;
+    font-size: 12px;
+    margin-top: 2px;
+    transition: color 500ms ease;
+}
+
+.mu-source {
+    color: @mu_text_dim;
+    font-size: 11px;
+    opacity: 0.9;
+}
+
+.mu-error {
+    color: @mu_primary;
+}
+
+.mu-disabled-control,
+.mu-disabled-control:disabled {
+    opacity: 0.30;
+}
+
+.mu-full-player {
+    max-width: 1180px;
+    min-width: 760px;
+}
+
+.mu-player-column {
+    width: 680px;
+    min-width: 680px;
+    max-width: 680px;
+}
+
+.mu-player-column-game {
+    width: 680px;
+    min-width: 680px;
+    max-width: 680px;
+}
+
+.mu-mode-shell {
+    padding: 2px;
+}
+
+.mu-mode-dropdown,
+.mu-game-dropdown {
+    min-height: 38px;
+    border-radius: 999px;
+    background-color: @mu_secondary_container;
+    color: @mu_on_primary_container;
+    box-shadow: none;
+}
+
+.mu-mode-dropdown > button,
+.mu-game-dropdown > button {
+    min-height: 38px;
+    min-width: 230px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    background: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    color: @mu_on_primary_container;
+}
+
+.mu-game-dropdown > button {
+    min-width: 0;
+    min-height: 44px;
+    padding: 7px 14px;
+    text-align: left;
+}
+
+.mu-mode-dropdown:hover > button,
+.mu-game-dropdown:hover > button {
+    background-color: alpha(@mu_primary, 0.10);
+}
+
+.mu-track-panel {
+    min-width: 390px;
+    max-width: 390px;
+    padding: 18px;
+    border-radius: 28px;
+    background-color: alpha(@mu_surface_container, 0.92);
+}
+
+.mu-title-language button {
+    min-width: 34px;
+    min-height: 28px;
+    padding: 2px 10px;
+    background-image: none;
+    background-color: @mu_surface_high;
+    color: @mu_text_dim;
+    border-color: alpha(@mu_text_dim, 0.2);
+    box-shadow: none;
+    font-weight: 700;
+}
+
+.mu-title-language button:hover {
+    color: @mu_text;
+}
+
+.mu-title-language button:checked {
+    background-color: @mu_primary;
+    color: @mu_on_primary;
+}
+
+.mu-track-panel-title {
+    color: @mu_text;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.mu-track-panel-subtitle {
+    color: @mu_text_dim;
+    font-size: 12px;
+}
+
+.mu-dropdown-note {
+    color: @mu_text_dim;
+    font-size: 11px;
+}
+
+.mu-favorites-nav {
+    min-height: 40px;
+    border-radius: 18px;
+    background: transparent;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+    padding: 4px 10px;
+    color: @mu_text_dim;
+}
+
+.mu-favorites-nav:hover,
+.mu-favorites-nav:active {
+    background-color: alpha(@mu_primary, 0.13);
+    color: @mu_primary;
+}
+
+.mu-favorites-nav-label {
+    font-weight: 700;
+}
+
+.mu-track-separator {
+    opacity: 0.35;
+}
+
+.mu-track-scroll {
+    min-height: 0;
+}
+
+.mu-track-list {
+    background: transparent;
+}
+
+.mu-track-list > row,
+.mu-track-row {
+    border-radius: 18px;
+    background: transparent;
+    color: @mu_text;
+    margin: 2px 0;
+    transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.mu-track-row:hover {
+    background-color: alpha(@mu_primary, 0.10);
+}
+
+.mu-track-row:active {
+    background-color: alpha(@mu_primary, 0.17);
+}
+
+.mu-track-list > row.mu-track-row-active,
+.mu-track-row-active {
+    background-color: alpha(@mu_primary, 0.16);
+}
+
+.mu-track-list > row.mu-track-row-active:hover,
+.mu-track-row-active:hover {
+    background-color: alpha(@mu_primary, 0.16);
+}
+
+.mu-track-number {
+    color: @mu_text_dim;
+    font-size: 12px;
+}
+
+.mu-track-title {
+    color: @mu_text;
+    font-weight: 700;
+}
+
+.mu-track-subtitle {
+    color: @mu_text_dim;
+    font-size: 11px;
+}
+
+@keyframes mu-star-a { 0% { transform: scale(1); } 28% { transform: scale(1.7) rotate(-14deg); } 52% { transform: scale(0.82) rotate(8deg); } 76% { transform: scale(1.18) rotate(-3deg); } 100% { transform: scale(1) rotate(0deg); } }
+@keyframes mu-star-b { 0% { transform: scale(1); } 28% { transform: scale(1.7) rotate(-14deg); } 52% { transform: scale(0.82) rotate(8deg); } 76% { transform: scale(1.18) rotate(-3deg); } 100% { transform: scale(1) rotate(0deg); } }
+.mu-star-a, .mu-star-b {
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+    animation-fill-mode: both;
+}
+.mu-star-a { animation-name: mu-star-a; }
+.mu-star-b { animation-name: mu-star-b; }
+
+.mu-favorites-nav {
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 320ms ease, transform 380ms cubic-bezier(0.05, 0.7, 0.1, 1),
+        background-color 160ms ease, color 160ms ease;
+}
+.mu-favorites-nav.mu-fav-in {
+    opacity: 1;
+    transform: translateY(0px);
+}
+
+.mu-track-favorite {
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 999px;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    color: @mu_text_dim;
+}
+
+.mu-track-favorite:hover {
+    background-color: alpha(@mu_primary, 0.12);
+    color: @mu_primary;
+}
+
+.mu-track-favorite:checked {
+    color: @mu_primary;
+}
+
+.mu-track-empty {
+    color: @mu_text_dim;
+    font-size: 12px;
+}
+
+.mu-fade-target {
+    opacity: 0;
+    transition: opacity 320ms cubic-bezier(0.2, 0, 0, 1);
+}
+.mu-fade-target.mu-shown {
+    opacity: 1;
+    transition-delay: 90ms;
+}
+
+.mu-loader {
+    color: @mu_on_primary_container;
+    background-color: @mu_primary_container;
+    border-radius: 999px;
+    padding: 0;
+    animation: mu-loader-in 300ms cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+@keyframes mu-loader-in {
+    from { opacity: 0; transform: scale(0.6); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.mu-dd {
+    transition: background-color 200ms ease, box-shadow 200ms ease;
+}
+.mu-dd > button {
+    transition: background-color 200ms ease;
+}
+.mu-dd > button:checked,
+.mu-dd > button:active {
+    background-color: alpha(@mu_primary, 0.16);
+}
+.mu-dd > button:focus-visible {
+    outline: 2px solid alpha(@mu_primary, 0.55);
+    outline-offset: -2px;
+}
+.mu-dd > button arrow {
+    min-width: 16px;
+    min-height: 16px;
+    opacity: 0.8;
+    transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
+}
+.mu-dd > button:checked arrow {
+    transform: rotate(180deg);
+}
+.mu-dd-label {
+    font-weight: 700;
+}
+
+@keyframes mu-dd-in {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0px) scale(1); }
+}
+
+popover.mu-dd-popover {
+    background: transparent;
+    box-shadow: none;
+}
+
+popover.mu-dd-popover > contents {
+    padding: 6px;
+    margin-top: 6px;
+    border-radius: 22px;
+    border: 1px solid alpha(@mu_on_primary_container, 0.10);
+    background-color: @mu_surface_high;
+    color: @mu_text;
+    box-shadow: 0 12px 32px alpha(black, 0.34);
+    animation: mu-dd-in 240ms cubic-bezier(0.05, 0.7, 0.1, 1) both;
+}
+
+popover.mu-dd-popover listview,
+popover.mu-dd-popover scrolledwindow,
+popover.mu-dd-popover list {
+    background: transparent;
+    color: inherit;
+}
+
+popover.mu-dd-popover listview > row {
+    min-height: 40px;
+    margin: 2px 0;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: transparent;
+    color: @mu_text;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+popover.mu-dd-popover listview > row:hover {
+    background-color: alpha(@mu_primary, 0.10);
+}
+popover.mu-dd-popover listview > row:selected {
+    background-color: @mu_secondary_container;
+    color: @mu_on_primary_container;
+}
+popover.mu-dd-popover listview > row:active {
+    background-color: alpha(@mu_primary, 0.18);
+}
+popover.mu-dd-popover listview > row:disabled label {
+    color: @mu_text_dim;
+    font-weight: 500;
+}
+
+popover.mu-dd-popover image.checkmark,
+popover.mu-dd-popover checkmark {
+    opacity: 0;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    -gtk-icon-size: 0px;
+}
+
+
+entry > text > placeholder,
+entry placeholder {
+    opacity: 0.32;
+    font-style: italic;
+}
+
+
+.fp-window,
+.fp-root {
+    background-color: @app_bg;
+    color: @app_fg;
+}
+
+.fp-toolbar {
+    padding: 8px 10px;
+    border-bottom: 1px solid alpha(@app_fg, 0.07);
+}
+
+.fp-icon-btn {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0;
+    border-radius: 8px;
+    background: none;
+    box-shadow: none;
+    border: none;
+    color: @app_fg;
+    transition: background-color 140ms ease, opacity 140ms ease;
+}
+
+.fp-icon-btn:hover {
+    background-color: alpha(@app_fg, 0.09);
+}
+
+.fp-icon-btn:checked {
+    background-color: alpha(@app_accent, 0.22);
+    color: @app_accent;
+}
+
+.fp-icon-btn:disabled {
+    opacity: 0.3;
+}
+
+.fp-path,
+.fp-search,
+.fp-type {
+    min-height: 30px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background-color: alpha(@app_fg, 0.06);
+    background-image: none;
+    box-shadow: none;
+    color: @app_fg;
+}
+
+.fp-path:focus-within,
+.fp-search:focus-within {
+    border-color: @app_accent;
+}
+
+.fp-path.fp-error {
+    border-color: #ff6b6b;
+}
+
+.fp-sidebar {
+    padding: 8px 6px;
+    border-right: 1px solid alpha(@app_fg, 0.07);
+    background-color: alpha(@app_fg, 0.025);
+}
+
+.fp-side-list,
+.fp-side-list row {
+    background: none;
+}
+
+.fp-side-row {
+    padding: 7px 10px;
+    margin: 1px 0;
+    border-radius: 8px;
+    color: @app_fg_dim;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+.fp-side-row:hover {
+    background-color: alpha(@app_fg, 0.08);
+    color: @app_fg;
+}
+
+.fp-list,
+.fp-list row {
+    background: none;
+    color: @app_fg;
+}
+
+.fp-list row {
+    margin: 1px 6px;
+    border-radius: 8px;
+    transition: background-color 120ms ease;
+}
+
+.fp-list row:hover {
+    background-color: alpha(@app_fg, 0.06);
+}
+
+.fp-list row:selected {
+    background-color: alpha(@app_accent, 0.24);
+    color: @app_fg;
+}
+
+.fp-row {
+    padding: 6px 8px;
+}
+
+.fp-folder-icon {
+    color: @app_accent;
+}
+
+.fp-meta,
+.fp-status,
+.fp-empty {
+    color: @app_fg_dim;
+    font-size: 0.9em;
+}
+
+.fp-footer {
+    padding: 8px 12px;
+    border-top: 1px solid alpha(@app_fg, 0.07);
+}
+
+.fp-cancel,
+.fp-accept {
+    min-height: 30px;
+    padding: 0 18px;
+    border-radius: 8px;
+    border: none;
+    box-shadow: none;
+    background-image: none;
+    transition: background-color 140ms ease, transform 120ms ease;
+}
+
+.fp-cancel {
+    background-color: alpha(@app_fg, 0.08);
+    color: @app_fg;
+}
+
+.fp-cancel:hover {
+    background-color: alpha(@app_fg, 0.14);
+}
+
+.fp-accept {
+    background-color: @app_accent;
+    color: @app_on_accent;
+    font-weight: bold;
+}
+
+.fp-accept:hover {
+    background-color: @app_accent_hover;
+}
+
+.fp-accept:disabled {
+    opacity: 0.35;
+}
+
+.fp-cancel:active,
+.fp-accept:active {
+    transform: scale(0.96);
+}
+
+.settings-github-button,
+.settings-github-button:visited {
+    min-height: 44px;
+    padding: 0 24px;
+    border: none;
+    border-radius: 999px;
+    background-image: none;
+    background-color: @app_accent;
+    color: @app_on_accent;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: none;
+    transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+.settings-github-button:hover {
+    background-color: mix(@app_accent, @app_on_accent, 0.08);
+    box-shadow: 0 2px 6px alpha(@app_fg, 0.12);
+}
+.settings-github-button:active {
+    background-color: mix(@app_accent, @app_on_accent, 0.16);
+    box-shadow: none;
+}
+.settings-github-button:focus-visible {
+    outline: 2px solid @app_accent;
+    outline-offset: 3px;
+}
+.settings-github-button label,
+.settings-github-button image {
+    color: @app_on_accent;
+    text-decoration: none;
+}
