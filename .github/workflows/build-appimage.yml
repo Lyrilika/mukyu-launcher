@@ -41,12 +41,34 @@ jobs:
           assert all((TOOLS_DIR / item).is_file() for item in ('thtk/bin/thdat', 'pc98/bin/pmd_render', 'pc98/bin/mdt_render', 'umu/umu-run'))
           print(ssl.OPENSSL_VERSION)
           print('GTK', Gtk.get_major_version(), Gtk.get_minor_version(), '| OK')"
-      - uses: actions/upload-artifact@v7
+      - name: Report download sizes
+        run: |
+          python3 - <<'PYTHON' >> "$GITHUB_STEP_SUMMARY"
+          from pathlib import Path
+          image = Path("dist/Mukyu_Launcher-x86_64.AppImage")
+          sources = sorted(Path("dist").glob("Mukyu-linux-*"))
+          if not image.is_file() or not list(Path("dist").glob("Mukyu-linux-sources.tar.part*")):
+              raise SystemExit("The AppImage or its matching source archive is missing")
+          print("## Linux downloads\n")
+          print("| Download | Size | Purpose |")
+          print("| --- | ---: | --- |")
+          print(f"| Mukyu-Launcher-AppImage | {image.stat().st_size / 1048576:.1f} MiB | Run the launcher |")
+          print(f"| Mukyu-Launcher-Linux-Sources | {sum(p.stat().st_size for p in sources) / 1048576:.1f} MiB | Corresponding sources, checksums and notices |")
+          print("\nOnly the AppImage download is needed to run the launcher. The separate sources remain available for rebuilding and redistribution.")
+          PYTHON
+      - name: Upload runnable AppImage
+        uses: actions/upload-artifact@v7
         with:
           name: Mukyu-Launcher-AppImage
-          path: |
-            dist/Mukyu_Launcher-x86_64.AppImage
-            dist/Mukyu-linux-*
+          path: dist/Mukyu_Launcher-x86_64.AppImage
+          compression-level: 0
+          if-no-files-found: error
+      - name: Upload corresponding sources
+        uses: actions/upload-artifact@v7
+        with:
+          name: Mukyu-Launcher-Linux-Sources
+          path: dist/Mukyu-linux-*
+          compression-level: 0
           if-no-files-found: error
       - name: Attach to release
         if: startsWith(github.ref, 'refs/tags/')
