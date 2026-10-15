@@ -62,7 +62,7 @@ Download `Mukyu_Launcher-x86_64.AppImage` from the [latest release](../../releas
 ./scripts/install_umu.sh
 python3 main.py
 ```
-### Windows 10/11
+### Windows 10/11 (EXPERIMENTAL)
 
 #### Installer
 
