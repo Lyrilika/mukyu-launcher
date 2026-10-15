@@ -1,0 +1,58 @@
+name: Build Linux AppImage
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build AppImage
+        run: sudo -E bash packaging/appimage/build_appimage.sh
+      - name: Give the runner user ownership of the build output
+        run: sudo chown -R "$(id -u):$(id -g)" dist build
+      - name: Install host libraries the smoke test expects on a desktop
+        run: sudo apt-get install -y --no-install-recommends libvulkan1 libgl1 libegl1 libgbm1 libdrm2
+      - name: Smoke test (imports GTK 4, GStreamer, pypdfium2 from the AppImage)
+        run: |
+          chmod +x dist/*.AppImage
+          dist/Mukyu_Launcher-x86_64.AppImage --appimage-extract >/dev/null
+          cd squashfs-root
+          export TL_APPIMAGE=1 PYTHONHOME="$PWD/usr" \
+                 LD_LIBRARY_PATH="$PWD/usr/lib/x86_64-linux-gnu" \
+                 GI_TYPELIB_PATH="$PWD/usr/lib/x86_64-linux-gnu/girepository-1.0" \
+                 PYTHONPATH="$PWD/usr/lib/python3/dist-packages"
+          "$PWD/usr/bin/python3" -c "
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, str(Path('usr/share/mukyulauncher').resolve()))
+          import gi
+          gi.require_version('Gtk','4.0'); gi.require_version('Gst','1.0')
+          from gi.repository import Gtk, Gst
+          import pypdfium2, ssl, _hashlib
+          import mukyu.app, mukyu.pages.games, mukyu.pages.music, mukyu.pages.printworks
+          import mukyu.reader.pdf_reader, mukyu.music.desktop.mpris
+          from mukyu.paths import ASSETS_DIR, TOOLS_DIR, ICON_PATH
+          assert (ASSETS_DIR / 'styles/style.css').is_file()
+          assert ICON_PATH.is_file()
+          assert all((TOOLS_DIR / item).is_file() for item in ('thtk/bin/thdat', 'pc98/bin/pmd_render', 'pc98/bin/mdt_render', 'umu/umu-run'))
+          print(ssl.OPENSSL_VERSION)
+          print('GTK', Gtk.get_major_version(), Gtk.get_minor_version(), '| OK')"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Mukyu-Launcher-AppImage
+          path: |
+            dist/Mukyu_Launcher-x86_64.AppImage
+            dist/Mukyu-linux-*
+          if-no-files-found: error
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/Mukyu_Launcher-x86_64.AppImage
+            dist/Mukyu-linux-*
+          fail_on_unmatched_files: true
