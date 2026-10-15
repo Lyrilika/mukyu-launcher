@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+USR="$HERE/usr"
+LIB="$USR/lib/x86_64-linux-gnu"
+
+save() { local n="$1"; if [ "${!n+x}" = x ]; then export "TL_ORIG_$n=${!n}"; else export "TL_ORIG_$n=__TL_UNSET__"; fi; }
+for v in PATH LD_LIBRARY_PATH XDG_DATA_DIRS PYTHONHOME PYTHONPATH GI_TYPELIB_PATH \
+         GST_PLUGIN_SYSTEM_PATH_1_0 GST_PLUGIN_PATH_1_0 GST_PLUGIN_SCANNER GST_REGISTRY_1_0 \
+         GDK_PIXBUF_MODULE_FILE GDK_PIXBUF_MODULEDIR GTK_PATH GSETTINGS_SCHEMA_DIR GIO_MODULE_DIR SSL_CERT_FILE GTK_USE_PORTAL \
+         MALLOC_ARENA_MAX MALLOC_TRIM_THRESHOLD_ PYTHONPYCACHEPREFIX PYTHONDONTWRITEBYTECODE; do save "$v"; done
+export TL_APPIMAGE=1
+
+export PATH="$USR/bin:$PATH"
+export LD_LIBRARY_PATH="$LIB:$LIB/pulseaudio:$USR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export PYTHONHOME="$USR"
+export PYTHONPATH="$USR/lib/python3/dist-packages:$USR/lib/python3.12/site-packages"
+export GI_TYPELIB_PATH="$LIB/girepository-1.0"
+export XDG_DATA_DIRS="$USR/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+export GSETTINGS_SCHEMA_DIR="$USR/share/glib-2.0/schemas"
+[ -d "$LIB/gio/modules" ] && export GIO_MODULE_DIR="$LIB/gio/modules"
+
+export GST_PLUGIN_SYSTEM_PATH_1_0="$LIB/gstreamer-1.0"
+export GST_PLUGIN_PATH_1_0="$LIB/gstreamer-1.0"
+export GST_PLUGIN_SCANNER="$LIB/gstreamer1.0/gstreamer-1.0/gst-plugin-scanner"
+
+CACHE="${XDG_CACHE_HOME:-$HOME/.cache}/mukyulauncher/appimage"
+mkdir -p "$CACHE" 2>/dev/null
+export GST_REGISTRY_1_0="$CACHE/gst-registry.bin"
+export PYTHONPYCACHEPREFIX="$CACHE/pycache"
+
+export MALLOC_ARENA_MAX="${MALLOC_ARENA_MAX:-2}"
+export MALLOC_TRIM_THRESHOLD_="${MALLOC_TRIM_THRESHOLD_:-131072}"
+
+PIXDIR="$(ls -d "$LIB"/gdk-pixbuf-2.0/2.* 2>/dev/null | head -1)"
+QUERY="$LIB/gdk-pixbuf-2.0/gdk-pixbuf-query-loaders"
+if [ -n "$PIXDIR" ] && [ -x "$QUERY" ]; then
+    export GDK_PIXBUF_MODULEDIR="$PIXDIR/loaders"
+    export GDK_PIXBUF_MODULE_FILE="$CACHE/pixbuf-loaders-$$.cache"
+    "$QUERY" > "$GDK_PIXBUF_MODULE_FILE" 2>/dev/null
+    trap 'rm -f "$GDK_PIXBUF_MODULE_FILE"' EXIT
+fi
+
+export GTK_PATH="$LIB/gtk-4.0"
+
+export GTK_USE_PORTAL="${GTK_USE_PORTAL:-1}"
+
+if [ -z "${SSL_CERT_FILE:-}" ]; then
+    for f in /etc/ssl/certs/ca-certificates.crt /etc/pki/tls/certs/ca-bundle.crt \
+             /etc/ssl/ca-bundle.pem /etc/pki/tls/cacert.pem /etc/ssl/cert.pem \
+             /etc/ca-certificates/extracted/tls-ca-bundle.pem; do
+        if [ -r "$f" ]; then export SSL_CERT_FILE="$f"; break; fi
+    done
+fi
+
+cd "$HERE/usr/share/mukyulauncher" || exit 1
+PY="$USR/bin/mukyulauncher"
+[ -x "$PY" ] || PY="$USR/bin/python3"
+exec "$PY" main.py "$@"

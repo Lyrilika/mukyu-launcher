@@ -1,0 +1,185 @@
+Mukyu Launcher — third-party notices
+
+License scope
+=============
+Mukyu Launcher's original code is licensed under GNU AGPL version 3 or, at
+your option, any later version. The full license is in the root LICENSE file.
+This grant does not relicense third-party components or grant rights to game
+files, sound recordings, cover art, printwork thumbnails, trademarks or other
+third-party artwork. Original copyright and license notices remain applicable.
+The bundled helper executables are not covered by a blanket AGPL declaration.
+
+Sources accompanying releases
+=============================
+The GitHub Actions builders generate platform-specific source archives split
+into numbered Mukyu-*-sources.tar.partNNN files, plus SHA256 checksums and
+reassembly instructions. They are uploaded with the matching AppImage or
+Windows installer to workflow artifacts and tagged releases:
+https://github.com/Lyrilika/mukyu-launcher/releases
+
+These archives include the launcher's source/build recipes, native helper
+sources, exact Ubuntu or MSYS2 source packages with package-version records,
+and applicable bundled copyleft components. Missing source downloads fail the
+build. Keep every source part accessible with its matching binary. The links
+below identify upstream projects and supplement those release archives.
+
+Legacy releases built before this source-collection workflow are not covered
+retroactively; their dependency versions and corresponding sources must be
+recovered separately. Third-party licenses remain applicable independently.
+
+Direct runtime components:
+Python / Python Software Foundation and contributors
+  PSF license and additional historical notices.
+  Source: https://www.python.org/downloads/source/
+  License: https://docs.python.org/3/license.html
+
+GTK, GLib, GObject, GIO, GObject Introspection, Pango, GdkPixbuf, Graphene,
+librsvg and their contributors
+  Principally LGPL; individual bundled files and libraries retain their terms.
+  Source: https://gitlab.gnome.org/GNOME
+  Packaged notices: runtime share/doc and share/licenses, where provided by
+  the distribution. Dependency versions and sources must match the build.
+
+PyGObject / PyGObject contributors
+  LGPL-2.1-or-later.
+  Source: https://gitlab.gnome.org/GNOME/pygobject
+
+Pycairo / Pycairo contributors; Cairo / Cairo contributors
+  Pycairo: LGPL-2.1-or-later OR MPL-1.1.
+  Cairo: LGPL-2.1-or-later OR MPL-1.1, with file-specific notices.
+  Sources: https://github.com/pygobject/pycairo
+           https://www.cairographics.org/releases/
+
+GStreamer / GStreamer contributors
+  Core and most plugins: LGPL-2.1-or-later; plugin dependencies have their own
+  licenses. Inspect the actual packaged plugins and distribution notices.
+  Source: https://gstreamer.freedesktop.org/src/
+  Licensing: https://gstreamer.freedesktop.org/documentation/frequently-asked-questions/licensing.html
+
+FFmpeg / FFmpeg contributors
+  LGPL-2.1-or-later or GPL, depending on the configured components. A nonfree
+  configuration cannot be assumed redistributable. Use each shipped build's
+  configuration and license notices to determine the applicable terms.
+  Source: https://ffmpeg.org/download.html
+  Licensing: https://ffmpeg.org/legal.html
+
+pypdfium2 / pypdfium2 contributors
+  Apache-2.0 OR BSD-3-Clause; PDFium and its dependencies retain their licenses.
+  Source: https://github.com/pypdfium2-team/pypdfium2
+  License guidance: https://pypdfium2.readthedocs.io/en/stable/readme.html#licensing
+  Preserve the installed pypdfium2 dist-info license files and all PDFium
+  notices shipped with pypdfium2_raw, including third-party license texts.
+
+PDFium / The PDFium Authors and third-party contributors
+  BSD-style license plus the licenses of its bundled dependencies.
+  Source: https://pdfium.googlesource.com/pdfium/
+  License: https://pdfium.googlesource.com/pdfium/+/refs/heads/main/LICENSE
+
+Native helpers and launch integration:
+thtk / thtk contributors
+  BSD-style license, with zlib and libpng notices for applicable components.
+  Local texts: thtk/COPYING, thtk/COPYING.zlib, thtk/COPYING.libpng.
+  Source: https://github.com/thpatch/thtk
+  The recorded helper revision is in tools/thtk/REVISION.
+
+98fmplayer / Takamichi Horikawa and contributors
+  BSD-2-Clause. Used for the PMD format decoder and libopna sound core.
+  Local text: 98fmplayer-LICENSE.
+  Source: https://github.com/myon98/98fmplayer
+  Revision: 4fa914e4b2b994cb3ccf92d571a20a7cdf1fe36a.
+  The launcher supplies its own command-line adapters, timer integration,
+  WAV rhythm loading and output resampling. The upstream source is retained
+  unchanged in the matching native-dependency source archive.
+
+Earlier PC-98 implementations used pmdmini, PMDWin (C60), PMD (M. Kajihara / KAJA),
+PPZ8 (Ukky) and FMGEN (cisc). Those inherited PMDWin/FMGEN implementations have
+been removed from the current helper builds because their separate custom
+terms cannot be assumed covered by pmdmini's GPL license. Game-driver programs
+such as TH01's MDRV98.COM are read from the user's own game files, not bundled.
+
+libx86emu / SciTech Software, David Mosberger-Tang, Egbert Eich, SUSE and
+Steffen Winterfeldt, and contributors
+  Permissive license, including restrictions on promotional use of names.
+  Local text: libx86emu-LICENSE.
+  Source: https://github.com/wfeldt/libx86emu
+
+umu-launcher / Open Wine Components and contributors
+  GPL-3.0-or-later. Bundled on Linux only, version 1.4.4.
+  Source: https://github.com/Open-Wine-Components/umu-launcher/tree/1.4.4
+  Full embedded license texts copied verbatim into umu/.
+  The zipapp additionally contains:
+    urllib3 2.7.0 — MIT — https://github.com/urllib3/urllib3
+    python-xlib 0.33 — LGPL-2.0-or-later — https://github.com/python-xlib/python-xlib
+    six 1.17.0 — MIT — https://github.com/benjaminp/six
+    truststore 0.10.4 — MIT — https://github.com/sethmlarson/truststore
+  PyPI source distributions: https://pypi.org/
+  Copyleft corresponding source must match these installed versions.
+
+Wine, GE-Proton, DOSBox-X and downloaded runtimes
+  These are external programs selected or downloaded for launching games.
+  Their files are not relicensed by Mukyu Launcher. Wine is primarily LGPL;
+  GE-Proton combines components with different licenses; DOSBox-X is GPL.
+  Sources: https://gitlab.winehq.org/wine/wine
+           https://github.com/GloriousEggroll/proton-ge-custom
+           https://github.com/joncampbell123/dosbox-x
+  Their own notices and source obligations apply if repackaged or distributed.
+
+Format research, metadata and icons:
+135tk / brliron, Riatre and contributors
+  Archive-format research reference. Local text: 135tk-UNLICENSE.
+  Source: https://github.com/brliron/135tk
+
+foo_thbgm / nyfair
+  Music catalog/reference data. Local text: foo_thbgm-LICENSE (upstream custom
+  wording retained verbatim; do not replace it with a different license text).
+  Source: https://github.com/nyfair/foo_thbgm
+
+Octicons / GitHub, Inc.
+  MIT. GitHub mark used for the repository button.
+  Local text: octicons-LICENSE.
+  Source: https://github.com/primer/octicons
+  The icon license does not grant trademark endorsement rights.
+
+Microsoft STL / Microsoft and contributors
+  Apache-2.0 WITH LLVM-exception. Local text: microsoft-stl-LICENSE.
+  Source: https://github.com/microsoft/STL
+
+C++/WinRT / Microsoft and contributors
+  MIT. Local text: cppwinrt-LICENSE.
+  Source: https://github.com/microsoft/cppwinrt
+  The Windows SDK and Visual C++ tools/runtime also retain Microsoft's terms.
+
+Build and packaging infrastructure:
+AppImage / AppImage contributors
+  The type2 runtime is MIT; its embedded dependencies retain their licenses.
+  Local texts: appimage/ (type2-runtime, libfuse LGPL, squashfuse BSD, musl MIT,
+  zstd BSD, zlib and mimalloc MIT). The selected runtime binary's commit and
+  checksum are verified and recorded in the source bundle, with the libfuse
+  source and runtime build patches. appimagetool is a build-time tool.
+  Sources: https://github.com/AppImage/appimagetool
+           https://github.com/AppImage/type2-runtime
+  The exact embedded runtime's license and source must accompany releases as
+  required by that runtime's terms; the packaging tool is not launcher code.
+
+MSYS2 / MSYS2 and upstream package contributors
+  Each runtime package retains its own license, including GTK's transitive
+  dependencies, compiler runtime libraries, fonts and icons.
+  Recipes: https://github.com/msys2/MINGW-packages
+  Source archives: https://repo.msys2.org/mingw/sources/
+  Preserve runtime/share/licenses and runtime/share/doc.
+
+Ubuntu / Debian / upstream package contributors
+  AppImage runtime dependencies are drawn from distribution packages.
+  Preserve usr/share/doc and usr/share/common-licenses, including symlink
+  targets. Obtain exact matching Debian source packages and build patches.
+  Sources: https://archive.ubuntu.com/ubuntu/pool/
+
+Inno Setup / Jordan Russell and Martijn Laan
+  Inno Setup license; the exact installed compiler License.txt is copied to
+  the Windows build as Inno-Setup-LICENSE.txt.
+  Source: https://github.com/jrsoftware/issrc
+  Review the exact version's license when distributing an installer.
+
+This inventory identifies the direct components and known research sources.
+Runtime package inventories are generated for each build in the source bundle.
+The distributions' own package notices remain in every build.

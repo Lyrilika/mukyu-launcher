@@ -1,0 +1,4 @@
+pypdfium2
+PyGObject>=3.46 ; sys_platform == "linux"
+pycairo ; sys_platform == "linux"
+

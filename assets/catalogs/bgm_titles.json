@@ -1,0 +1,3801 @@
+{
+  "th1": {
+    "reimu.mdt": {
+      "en": "A Sacred Lot",
+      "ja": "A Sacred Lot",
+      "reference": "th01_01"
+    },
+    "st0.mdt": {
+      "en": "Eternal Shrine Maiden",
+      "ja": "永遠の巫女",
+      "reference": "th01_02"
+    },
+    "positive.mdt": {
+      "en": "The Positive and Negative",
+      "ja": "The Positive and Negative",
+      "reference": "th01_03"
+    },
+    "st1.mdt": {
+      "en": "Highly Responsive to Prayers",
+      "ja": "Highly Responsive to Prayers",
+      "reference": "th01_04"
+    },
+    "st2.mdt": {
+      "en": "Eastern Tale of Fancy",
+      "ja": "東方怪奇談",
+      "reference": "th01_05"
+    },
+    "legend.mdt": {
+      "en": "Angel's Legend",
+      "ja": "天使伝説",
+      "reference": "th01_06"
+    },
+    "st3.mdt": {
+      "en": "Oriental Magician",
+      "ja": "Oriental Magician",
+      "reference": "th01_07"
+    },
+    "st4.mdt": {
+      "en": "Small Evil-Crushing Blade",
+      "ja": "破邪の小太刀",
+      "reference": "th01_08"
+    },
+    "kami.mdt": {
+      "en": "Magic Mirror",
+      "ja": "魔鏡",
+      "reference": "th01_09"
+    },
+    "st5.mdt": {
+      "en": "the Legend of KAGE",
+      "ja": "the Legend of KAGE",
+      "reference": "th01_10"
+    },
+    "tensi.mdt": {
+      "en": "Now, Until the Moment You Die",
+      "ja": "いざ、倒れ逝くその時まで",
+      "reference": "th01_11"
+    },
+    "shugen.mdt": {
+      "en": "Civilization of Magic",
+      "ja": "Civilization of Magic",
+      "reference": "th01_12"
+    },
+    "alice.mdt": {
+      "en": "Angel of a Distant Star",
+      "ja": "星幽天使",
+      "reference": "th01_13"
+    },
+    "iris.mdt": {
+      "en": "Iris",
+      "ja": "アイリス",
+      "reference": "th01_14"
+    },
+    "zipangu.mdt": {
+      "en": "Shrine of the Wind",
+      "ja": "風の神社",
+      "reference": "th01_15"
+    },
+    "st6.mdt": {
+      "en": "Eternal Shrine Maiden",
+      "ja": "永遠の巫女",
+      "reference": "th01_02"
+    },
+    "kami2.mdt": {
+      "en": "Magic Mirror",
+      "ja": "魔鏡",
+      "reference": "th01_09"
+    },
+    "syugen.mdt": {
+      "en": "Civilization of Magic",
+      "ja": "Civilization of Magic",
+      "reference": "th01_12"
+    }
+  },
+  "th2": {
+    "op.m": {
+      "en": "Eastern Demon-Sealing Record ~ Pure Land Mandala",
+      "ja": "東方封魔録　～浄土曼荼羅",
+      "reference": "th02_01"
+    },
+    "stage0.m": {
+      "en": "Hakurei ~ Eastern Wind",
+      "ja": "博麗　～Eastern Wind",
+      "reference": "th02_02"
+    },
+    "boss1.m": {
+      "en": "She's in a temper!!",
+      "ja": "She's in a temper!!",
+      "reference": "th02_03"
+    },
+    "stage1.m": {
+      "en": "End of Daylight",
+      "ja": "End of Daylight",
+      "reference": "th02_04"
+    },
+    "boss4.m": {
+      "en": "Power of Darkness",
+      "ja": "やみのちから",
+      "reference": "th02_05"
+    },
+    "stage2.m": {
+      "en": "World of Fantasies",
+      "ja": "幻夢界",
+      "reference": "th02_06"
+    },
+    "boss2.m": {
+      "en": "Bet on Death",
+      "ja": "死を賭して",
+      "reference": "th02_07"
+    },
+    "stage3.m": {
+      "en": "Himorogi, Burn in Violet",
+      "ja": "ひもろぎ、むらさきにもえ",
+      "reference": "th02_08"
+    },
+    "boss3.m": {
+      "en": "Love-Colored Magic",
+      "ja": "恋色マジック",
+      "reference": "th02_09"
+    },
+    "stage4.m": {
+      "en": "Eastern Demon-Sealing Record ~ Spectral Boisterous Dance",
+      "ja": "東方封魔録　～幽幻乱舞",
+      "reference": "th02_10"
+    },
+    "mima.m": {
+      "en": "Complete Darkness",
+      "ja": "Complete Darkness",
+      "reference": "th02_11"
+    },
+    "stage5.m": {
+      "en": "Extra Love",
+      "ja": "エキストララブ",
+      "reference": "th02_12"
+    },
+    "boss5.m": {
+      "en": "The Tank Girl's Dream",
+      "ja": "戦車むすめのみるゆめ",
+      "reference": "th02_13"
+    },
+    "end1.m": {
+      "en": "Forest of Tono",
+      "ja": "遠野の森",
+      "reference": "th02_14"
+    },
+    "ending.m": {
+      "en": "Legendary Wonderland",
+      "ja": "昔話わんだーらんど",
+      "reference": "th02_15"
+    },
+    "h_ng00.m": {
+      "en": "Hakurei Shrine Grounds",
+      "ja": "博麗神社境内",
+      "reference": "th02_16"
+    },
+    "h_ng01.m": {
+      "en": "Sunfall",
+      "ja": "陽落ちて",
+      "reference": "th02_17"
+    },
+    "h_ng02.m": {
+      "en": "Demon-Sealing Finale",
+      "ja": "封魔終演",
+      "reference": "th02_18"
+    },
+    "h_ng00.m2": {
+      "en": "Hakurei Shrine Grounds",
+      "ja": "博麗神社境内",
+      "reference": "th02_16"
+    },
+    "h_ng01.m2": {
+      "en": "Sunfall",
+      "ja": "陽落ちて",
+      "reference": "th02_17"
+    },
+    "h_ng02.m2": {
+      "en": "Demon-Sealing Finale",
+      "ja": "封魔終演",
+      "reference": "th02_18"
+    }
+  },
+  "th3": {
+    "op.m": {
+      "en": "A Dream Transcending Spacetime",
+      "ja": "夢は時空を越えて",
+      "reference": "th03_01"
+    },
+    "select.m": {
+      "en": "Selection",
+      "ja": "Selection",
+      "reference": "th03_02"
+    },
+    "00mm.m": {
+      "en": "Eastern Mystical Tale of Romance",
+      "ja": "東方妖恋談",
+      "reference": "th03_03"
+    },
+    "01mm.m": {
+      "en": "Reincarnation",
+      "ja": "Reincarnation",
+      "reference": "th03_04"
+    },
+    "02mm.m": {
+      "en": "Dim. Dream",
+      "ja": "Dim. Dream",
+      "reference": "th03_05"
+    },
+    "03mm.m": {
+      "en": "Tabula rasa ~ The Empty Girl",
+      "ja": "Tabula rasa　～空白少女",
+      "reference": "th03_06"
+    },
+    "04mm.m": {
+      "en": "Maniacal Princess",
+      "ja": "Maniacal Princess",
+      "reference": "th03_07"
+    },
+    "05mm.m": {
+      "en": "Vanishing Dream ~ Lost Dream",
+      "ja": "夢消失　～Lost Dream",
+      "reference": "th03_08"
+    },
+    "06mm.m": {
+      "en": "Visionary Game ~ Dream War",
+      "ja": "夢幻遊戯　～Dream War",
+      "reference": "th03_09"
+    },
+    "win.m": {
+      "en": "Victory Demonstration",
+      "ja": "勝利デモ",
+      "reference": "th03_10"
+    },
+    "dec.m": {
+      "en": "Decisive Magic Battle! ~ Fight it out!",
+      "ja": "魔法決戦！～Fight it out!",
+      "reference": "th03_11"
+    },
+    "demo1.m": {
+      "en": "Disunified Field Theory of Magic",
+      "ja": "非統一魔法世界論",
+      "reference": "th03_12"
+    },
+    "07mm.m": {
+      "en": "Sailor of Time",
+      "ja": "Sailor of Time",
+      "reference": "th03_13"
+    },
+    "demo2.m": {
+      "en": "Adoration of Magic",
+      "ja": "魔法鐘愛",
+      "reference": "th03_14"
+    },
+    "08mm.m": {
+      "en": "Strawberry Crisis!!",
+      "ja": "Strawberry Crisis!!",
+      "reference": "th03_15"
+    },
+    "demo3.m": {
+      "en": "Dream of Eternity",
+      "ja": "久遠の夢",
+      "reference": "th03_16"
+    },
+    "demo4.m": {
+      "en": "Eastern Blue Sky",
+      "ja": "東方の青い空",
+      "reference": "th03_17"
+    },
+    "demo5.m": {
+      "en": "Eternal Full Moon",
+      "ja": "永遠の満月",
+      "reference": "th03_18"
+    },
+    "ed.m": {
+      "en": "Maple Dream...",
+      "ja": "Maple Dream...",
+      "reference": "th03_19"
+    },
+    "over.m": {
+      "en": "Game Over",
+      "ja": "ゲームオーバー",
+      "reference": "th03_20"
+    },
+    "score.m": {
+      "en": "Ghostly Person's Holiday",
+      "ja": "霊人の休日",
+      "reference": "th03_21"
+    },
+    "y_ng00.m": {
+      "en": "Winds of Time",
+      "ja": "時の風",
+      "reference": "th03_22"
+    },
+    "y_ng00.m2": {
+      "en": "Winds of Time",
+      "ja": "時の風",
+      "reference": "th03_22"
+    },
+    "y_ng01.m": {
+      "en": "Starbow Dream",
+      "ja": "スターボウドリーム",
+      "reference": "th03_23"
+    },
+    "y_ng01.m2": {
+      "en": "Starbow Dream",
+      "ja": "スターボウドリーム",
+      "reference": "th03_23"
+    },
+    "y_ng02.m": {
+      "en": "Phantasmagoria",
+      "ja": "Phantasmagoria",
+      "reference": "th03_24"
+    },
+    "y_ng02.m2": {
+      "en": "Phantasmagoria",
+      "ja": "Phantasmagoria",
+      "reference": "th03_24"
+    }
+  },
+  "th4": {
+    "op.m86": {
+      "en": "Gensokyo ~ Lotus Land Story",
+      "ja": "幻想郷　～ Lotus Land Story",
+      "reference": "th04_01"
+    },
+    "st00.m86": {
+      "en": "Witching Dream",
+      "ja": "Witching Dream",
+      "reference": "th04_02"
+    },
+    "st10.m86": {
+      "en": "Selene's light",
+      "ja": "Selene's Light",
+      "reference": "th04_03"
+    },
+    "st00b.m86": {
+      "en": "Decoration Battle",
+      "ja": "装飾戦　～ Decoration Battle",
+      "reference": "th04_04"
+    },
+    "st01.m86": {
+      "en": "Break the Sabbath",
+      "ja": "Break the Sabbath",
+      "reference": "th04_05"
+    },
+    "st01b.m86": {
+      "en": "Scarlet Symphony ~ Scarlet Phoneme",
+      "ja": "紅響曲　～ Scarlet Phoneme",
+      "reference": "th04_06"
+    },
+    "st02.m86": {
+      "en": "Bad Apple!!",
+      "ja": "Bad Apple!!",
+      "reference": "th04_07"
+    },
+    "st02b.m86": {
+      "en": "Spirit Battle ~ Perdition crisis",
+      "ja": "霊戦　～ Perdition crisis",
+      "reference": "th04_08"
+    },
+    "st03.m86": {
+      "en": "Alice Maestra",
+      "ja": "アリスマエステラ",
+      "reference": "th04_09"
+    },
+    "st03c.m86": {
+      "en": "Maiden's Capriccio ~ Capriccio",
+      "ja": "少女綺想曲　～ Capriccio",
+      "reference": "th04_10"
+    },
+    "st03b.m86": {
+      "en": "Vessel of Stars ~ Casket of Star",
+      "ja": "星の器　～ Casket of Star",
+      "reference": "th04_11"
+    },
+    "st04.m86": {
+      "en": "Lotus Love",
+      "ja": "Lotus Love",
+      "reference": "th04_12"
+    },
+    "st04b.m86": {
+      "en": "Sleeping Terror",
+      "ja": "眠れる恐怖　～ Sleeping Terror",
+      "reference": "th04_13"
+    },
+    "st05.m86": {
+      "en": "Dream Land",
+      "ja": "Dream Land",
+      "reference": "th04_14"
+    },
+    "st05b.m86": {
+      "en": "Faint Dream ~ Inanimate Dream",
+      "ja": "幽夢　～ Inanimate Dream",
+      "reference": "th04_15"
+    },
+    "st06.m86": {
+      "en": "The Inevitably Forbidden Game",
+      "ja": "禁じざるをえない遊戯",
+      "reference": "th04_16"
+    },
+    "st06b.m86": {
+      "en": "Illusion of a Maid ~ Icemilk Magic",
+      "ja": "メイド幻想　～ Icemilk Magic",
+      "reference": "th04_17"
+    },
+    "st06c.m86": {
+      "en": "Cute Devil ~ Innocence",
+      "ja": "かわいい悪魔　～ Innocence",
+      "reference": "th04_18"
+    },
+    "end1.m86": {
+      "en": "Days",
+      "ja": "Days",
+      "reference": "th04_19"
+    },
+    "end2.m86": {
+      "en": "Peaceful",
+      "ja": "Peaceful",
+      "reference": "th04_20"
+    },
+    "staff.m86": {
+      "en": "Arcadian Dream",
+      "ja": "Arcadian Dream",
+      "reference": "th04_21"
+    },
+    "name.m86": {
+      "en": "Those Who Live in Illusions",
+      "ja": "幻想の住人",
+      "reference": "th04_22"
+    },
+    "g_ng00.m2": {
+      "en": "Lotus Road",
+      "ja": "Lotus Road",
+      "reference": "th04_23"
+    },
+    "g_ng01.m2": {
+      "en": "Dreamy Pilot",
+      "ja": "Dreamy Pilot",
+      "reference": "th04_24"
+    },
+    "g_ng02.m2": {
+      "en": "Incomplete Plot",
+      "ja": "Incomplete Plot",
+      "reference": "th04_25"
+    },
+    "g_ng03.m2": {
+      "en": "Border Land",
+      "ja": "Border Land",
+      "reference": "th04_26"
+    },
+    "g_ng04.m2": {
+      "en": "Magic Shop of Raspberry",
+      "ja": "Magic Shop of Raspberry",
+      "reference": "th04_27"
+    },
+    "g_ng05.m2": {
+      "en": "Crescent Dream",
+      "ja": "Crescent Dream",
+      "reference": "th04_28"
+    },
+    "op.m26": {
+      "en": "Gensokyo ~ Lotus Land Story",
+      "ja": "幻想郷　～ Lotus Land Story",
+      "reference": "th04_01"
+    },
+    "st00.m26": {
+      "en": "Witching Dream",
+      "ja": "Witching Dream",
+      "reference": "th04_02"
+    },
+    "st10.m26": {
+      "en": "Selene's light",
+      "ja": "Selene's Light",
+      "reference": "th04_03"
+    },
+    "st00b.m26": {
+      "en": "Decoration Battle",
+      "ja": "装飾戦　～ Decoration Battle",
+      "reference": "th04_04"
+    },
+    "st01.m26": {
+      "en": "Break the Sabbath",
+      "ja": "Break the Sabbath",
+      "reference": "th04_05"
+    },
+    "st01b.m26": {
+      "en": "Scarlet Symphony ~ Scarlet Phoneme",
+      "ja": "紅響曲　～ Scarlet Phoneme",
+      "reference": "th04_06"
+    },
+    "st02.m26": {
+      "en": "Bad Apple!!",
+      "ja": "Bad Apple!!",
+      "reference": "th04_07"
+    },
+    "st02b.m26": {
+      "en": "Spirit Battle ~ Perdition crisis",
+      "ja": "霊戦　～ Perdition crisis",
+      "reference": "th04_08"
+    },
+    "st03.m26": {
+      "en": "Alice Maestra",
+      "ja": "アリスマエステラ",
+      "reference": "th04_09"
+    },
+    "st03c.m26": {
+      "en": "Maiden's Capriccio ~ Capriccio",
+      "ja": "少女綺想曲　～ Capriccio",
+      "reference": "th04_10"
+    },
+    "st03b.m26": {
+      "en": "Vessel of Stars ~ Casket of Star",
+      "ja": "星の器　～ Casket of Star",
+      "reference": "th04_11"
+    },
+    "st04.m26": {
+      "en": "Lotus Love",
+      "ja": "Lotus Love",
+      "reference": "th04_12"
+    },
+    "st04b.m26": {
+      "en": "Sleeping Terror",
+      "ja": "眠れる恐怖　～ Sleeping Terror",
+      "reference": "th04_13"
+    },
+    "st05.m26": {
+      "en": "Dream Land",
+      "ja": "Dream Land",
+      "reference": "th04_14"
+    },
+    "st05b.m26": {
+      "en": "Faint Dream ~ Inanimate Dream",
+      "ja": "幽夢　～ Inanimate Dream",
+      "reference": "th04_15"
+    },
+    "st06.m26": {
+      "en": "The Inevitably Forbidden Game",
+      "ja": "禁じざるをえない遊戯",
+      "reference": "th04_16"
+    },
+    "st06b.m26": {
+      "en": "Illusion of a Maid ~ Icemilk Magic",
+      "ja": "メイド幻想　～ Icemilk Magic",
+      "reference": "th04_17"
+    },
+    "st06c.m26": {
+      "en": "Cute Devil ~ Innocence",
+      "ja": "かわいい悪魔　～ Innocence",
+      "reference": "th04_18"
+    },
+    "end1.m26": {
+      "en": "Days",
+      "ja": "Days",
+      "reference": "th04_19"
+    },
+    "end2.m26": {
+      "en": "Peaceful",
+      "ja": "Peaceful",
+      "reference": "th04_20"
+    },
+    "staff.m26": {
+      "en": "Arcadian Dream",
+      "ja": "Arcadian Dream",
+      "reference": "th04_21"
+    },
+    "name.m26": {
+      "en": "Those Who Live in Illusions",
+      "ja": "幻想の住人",
+      "reference": "th04_22"
+    },
+    "g_ng00.m": {
+      "en": "Lotus Road",
+      "ja": "Lotus Road",
+      "reference": "th04_23"
+    },
+    "g_ng01.m": {
+      "en": "Dreamy Pilot",
+      "ja": "Dreamy Pilot",
+      "reference": "th04_24"
+    },
+    "g_ng02.m": {
+      "en": "Incomplete Plot",
+      "ja": "Incomplete Plot",
+      "reference": "th04_25"
+    },
+    "g_ng03.m": {
+      "en": "Border Land",
+      "ja": "Border Land",
+      "reference": "th04_26"
+    },
+    "g_ng04.m": {
+      "en": "Magic Shop of Raspberry",
+      "ja": "Magic Shop of Raspberry",
+      "reference": "th04_27"
+    },
+    "g_ng05.m": {
+      "en": "Crescent Dream",
+      "ja": "Crescent Dream",
+      "reference": "th04_28"
+    }
+  },
+  "th5": {
+    "op.m2": {
+      "en": "Bizarre Romantic Story ~ Mystic Square",
+      "ja": "怪綺談　～ Mystic Square",
+      "reference": "th05_01"
+    },
+    "st00.m2": {
+      "en": "Dream Express",
+      "ja": "Dream Express",
+      "reference": "th05_02"
+    },
+    "st00b.m2": {
+      "en": "Magic Square",
+      "ja": "魔法陣　～ Magic Square",
+      "reference": "th05_03"
+    },
+    "st01.m2": {
+      "en": "Dimension of Reverie",
+      "ja": "夢想時空",
+      "reference": "th05_04"
+    },
+    "st01b.m2": {
+      "en": "Spiritual Heaven",
+      "ja": "霊天　～ Spiritual Heaven",
+      "reference": "th05_05"
+    },
+    "st02.m2": {
+      "en": "Romantic Children",
+      "ja": "Romantic Children",
+      "reference": "th05_06"
+    },
+    "st02b.m2": {
+      "en": "Plastic Mind",
+      "ja": "プラスチックマインド",
+      "reference": "th05_07"
+    },
+    "st03.m2": {
+      "en": "Maple Wise",
+      "ja": "メイプルワイズ",
+      "reference": "th05_08"
+    },
+    "st03b.m2": {
+      "en": "Forbidden Magic",
+      "ja": "禁断の魔法　～ Forbidden Magic",
+      "reference": "th05_09"
+    },
+    "st03c.m2": {
+      "en": "Crimson Maiden ~ Crimson Dead!!",
+      "ja": "真紅の少女　～ Crimson Dead!!",
+      "reference": "th05_10"
+    },
+    "st03d.m2": {
+      "en": "Treacherous Maiden ~ Judas Kiss",
+      "ja": "裏切りの少女　～ Judas Kiss",
+      "reference": "th05_11"
+    },
+    "st04.m2": {
+      "en": "the Last Judgment",
+      "ja": "the Last Judgement",
+      "reference": "th05_12"
+    },
+    "st04b.m2": {
+      "en": "Doll of Misery",
+      "ja": "悲しき人形　～ Doll of Misery",
+      "reference": "th05_13"
+    },
+    "st05.m2": {
+      "en": "End of the World ~ World's End",
+      "ja": "世界の果て　～ World's End",
+      "reference": "th05_14"
+    },
+    "st05b.m2": {
+      "en": "Legendary Illusion ~ Infinite Being",
+      "ja": "神話幻想　～ Infinite Being",
+      "reference": "th05_15"
+    },
+    "st06.m2": {
+      "en": "Alice in Wonderland",
+      "ja": "不思議の国のアリス",
+      "reference": "th05_16"
+    },
+    "st06b.m2": {
+      "en": "the Grimoire of Alice",
+      "ja": "the Grimoire of Alice",
+      "reference": "th05_17"
+    },
+    "ed00.m2": {
+      "en": "Shinto Shrine",
+      "ja": "神社",
+      "reference": "th05_18"
+    },
+    "ed01.m2": {
+      "en": "Endless",
+      "ja": "Endless",
+      "reference": "th05_19"
+    },
+    "ed02.m2": {
+      "en": "Eternal Paradise",
+      "ja": "久遠の楽園",
+      "reference": "th05_20"
+    },
+    "staff.m2": {
+      "en": "Mystic Dream",
+      "ja": "Mystic Dream",
+      "reference": "th05_21"
+    },
+    "exed.m2": {
+      "en": "Peaceful Romancer",
+      "ja": "Peaceful Romancer",
+      "reference": "th05_23"
+    },
+    "name.m2": {
+      "en": "Soul's Resting Place",
+      "ja": "魂の休らむ所",
+      "reference": "th05_22"
+    },
+    "op.m": {
+      "en": "Bizarre Romantic Story ~ Mystic Square",
+      "ja": "怪綺談　～ Mystic Square",
+      "reference": "th05_01"
+    },
+    "st00.m": {
+      "en": "Dream Express",
+      "ja": "Dream Express",
+      "reference": "th05_02"
+    },
+    "st00b.m": {
+      "en": "Magic Square",
+      "ja": "魔法陣　～ Magic Square",
+      "reference": "th05_03"
+    },
+    "st01.m": {
+      "en": "Dimension of Reverie",
+      "ja": "夢想時空",
+      "reference": "th05_04"
+    },
+    "st01b.m": {
+      "en": "Spiritual Heaven",
+      "ja": "霊天　～ Spiritual Heaven",
+      "reference": "th05_05"
+    },
+    "st02.m": {
+      "en": "Romantic Children",
+      "ja": "Romantic Children",
+      "reference": "th05_06"
+    },
+    "st02b.m": {
+      "en": "Plastic Mind",
+      "ja": "プラスチックマインド",
+      "reference": "th05_07"
+    },
+    "st03.m": {
+      "en": "Maple Wise",
+      "ja": "メイプルワイズ",
+      "reference": "th05_08"
+    },
+    "st03b.m": {
+      "en": "Forbidden Magic",
+      "ja": "禁断の魔法　～ Forbidden Magic",
+      "reference": "th05_09"
+    },
+    "st03c.m": {
+      "en": "Crimson Maiden ~ Crimson Dead!!",
+      "ja": "真紅の少女　～ Crimson Dead!!",
+      "reference": "th05_10"
+    },
+    "st03d.m": {
+      "en": "Treacherous Maiden ~ Judas Kiss",
+      "ja": "裏切りの少女　～ Judas Kiss",
+      "reference": "th05_11"
+    },
+    "st04.m": {
+      "en": "the Last Judgment",
+      "ja": "the Last Judgement",
+      "reference": "th05_12"
+    },
+    "st04b.m": {
+      "en": "Doll of Misery",
+      "ja": "悲しき人形　～ Doll of Misery",
+      "reference": "th05_13"
+    },
+    "st05.m": {
+      "en": "End of the World ~ World's End",
+      "ja": "世界の果て　～ World's End",
+      "reference": "th05_14"
+    },
+    "st05b.m": {
+      "en": "Legendary Illusion ~ Infinite Being",
+      "ja": "神話幻想　～ Infinite Being",
+      "reference": "th05_15"
+    },
+    "st06.m": {
+      "en": "Alice in Wonderland",
+      "ja": "不思議の国のアリス",
+      "reference": "th05_16"
+    },
+    "st06b.m": {
+      "en": "the Grimoire of Alice",
+      "ja": "the Grimoire of Alice",
+      "reference": "th05_17"
+    },
+    "ed00.m": {
+      "en": "Shinto Shrine",
+      "ja": "神社",
+      "reference": "th05_18"
+    },
+    "ed01.m": {
+      "en": "Endless",
+      "ja": "Endless",
+      "reference": "th05_19"
+    },
+    "ed02.m": {
+      "en": "Eternal Paradise",
+      "ja": "久遠の楽園",
+      "reference": "th05_20"
+    },
+    "staff.m": {
+      "en": "Mystic Dream",
+      "ja": "Mystic Dream",
+      "reference": "th05_21"
+    },
+    "exed.m": {
+      "en": "Peaceful Romancer",
+      "ja": "Peaceful Romancer",
+      "reference": "th05_23"
+    },
+    "name.m": {
+      "en": "Soul's Resting Place",
+      "ja": "魂の休らむ所",
+      "reference": "th05_22"
+    }
+  },
+  "th6": {
+    "th06_01.wav": {
+      "en": "A Dream More Scarlet than Red",
+      "ja": "赤より紅い夢",
+      "reference": "th06_01"
+    },
+    "th06_02.wav": {
+      "en": "A Soul as Scarlet as a Ground Cherry",
+      "ja": "ほおずきみたいに紅い魂",
+      "reference": "th06_02"
+    },
+    "th06_03.wav": {
+      "en": "Apparitions Stalk the Night",
+      "ja": "妖魔夜行",
+      "reference": "th06_03"
+    },
+    "th06_04.wav": {
+      "en": "Lunate Elf",
+      "ja": "ルーネイトエルフ",
+      "reference": "th06_04"
+    },
+    "th06_05.wav": {
+      "en": "Tomboyish Girl in Love",
+      "ja": "おてんば恋娘",
+      "reference": "th06_05"
+    },
+    "th06_06.wav": {
+      "en": "Shanghai Scarlet Teahouse ~ Chinese Tea",
+      "ja": "上海紅茶館　～ Chinese Tea",
+      "reference": "th06_06"
+    },
+    "th06_07.wav": {
+      "en": "Shanghai Alice of Meiji 17",
+      "ja": "明治十七年の上海アリス",
+      "reference": "th06_07"
+    },
+    "th06_08.wav": {
+      "en": "Voile, the Magic Library",
+      "ja": "ヴワル魔法図書館",
+      "reference": "th06_08"
+    },
+    "th06_09.wav": {
+      "en": "Locked Girl ~ The Girl's Sealed Room",
+      "ja": "ラクトガール　～ 少女密室",
+      "reference": "th06_09"
+    },
+    "th06_10.wav": {
+      "en": "The Maid and the Pocket Watch of Blood",
+      "ja": "メイドと血の懐中時計",
+      "reference": "th06_10"
+    },
+    "th06_11.wav": {
+      "en": "Lunar Clock ~ Luna Dial",
+      "ja": "月時計　～ ルナ・ダイアル",
+      "reference": "th06_11"
+    },
+    "th06_12.wav": {
+      "en": "The Young Descendant of Țepeș",
+      "ja": "ツェペシュの幼き末裔",
+      "reference": "th06_12"
+    },
+    "th06_13.wav": {
+      "en": "Septette for a Dead Princess",
+      "ja": "亡き王女の為のセプテット",
+      "reference": "th06_13"
+    },
+    "th06_14.wav": {
+      "en": "The Centennial Festival for Magical Girls",
+      "ja": "魔法少女達の百年祭",
+      "reference": "th06_14"
+    },
+    "th06_15.wav": {
+      "en": "U.N. Owen was Her?",
+      "ja": "U.N.オーエンは彼女なのか？",
+      "reference": "th06_15"
+    },
+    "th06_16.wav": {
+      "en": "An Eternity More Transient than Scarlet",
+      "ja": "紅より儚い永遠",
+      "reference": "th06_16"
+    },
+    "th06_17.wav": {
+      "en": "Scarlet Chamber ~ Eastern Dream...",
+      "ja": "紅楼　～ Eastern Dream...",
+      "reference": "th06_17"
+    }
+  },
+  "th7": {
+    "th07_01.wav": {
+      "en": "Ghostly Dream ~ Snow or Cherry Petal",
+      "ja": "妖々夢　～ Snow or Cherry Petal",
+      "reference": "th07_01"
+    },
+    "th07_02.wav": {
+      "en": "Paradise ~ Deep Mountain",
+      "ja": "無何有の郷　～ Deep Mountain",
+      "reference": "th07_02"
+    },
+    "th07_03.wav": {
+      "en": "Crystallized Silver",
+      "ja": "クリスタライズシルバー",
+      "reference": "th07_03"
+    },
+    "th07_04.wav": {
+      "en": "The Fantastic Tales from Tōno",
+      "ja": "遠野幻想物語",
+      "reference": "th07_04"
+    },
+    "th07_05.wav": {
+      "en": "Diāo Yè Zōng (withered leaf)",
+      "ja": "ティアオイエツォン(withered leaf)",
+      "reference": "th07_05"
+    },
+    "th07_06.wav": {
+      "en": "The Doll Maker of București",
+      "ja": "ブクレシュティの人形師",
+      "reference": "th07_06"
+    },
+    "th07_07.wav": {
+      "en": "Doll Judgment ~ The Girl Who Played with People's Shapes",
+      "ja": "人形裁判　～ 人の形弄びし少女",
+      "reference": "th07_07"
+    },
+    "th07_08.wav": {
+      "en": "The Capital City of Flowers in the Sky",
+      "ja": "天空の花の都",
+      "reference": "th07_08"
+    },
+    "th07_09.wav": {
+      "en": "Phantom Band ~ Phantom Ensemble",
+      "ja": "幽霊楽団　～ Phantom Ensemble",
+      "reference": "th07_09"
+    },
+    "th07_10.wav": {
+      "en": "Eastern Ghostly Dream ~ Ancient Temple",
+      "ja": "東方妖々夢　～ Ancient Temple",
+      "reference": "th07_10"
+    },
+    "th07_11.wav": {
+      "en": "Hiroari Shoots a Strange Bird ~ Till When?",
+      "ja": "広有射怪鳥事　～ Till When?",
+      "reference": "th07_11"
+    },
+    "th07_12.wav": {
+      "en": "Ultimate Truth",
+      "ja": "アルティメットトゥルース",
+      "reference": "th07_12"
+    },
+    "th07_13.wav": {
+      "en": "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+      "ja": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+      "reference": "th07_13"
+    },
+    "th07_13b.wav": {
+      "en": "Border of Life",
+      "ja": "ボーダーオブライフ",
+      "reference": "th07_14"
+    },
+    "th07_14.wav": {
+      "en": "Dream of a Spring Breeze",
+      "ja": "春風の夢",
+      "reference": "th07_19"
+    },
+    "th07_15.wav": {
+      "en": "Sakura, Sakura ~ Japanize Dream...",
+      "ja": "さくらさくら　～ Japanize Dream...",
+      "reference": "th07_20"
+    },
+    "th07_16.wav": {
+      "en": "Spiritual Domination",
+      "ja": "妖々跋扈",
+      "reference": "th07_15"
+    },
+    "th07_17.wav": {
+      "en": "A Maiden's Illusionary Funeral ~ Necro-Fantasy",
+      "ja": "少女幻葬　～ Necro-Fantasy",
+      "reference": "th07_16"
+    },
+    "th07_18.wav": {
+      "en": "Spiritual Domination ~ Who done it!",
+      "ja": "妖々跋扈　～ Who done it!",
+      "reference": "th07_17"
+    },
+    "th07_19.wav": {
+      "en": "Necrofantasia",
+      "ja": "ネクロファンタジア",
+      "reference": "th07_18"
+    }
+  },
+  "th7.5": {
+    "sys00_op.wav": {
+      "en": "Forgathering Dream",
+      "ja": "萃夢想",
+      "reference": "th075_01"
+    },
+    "00a.wav": {
+      "en": "Eastern Mystical Tale of Romance",
+      "ja": "東方妖恋談",
+      "reference": "th075_02"
+    },
+    "00b.wav": {
+      "en": "Maiden's Capriccio ~ Capriccio",
+      "ja": "少女綺想曲　～ Capriccio",
+      "reference": "th075_03"
+    },
+    "01a.wav": {
+      "en": "Love-Colored Magic",
+      "ja": "恋色マジック",
+      "reference": "th075_04"
+    },
+    "01b.wav": {
+      "en": "The Witches' Ball",
+      "ja": "魔女達の舞踏会",
+      "reference": "th075_05"
+    },
+    "02a.wav": {
+      "en": "The Maid and the Pocket Watch of Blood",
+      "ja": "メイドと血の懐中時計",
+      "reference": "th075_06"
+    },
+    "02b.wav": {
+      "en": "Lunar Clock ~ Luna Dial",
+      "ja": "月時計　～ ルナ・ダイアル",
+      "reference": "th075_07"
+    },
+    "03a.wav": {
+      "en": "The Doll Maker of București",
+      "ja": "ブクレシュティの人形師",
+      "reference": "th075_08"
+    },
+    "03b.wav": {
+      "en": "Doll Judgment",
+      "ja": "人形裁判",
+      "reference": "th075_09"
+    },
+    "04a.wav": {
+      "en": "Locked Girl ~ The Girl's Sealed Room",
+      "ja": "ラクトガール　～ 少女密室",
+      "reference": "th075_10"
+    },
+    "04b.wav": {
+      "en": "Voile, the Magic Library",
+      "ja": "ヴワル魔法図書館",
+      "reference": "th075_11"
+    },
+    "05a.wav": {
+      "en": "Hiroari Shoots a Strange Bird ~ Till When?",
+      "ja": "広有射怪鳥事　～ Till When?",
+      "reference": "th075_12"
+    },
+    "05b.wav": {
+      "en": "Eastern Ghostly Dream ~ Ancient Temple",
+      "ja": "東方妖々夢　～ Ancient Temple",
+      "reference": "th075_13"
+    },
+    "06a.wav": {
+      "en": "Septette for a Dead Princess",
+      "ja": "亡き王女の為のセプテット",
+      "reference": "th075_14"
+    },
+    "07a.wav": {
+      "en": "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+      "ja": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+      "reference": "th075_15"
+    },
+    "00c.wav": {
+      "en": "Demystify Feast",
+      "ja": "Demystify Feast",
+      "reference": "th075_16"
+    },
+    "08a.wav": {
+      "en": "Night Falls ~ Evening Star",
+      "ja": "夜が降りてくる ～ Evening Star",
+      "reference": "th075_17"
+    },
+    "09a.wav": {
+      "en": "The Fabled Land of Onigashima ~ Missing Power",
+      "ja": "御伽の国の鬼が島 ～ Missing Power",
+      "reference": "th075_18"
+    },
+    "53.wav": {
+      "en": "End of Summer",
+      "ja": "夏明き",
+      "reference": "th075_19"
+    },
+    "sys99_ed.wav": {
+      "en": "Eastern Forgathering Dream",
+      "ja": "東方萃夢想",
+      "reference": "th075_20"
+    },
+    "51.wav": {
+      "en": "Demonic Place",
+      "ja": "魔所",
+      "reference": "th075_21"
+    },
+    "52.wav": {
+      "en": "The Moon",
+      "ja": "月輪",
+      "reference": "th075_22"
+    },
+    "54.wav": {
+      "en": "Wanderings",
+      "ja": "遍参",
+      "reference": "th075_23"
+    },
+    "56.wav": {
+      "en": "Inner Heart",
+      "ja": "裏心",
+      "reference": "th075_24"
+    },
+    "57.wav": {
+      "en": "Intermezzo",
+      "ja": "Intermezzo",
+      "reference": "th075_25"
+    },
+    "58.wav": {
+      "en": "Eastern Wind",
+      "ja": "あゆのかぜ",
+      "reference": "th075_26"
+    },
+    "67.wav": {
+      "en": "Silence",
+      "ja": "森閑",
+      "reference": "th075_27"
+    },
+    "62.wav": {
+      "en": "Skygazer",
+      "ja": "仰空",
+      "reference": "th075_28"
+    },
+    "59.wav": {
+      "en": "Solitary Place",
+      "ja": "幽境",
+      "reference": "th075_29"
+    },
+    "68.wav": {
+      "en": "Unexpected Visitor",
+      "ja": "珍客",
+      "reference": "th075_30"
+    },
+    "60.wav": {
+      "en": "Scarlet Night",
+      "ja": "紅夜",
+      "reference": "th075_31"
+    },
+    "61.wav": {
+      "en": "Swift Battle",
+      "ja": "戦迅",
+      "reference": "th075_32"
+    },
+    "65.wav": {
+      "en": "Bad Omen",
+      "ja": "禍機",
+      "reference": "th075_33"
+    },
+    "63.wav": {
+      "en": "Broken Moon",
+      "ja": "砕月",
+      "reference": "th075_34"
+    }
+  },
+  "th8": {
+    "th08_01.wav": {
+      "en": "Eternal Night Vignette ~ Eastern Night",
+      "ja": "永夜抄　～ Eastern Night",
+      "reference": "th08_01"
+    },
+    "th08_00.wav": {
+      "en": "Illusionary Night ~ Ghostly Eyes",
+      "ja": "幻視の夜　～ Ghostly Eyes",
+      "reference": "th08_02"
+    },
+    "th08_03.wav": {
+      "en": "Wriggling Autumn Moon ~ Mooned Insect",
+      "ja": "蠢々秋月　～ Mooned Insect",
+      "reference": "th08_03"
+    },
+    "th08_04.wav": {
+      "en": "Song of the Night Sparrow ~ Night Bird",
+      "ja": "夜雀の歌声　～ Night Bird",
+      "reference": "th08_04"
+    },
+    "th08_05.wav": {
+      "en": "Deaf to All but the Song",
+      "ja": "もう歌しか聞こえない",
+      "reference": "th08_05"
+    },
+    "th08_06.wav": {
+      "en": "Nostalgic Blood of the East ~ Old World",
+      "ja": "懐かしき東方の血　～ Old World",
+      "reference": "th08_06"
+    },
+    "th08_07.wav": {
+      "en": "Plain Asia",
+      "ja": "プレインエイジア",
+      "reference": "th08_07"
+    },
+    "th08_08.wav": {
+      "en": "Retribution for the Eternal Night ~ Imperishable Night",
+      "ja": "永夜の報い　～ Imperishable Night",
+      "reference": "th08_08"
+    },
+    "th08_09.wav": {
+      "en": "Maiden's Capriccio ~ Dream Battle",
+      "ja": "少女綺想曲　～ Dream Battle",
+      "reference": "th08_09"
+    },
+    "th08_10.wav": {
+      "en": "Love-Colored Master Spark",
+      "ja": "恋色マスタースパーク",
+      "reference": "th08_10"
+    },
+    "th08_11.wav": {
+      "en": "Cinderella Cage ~ Kagome-Kagome",
+      "ja": "シンデレラケージ　～ Kagome-Kagome",
+      "reference": "th08_11"
+    },
+    "th08_12.wav": {
+      "en": "Lunatic Eyes ~ Invisible Full Moon",
+      "ja": "狂気の瞳　～ Invisible Full Moon",
+      "reference": "th08_12"
+    },
+    "th08_13.wav": {
+      "en": "Voyage 1969",
+      "ja": "ヴォヤージュ1969",
+      "reference": "th08_13"
+    },
+    "th08_14.wav": {
+      "en": "Gensokyo Millennium ~ History of the Moon",
+      "ja": "千年幻想郷　～ History of the Moon",
+      "reference": "th08_14"
+    },
+    "th08_13b.wav": {
+      "en": "Voyage 1970",
+      "ja": "ヴォヤージュ1970",
+      "reference": "th08_16"
+    },
+    "th08_15.wav": {
+      "en": "Flight of the Bamboo Cutter ~ Lunatic Princess",
+      "ja": "竹取飛翔　～ Lunatic Princess",
+      "reference": "th08_15"
+    },
+    "th08_16.wav": {
+      "en": "Evening Primrose",
+      "ja": "月見草",
+      "reference": "th08_19"
+    },
+    "th08_17.wav": {
+      "en": "Eternal Dream ~ Mystical Maple",
+      "ja": "Eternal Dream　～ 幽玄の槭樹",
+      "reference": "th08_20"
+    },
+    "th08_18.wav": {
+      "en": "Extend Ash ~ Person of Hourai",
+      "ja": "エクステンドアッシュ　～ 蓬莱人",
+      "reference": "th08_17"
+    },
+    "th08_19.wav": {
+      "en": "Reach for the Moon, Immortal Smoke",
+      "ja": "月まで届け、不死の煙",
+      "reference": "th08_18"
+    },
+    "th08_20.wav": {
+      "en": "Eastern Youkai Beauty",
+      "ja": "東方妖怪小町",
+      "reference": "th08_21"
+    }
+  },
+  "th9": {
+    "th09_00.wav": {
+      "en": "Flower Reflecting Mound ~ Higan Retour",
+      "ja": "花映塚 ～ Higan Retour",
+      "reference": "th09_01"
+    },
+    "th09_00b.wav": {
+      "en": "Oriental Dark Flight",
+      "ja": "オリエンタルダークフライト",
+      "reference": "th09_03"
+    },
+    "th09_00c.wav": {
+      "en": "The Mound Where the Flowers Reflect",
+      "ja": "花の映る塚",
+      "reference": "th09_16"
+    },
+    "th09_01.wav": {
+      "en": "Spring Lane ~ Colorful Path",
+      "ja": "春色小径　～ Colorful Path",
+      "reference": "th09_02"
+    },
+    "th09_02.wav": {
+      "en": "Flowering Night",
+      "ja": "フラワリングナイト",
+      "reference": "th09_04"
+    },
+    "th09_05.wav": {
+      "en": "Adventure of the Lovestruck Tomboy",
+      "ja": "おてんば恋娘の冒険",
+      "reference": "th09_07"
+    },
+    "th09_07.wav": {
+      "en": "Deaf to All but the Song ~ Flower Mix",
+      "ja": "もう歌しか聞こえない　～ Flower Mix",
+      "reference": "th09_09"
+    },
+    "th07_09.wav": {
+      "en": "Phantom Band ~ Phantom Ensemble",
+      "ja": "幽霊楽団　～ Phantom Ensemble",
+      "reference": "th09_08"
+    },
+    "th07_10_b.wav": {
+      "en": "Eastern Ghostly Dream ~ Ancient Temple",
+      "ja": "東方妖々夢　～ Ancient Temple",
+      "reference": "th09_05"
+    },
+    "th09_09.wav": {
+      "en": "Higan Retour ~ Riverside View",
+      "ja": "彼岸帰航　～ Riverside View",
+      "reference": "th09_14"
+    },
+    "th08_12.wav": {
+      "en": "Lunatic Eyes ~ Invisible Full Moon",
+      "ja": "狂気の瞳　～ Invisible Full Moon",
+      "reference": "th09_06"
+    },
+    "th09_10.wav": {
+      "en": "White Flag of Usa Shrine",
+      "ja": "お宇佐さまの素い幡",
+      "reference": "th09_10"
+    },
+    "th09_11.wav": {
+      "en": "Eastern Judgement in the Sixtieth Year ~ Fate of Sixty Years",
+      "ja": "六十年目の東方裁判　～ Fate of Sixty Years",
+      "reference": "th09_15"
+    },
+    "th09_12.wav": {
+      "en": "Poison Body ~ Forsaken Doll",
+      "ja": "ポイズンボディ　～ Forsaken Doll",
+      "reference": "th09_12"
+    },
+    "th09_13.wav": {
+      "en": "Gensokyo, Past and Present ~ Flower Land",
+      "ja": "今昔幻想郷　～ Flower Land",
+      "reference": "th09_13"
+    },
+    "th09_14.wav": {
+      "en": "The Flowers Remain in Fantasy",
+      "ja": "花は幻想のままに",
+      "reference": "th09_18"
+    },
+    "th09_15.wav": {
+      "en": "Mound of Shigan",
+      "ja": "此岸の塚",
+      "reference": "th09_17"
+    },
+    "th09_17.wav": {
+      "en": "Flower of Soul ~ Another Dream...",
+      "ja": "魂の花　～ Another Dream...",
+      "reference": "th09_19"
+    },
+    "th09_08_2.wav": {
+      "en": "Wind God Girl",
+      "ja": "風神少女",
+      "reference": "th09_11",
+      "suffix_en": " (Short Version)",
+      "suffix_ja": "（ショートバージョン）"
+    }
+  },
+  "th9.5": {
+    "th095_00.wav": {
+      "en": "Tengu's Notebook ~ Mysterious Note",
+      "ja": "天狗の手帖　～ Mysterious Note",
+      "reference": "th095_01"
+    },
+    "th095_01.wav": {
+      "en": "Wind Circulation ~ Wind Tour",
+      "ja": "風の循環　～ Wind Tour",
+      "reference": "th095_02"
+    },
+    "th095_02.wav": {
+      "en": "Tengu Is Watching ~ Black Eyes",
+      "ja": "天狗が見ている　～ Black Eyes",
+      "reference": "th095_03"
+    },
+    "th095_03.wav": {
+      "en": "Sleepless Night of the Eastern Country",
+      "ja": "東の国の眠らない夜",
+      "reference": "th095_04"
+    },
+    "th095_04.wav": {
+      "en": "Retrospective Kyoto",
+      "ja": "レトロスペクティブ京都",
+      "reference": "th095_05"
+    },
+    "th09_08_2.wav": {
+      "en": "Wind God Girl",
+      "ja": "風神少女",
+      "reference": "th095_06"
+    }
+  },
+  "th10": {
+    "th10_02.wav": {
+      "en": "Sealed Gods",
+      "ja": "封印されし神々",
+      "reference": "th10_01"
+    },
+    "th10_00.wav": {
+      "en": "A God That Misses People ~ Romantic Fall",
+      "ja": "人恋し神様　～ Romantic Fall",
+      "reference": "th10_02"
+    },
+    "th10_01.wav": {
+      "en": "Because Princess Inada Is Scolding Me",
+      "ja": "稲田姫様に叱られるから",
+      "reference": "th10_03"
+    },
+    "th10_03.wav": {
+      "en": "The Road of the Misfortune God ~ Dark Road",
+      "ja": "厄神様の通り道　～ Dark Road",
+      "reference": "th10_04"
+    },
+    "th10_04.wav": {
+      "en": "Dark Side of Fate",
+      "ja": "運命のダークサイド",
+      "reference": "th10_05"
+    },
+    "th10_05.wav": {
+      "en": "The Gensokyo the Gods Loved",
+      "ja": "神々が恋した幻想郷",
+      "reference": "th10_06"
+    },
+    "th10_06.wav": {
+      "en": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "ja": "芥川龍之介の河童　～ Candid Friend",
+      "reference": "th10_07"
+    },
+    "th10_07.wav": {
+      "en": "Fall of Fall ~ Autumnal Waterfall",
+      "ja": "フォールオブフォール　～ 秋めく滝",
+      "reference": "th10_08"
+    },
+    "th10_08.wav": {
+      "en": "Youkai Mountain ~ Mysterious Mountain",
+      "ja": "妖怪の山　～ Mysterious Mountain",
+      "reference": "th10_09"
+    },
+    "th10_09.wav": {
+      "en": "The Primal Scene of Japan the Girl Saw",
+      "ja": "少女が見た日本の原風景",
+      "reference": "th10_10"
+    },
+    "th10_10.wav": {
+      "en": "Faith Is for the Transient People",
+      "ja": "信仰は儚き人間の為に",
+      "reference": "th10_11"
+    },
+    "th10_11.wav": {
+      "en": "Cemetery of Onbashira ~ Grave of Being",
+      "ja": "御柱の墓場　～ Grave of Being",
+      "reference": "th10_12"
+    },
+    "th10_12.wav": {
+      "en": "The Venerable Ancient Battlefield ~ Suwa Foughten Field",
+      "ja": "神さびた古戦場　～ Suwa Foughten Field",
+      "reference": "th10_13"
+    },
+    "th10_15.wav": {
+      "en": "Tomorrow Will Be Special, Yesterday Was Not",
+      "ja": "明日ハレの日、ケの昨日",
+      "reference": "th10_14"
+    },
+    "th10_16.wav": {
+      "en": "Native Faith",
+      "ja": "ネイティブフェイス",
+      "reference": "th10_15"
+    },
+    "th10_13.wav": {
+      "en": "Shrine at the Foot of the Mountain",
+      "ja": "麓の神社",
+      "reference": "th10_16"
+    },
+    "th10_14.wav": {
+      "en": "The Gods Give Us Blessed Rain ~ Sylphid Dream",
+      "ja": "神は恵みの雨を降らす　～ Sylphid Dream",
+      "reference": "th10_17"
+    },
+    "th10_17.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th10_18"
+    }
+  },
+  "th10.5": {
+    "op.ogg": {
+      "en": "Heaven of Scarlet Perception",
+      "ja": "緋想天",
+      "reference": "th105_01"
+    },
+    "ta00.ogg": {
+      "en": "Usual Days",
+      "ja": "日常坐臥",
+      "reference": "th105_02"
+    },
+    "st00.ogg": {
+      "en": "The Ground's Color is Yellow",
+      "ja": "地の色は黄色",
+      "reference": "th105_03"
+    },
+    "ta01.ogg": {
+      "en": "Argue for and Against",
+      "ja": "甲論乙駁",
+      "reference": "th105_04"
+    },
+    "ta03.ogg": {
+      "en": "Beautiful Nature Sight",
+      "ja": "風光明媚",
+      "reference": "th105_05"
+    },
+    "st01.ogg": {
+      "en": "Fragrant Plants",
+      "ja": "香る樹葉花",
+      "reference": "th105_06"
+    },
+    "st02.ogg": {
+      "en": "Dancing Water Spray",
+      "ja": "踊る水飛沫",
+      "reference": "th105_07"
+    },
+    "ta05.ogg": {
+      "en": "Swing a Fish to Drive Away Flies",
+      "ja": "以魚駆蠅",
+      "reference": "th105_08"
+    },
+    "ta08.ogg": {
+      "en": "Free and Easy",
+      "ja": "放縦不羈",
+      "reference": "th105_09"
+    },
+    "st03.ogg": {
+      "en": "Ridiculous Game",
+      "ja": "嘲りの遊戯",
+      "reference": "th105_10"
+    },
+    "ta04.ogg": {
+      "en": "Drunk as I Like",
+      "ja": "冷吟閑酔",
+      "reference": "th105_11"
+    },
+    "ta02.ogg": {
+      "en": "Skies Beyond the Clouds",
+      "ja": "雲外蒼天",
+      "reference": "th105_12"
+    },
+    "st04.ogg": {
+      "en": "Crimson in the Black Sea ~ Legendary Fish",
+      "ja": "黒い海に紅く　～ Legendary Fish",
+      "reference": "th105_13"
+    },
+    "ta07.ogg": {
+      "en": "Flawless as Clothing of the Celestials",
+      "ja": "天衣無縫",
+      "reference": "th105_14"
+    },
+    "st05.ogg": {
+      "en": "Catastrophe in Bhavaagra ~ Wonderful Heaven",
+      "ja": "有頂天変　～ Wonderful Heaven",
+      "reference": "th105_15"
+    },
+    "st06.ogg": {
+      "en": "Bhavaagra As Seen Through a Child's Mind",
+      "ja": "幼心地の有頂天",
+      "reference": "th105_16"
+    },
+    "ta06.ogg": {
+      "en": "Darkening Dusk",
+      "ja": "暮色蒼然",
+      "reference": "th105_17"
+    },
+    "sr.ogg": {
+      "en": "Eastern Heaven of Scarlet Perception",
+      "ja": "東方緋想天",
+      "reference": "th105_18"
+    },
+    "st10.ogg": {
+      "en": "Eastern Mystical Tale of Romance",
+      "ja": "東方妖恋談",
+      "reference": "th105_19"
+    },
+    "st11.ogg": {
+      "en": "Vessel of Stars ~ Casket of Star",
+      "ja": "星の器　～ Casket of Star",
+      "reference": "th105_20"
+    },
+    "st12.ogg": {
+      "en": "Flowering Night",
+      "ja": "フラワリングナイト",
+      "reference": "th105_21"
+    },
+    "st13.ogg": {
+      "en": "The Doll Maker of București",
+      "ja": "ブクレシュティの人形師",
+      "reference": "th105_22"
+    },
+    "st14.ogg": {
+      "en": "Hiroari Shoots a Strange Bird ~ Till When?",
+      "ja": "広有射怪鳥事　～ Till When?",
+      "reference": "th105_23"
+    },
+    "st15.ogg": {
+      "en": "Locked Girl ~ The Girl's Sealed Room",
+      "ja": "ラクトガール　～ 少女密室",
+      "reference": "th105_24"
+    },
+    "st16.ogg": {
+      "en": "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+      "ja": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+      "reference": "th105_25"
+    },
+    "st17.ogg": {
+      "en": "Septette for a Dead Princess",
+      "ja": "亡き王女の為のセプテット",
+      "reference": "th105_26"
+    },
+    "st18.ogg": {
+      "en": "Night Falls ~ Evening Star",
+      "ja": "夜が降りてくる ～ Evening Star",
+      "reference": "th105_27"
+    },
+    "st19.ogg": {
+      "en": "Broken Moon",
+      "ja": "砕月",
+      "reference": "th105_28"
+    },
+    "st20.ogg": {
+      "en": "Lunatic Eyes ~ Invisible Full Moon",
+      "ja": "狂気の瞳　～ Invisible Full Moon",
+      "reference": "th105_29"
+    },
+    "st21.ogg": {
+      "en": "Wind God Girl",
+      "ja": "風神少女",
+      "reference": "th105_30"
+    },
+    "st22.ogg": {
+      "en": "Higan Retour ~ Riverside View",
+      "ja": "彼岸帰航　～ Riverside View",
+      "reference": "th105_31"
+    }
+  },
+  "th11": {
+    "th11_00.wav": {
+      "en": "Awakening of the Earth Spirits",
+      "ja": "地霊達の起床",
+      "reference": "th11_01"
+    },
+    "th11_01.wav": {
+      "en": "The Dark Blowhole",
+      "ja": "暗闇の風穴",
+      "reference": "th11_02"
+    },
+    "th11_02.wav": {
+      "en": "The Sealed-Away Youkai ~ Lost Place",
+      "ja": "封じられた妖怪　～ Lost Place",
+      "reference": "th11_03"
+    },
+    "th11_03.wav": {
+      "en": "The Bridge People No Longer Cross",
+      "ja": "渡る者の途絶えた橋",
+      "reference": "th11_04"
+    },
+    "th11_05.wav": {
+      "en": "Green-Eyed Jealousy",
+      "ja": "緑眼のジェラシー",
+      "reference": "th11_05"
+    },
+    "th11_06.wav": {
+      "en": "Walking the Streets of a Former Hell",
+      "ja": "旧地獄街道を行く",
+      "reference": "th11_06"
+    },
+    "th11_07.wav": {
+      "en": "A Flower-Studded Saké Dish on Mt. Ooe",
+      "ja": "華のさかづき大江山",
+      "reference": "th11_07"
+    },
+    "th11_08.wav": {
+      "en": "Heartfelt Fancy",
+      "ja": "ハートフェルトファンシー",
+      "reference": "th11_08"
+    },
+    "th11_10.wav": {
+      "en": "Satori Maiden ~ 3rd eye",
+      "ja": "少女さとり　～ 3rd eye",
+      "reference": "th11_09"
+    },
+    "th11_12.wav": {
+      "en": "Lullaby of Deserted Hell",
+      "ja": "廃獄ララバイ",
+      "reference": "th11_10"
+    },
+    "th11_13.wav": {
+      "en": "Corpse Voyage ~ Be of good cheer!",
+      "ja": "死体旅行　～ Be of good cheer!",
+      "reference": "th11_11"
+    },
+    "th11_14.wav": {
+      "en": "Hellfire Mantle",
+      "ja": "業火マントル",
+      "reference": "th11_12"
+    },
+    "th11_16.wav": {
+      "en": "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+      "ja": "霊知の太陽信仰　～ Nuclear Fusion",
+      "reference": "th11_13"
+    },
+    "th11_15.wav": {
+      "en": "Last Remote",
+      "ja": "ラストリモート",
+      "reference": "th11_14"
+    },
+    "th11_17.wav": {
+      "en": "Hartmann's Youkai Girl",
+      "ja": "ハルトマンの妖怪少女",
+      "reference": "th11_15"
+    },
+    "th11_18.wav": {
+      "en": "The Earth Spirits' Homecoming",
+      "ja": "地霊達の帰宅",
+      "reference": "th11_16"
+    },
+    "th11_19.wav": {
+      "en": "Energy Daybreak ~ Future Dream...",
+      "ja": "エネルギー黎明 ～ Future Dream...",
+      "reference": "th11_17"
+    },
+    "th10_17.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th10_18"
+    }
+  },
+  "th12": {
+    "th12_01.wav": {
+      "en": "A Shadow in the Blue Sky",
+      "ja": "青空の影",
+      "reference": "th12_01"
+    },
+    "th12_00.wav": {
+      "en": "At the Harbor of Spring",
+      "ja": "春の湊に",
+      "reference": "th12_02"
+    },
+    "th12_02.wav": {
+      "en": "A Tiny, Tiny, Clever Commander",
+      "ja": "小さな小さな賢将",
+      "reference": "th12_03"
+    },
+    "th12_04.wav": {
+      "en": "The Sealed Cloud Route",
+      "ja": "閉ざせし雲の通い路",
+      "reference": "th12_04"
+    },
+    "th12_05.wav": {
+      "en": "Beware the Umbrella Left There Forever",
+      "ja": "万年置き傘にご注意を",
+      "reference": "th12_05"
+    },
+    "th12_07.wav": {
+      "en": "Sky Ruin",
+      "ja": "スカイルーイン",
+      "reference": "th12_06"
+    },
+    "th12_08.wav": {
+      "en": "The Traditional Old Man and the Stylish Girl",
+      "ja": "時代親父とハイカラ少女",
+      "reference": "th12_07"
+    },
+    "th12_09.wav": {
+      "en": "Interdimensional Voyage of a Ghostly Passenger Ship",
+      "ja": "幽霊客船の時空を越えた旅",
+      "reference": "th12_08"
+    },
+    "th12_10.wav": {
+      "en": "Captain Murasa",
+      "ja": "キャプテン・ムラサ",
+      "reference": "th12_09"
+    },
+    "th12_13.wav": {
+      "en": "Rural Makai City Esoteria",
+      "ja": "魔界地方都市エソテリア",
+      "reference": "th12_10"
+    },
+    "th12_14.wav": {
+      "en": "The Tiger-Patterned Bishamonten",
+      "ja": "虎柄の毘沙門天",
+      "reference": "th12_11"
+    },
+    "th12_16.wav": {
+      "en": "Fires of Hokkai",
+      "ja": "法界の火",
+      "reference": "th12_12"
+    },
+    "th12_17.wav": {
+      "en": "Emotional Skyscraper ~ Cosmic Mind",
+      "ja": "感情の摩天楼　～ Cosmic Mind",
+      "reference": "th12_13"
+    },
+    "th12_18.wav": {
+      "en": "UFO Romance in the Night Sky",
+      "ja": "夜空のユーフォーロマンス",
+      "reference": "th12_14"
+    },
+    "th12_19.wav": {
+      "en": "Heian Alien",
+      "ja": "平安のエイリアン",
+      "reference": "th12_15"
+    },
+    "th12_20.wav": {
+      "en": "Youkai Temple",
+      "ja": "妖怪寺",
+      "reference": "th12_16"
+    },
+    "th12_21.wav": {
+      "en": "Returning Home from the Sky ~ Sky Dream",
+      "ja": "空の帰り道　～ Sky Dream",
+      "reference": "th12_17"
+    },
+    "th10_17.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th10_18"
+    }
+  },
+  "th12.3": {
+    "op2.ogg": {
+      "en": "Did You See That Shadow?",
+      "ja": "君はあの影を見たか？",
+      "reference": "th123_01"
+    },
+    "select.ogg": {
+      "en": "Forgathering Dream",
+      "ja": "萃夢想",
+      "reference": "th123_02"
+    },
+    "ta20.ogg": {
+      "en": "The Legendary Titan",
+      "ja": "伝説の巨神",
+      "reference": "th123_03"
+    },
+    "st30.ogg": {
+      "en": "Faith Is for the Transient People",
+      "ja": "信仰は儚き人間の為に",
+      "reference": "th123_04"
+    },
+    "st31.ogg": {
+      "en": "Tomboyish Girl in Love",
+      "ja": "おてんば恋娘",
+      "reference": "th123_05"
+    },
+    "ta22.ogg": {
+      "en": "Scenery with Dolls",
+      "ja": "人形のある風景",
+      "reference": "th123_06"
+    },
+    "st32.ogg": {
+      "en": "Shanghai Scarlet Teahouse ~ Chinese Tea",
+      "ja": "上海紅茶館　～ Chinese Tea",
+      "reference": "th123_07"
+    },
+    "st33.ogg": {
+      "en": "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+      "ja": "霊知の太陽信仰　～ Nuclear Fusion",
+      "reference": "th123_08"
+    },
+    "ta21.ogg": {
+      "en": "Our Hisoutensoku",
+      "ja": "ぼくらの非想天則",
+      "reference": "th123_09"
+    },
+    "st35.ogg": {
+      "en": "Unknown X ~ Unfound Adventure",
+      "ja": "アンノウンＸ　～ Unfound Adventure",
+      "reference": "th123_10"
+    },
+    "st36.ogg": {
+      "en": "X, the Floating Object in the Sky",
+      "ja": "空に浮かぶ物体Ｘ",
+      "reference": "th123_11"
+    },
+    "st40.ogg": {
+      "en": "Dichromatic Lotus Butterfly ~ Ancients",
+      "ja": "二色蓮花蝶　～ Ancients",
+      "reference": "th123_12"
+    },
+    "st41.ogg": {
+      "en": "Love-Colored Magic",
+      "ja": "恋色マジック",
+      "reference": "th123_13"
+    },
+    "st42.ogg": {
+      "en": "the Grimoire of Alice",
+      "ja": "the Grimoire of Alice",
+      "reference": "th123_14"
+    },
+    "st43.ogg": {
+      "en": "Voile, the Magic Library",
+      "ja": "ヴワル魔法図書館",
+      "reference": "th123_15"
+    },
+    "st34.ogg": {
+      "en": "Tomorrow Will Be Special, Yesterday Was Not",
+      "ja": "明日ハレの日、ケの昨日",
+      "reference": "th123_16"
+    },
+    "sr2.ogg": {
+      "en": "The Eternal Steam Engine",
+      "ja": "悠久の蒸気機関",
+      "reference": "th123_17"
+    },
+    "st99.ogg": {
+      "en": "Eastern Mystical Tale of Romance (Century's End Version)",
+      "ja": "東方妖恋談 (世紀末バージョン)",
+      "reference": "th123_19"
+    }
+  },
+  "th12.5": {
+    "th125_00.wav": {
+      "en": "Newshound",
+      "ja": "ニュースハウンド",
+      "reference": "th125_01"
+    },
+    "th125_01.wav": {
+      "en": "The Mystery in Your Town",
+      "ja": "あなたの町の怪事件",
+      "reference": "th125_02"
+    },
+    "th125_03.wav": {
+      "en": "Youkai Modern Colony",
+      "ja": "妖怪モダンコロニー",
+      "reference": "th125_03"
+    },
+    "th125_04.wav": {
+      "en": "Nemesis's Stronghold",
+      "ja": "ネメシスの要塞",
+      "reference": "th125_04"
+    },
+    "th125_05.wav": {
+      "en": "Bell of Avīci ~ Infinite Nightmare",
+      "ja": "無間の鐘　～ Infinite Nightmare",
+      "reference": "th125_05"
+    },
+    "th125_06.wav": {
+      "en": "Youkai Mountain ~ Mysterious Mountain",
+      "ja": "妖怪の山　～ Mysterious Mountain",
+      "reference": "th125_06"
+    },
+    "th125_07.wav": {
+      "en": "Hatate Unlock",
+      "ja": "はたてアンロック",
+      "reference": "th125_07"
+    }
+  },
+  "th12.8": {
+    "th128_07.wav": {
+      "en": "An Ice Fairy in Spring",
+      "ja": "春の氷精",
+      "reference": "th128_01"
+    },
+    "th128_00.wav": {
+      "en": "The Refrain of the Lovely Great War",
+      "ja": "可愛い大戦争のリフレーン",
+      "reference": "th128_02"
+    },
+    "th128_02.wav": {
+      "en": "Staking Your Life on a Prank",
+      "ja": "いたずらに命をかけて",
+      "reference": "th128_03"
+    },
+    "th128_01.wav": {
+      "en": "Year-Round Absorbed Curiosity",
+      "ja": "年中夢中の好奇心",
+      "reference": "th128_04"
+    },
+    "th128_05.wav": {
+      "en": "A Midnight Fairy Dance",
+      "ja": "真夜中のフェアリーダンス",
+      "reference": "th128_05"
+    },
+    "th128_09.wav": {
+      "en": "An Ice Fairy in Spring - Still -",
+      "ja": "春の氷精　- 静 -",
+      "reference": "th128_09"
+    },
+    "th128_10.wav": {
+      "en": "Loose Rain",
+      "ja": "ルーズレイン",
+      "reference": "th128_07"
+    },
+    "th128_11.wav": {
+      "en": "Magus Night",
+      "ja": "メイガスナイト",
+      "reference": "th128_08"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    },
+    "th128_06.wav": {
+      "en": "Great Fairy Wars ~ Fairy Wars",
+      "ja": "妖精大戦争　～ Fairy Wars",
+      "reference": "th128_06"
+    }
+  },
+  "th13": {
+    "th13_00.wav": {
+      "en": "Spirit of Avarice",
+      "ja": "欲深き霊魂",
+      "reference": "th13_01"
+    },
+    "th13_01.wav": {
+      "en": "Night Sakura of Dead Spirits",
+      "ja": "死霊の夜桜",
+      "reference": "th13_02"
+    },
+    "th13_03.wav": {
+      "en": "Ghost Lead",
+      "ja": "ゴーストリード",
+      "reference": "th13_03"
+    },
+    "th13_04.wav": {
+      "en": "Welcome to Youkai Temple",
+      "ja": "妖怪寺へようこそ",
+      "reference": "th13_04"
+    },
+    "th13_06.wav": {
+      "en": "Youkai Girl at the Gate",
+      "ja": "門前の妖怪小娘",
+      "reference": "th13_05"
+    },
+    "th13_07.wav": {
+      "en": "Let's Live in a Lovely Cemetery",
+      "ja": "素敵な墓場で暮しましょ",
+      "reference": "th13_06"
+    },
+    "th13_08.wav": {
+      "en": "Rigid Paradise",
+      "ja": "リジッドパラダイス",
+      "reference": "th13_07"
+    },
+    "th13_10.wav": {
+      "en": "Desire Drive",
+      "ja": "デザイアドライブ",
+      "reference": "th13_08"
+    },
+    "th13_11.wav": {
+      "en": "Old Yuanxian",
+      "ja": "古きユアンシェン",
+      "reference": "th13_09"
+    },
+    "th13_12.wav": {
+      "en": "The Hall of Dreams' Great Mausoleum",
+      "ja": "夢殿大祀廟",
+      "reference": "th13_10"
+    },
+    "th13_15.wav": {
+      "en": "Omiwa Legend",
+      "ja": "大神神話伝",
+      "reference": "th13_11"
+    },
+    "th13_16.wav": {
+      "en": "Starry Sky of Small Desires",
+      "ja": "小さな欲望の星空",
+      "reference": "th13_12"
+    },
+    "th13_17.wav": {
+      "en": "Shoutoku Legend ~ True Administrator",
+      "ja": "聖徳伝説　～　True Administrator",
+      "reference": "th13_13"
+    },
+    "th13_18.wav": {
+      "en": "A New Wind at the Shrine",
+      "ja": "神社の新しい風",
+      "reference": "th13_16"
+    },
+    "th13_19.wav": {
+      "en": "Desire Dream",
+      "ja": "デザイアドリーム",
+      "reference": "th13_17"
+    },
+    "th13_20.wav": {
+      "en": "Youkai's Temple Back Road",
+      "ja": "妖怪裏参道",
+      "reference": "th13_14"
+    },
+    "th13_22.wav": {
+      "en": "Futatsuiwa from Sado",
+      "ja": "佐渡の二ッ岩",
+      "reference": "th13_15"
+    },
+    "th13_01b.wav": {
+      "en": "Night Sakura of Dead Spirits",
+      "ja": "死霊の夜桜",
+      "reference": "th13_02",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_03b.wav": {
+      "en": "Ghost Lead",
+      "ja": "ゴーストリード",
+      "reference": "th13_03",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_04b.wav": {
+      "en": "Welcome to Youkai Temple",
+      "ja": "妖怪寺へようこそ",
+      "reference": "th13_04",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_06b.wav": {
+      "en": "Youkai Girl at the Gate",
+      "ja": "門前の妖怪小娘",
+      "reference": "th13_05",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_07b.wav": {
+      "en": "Let's Live in a Lovely Cemetery",
+      "ja": "素敵な墓場で暮しましょ",
+      "reference": "th13_06",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_08b.wav": {
+      "en": "Rigid Paradise",
+      "ja": "リジッドパラダイス",
+      "reference": "th13_07",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_10b.wav": {
+      "en": "Desire Drive",
+      "ja": "デザイアドライブ",
+      "reference": "th13_08",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_11b.wav": {
+      "en": "Old Yuanxian",
+      "ja": "古きユアンシェン",
+      "reference": "th13_09",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_12b.wav": {
+      "en": "The Hall of Dreams' Great Mausoleum",
+      "ja": "夢殿大祀廟",
+      "reference": "th13_10",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_15b.wav": {
+      "en": "Omiwa Legend",
+      "ja": "大神神話伝",
+      "reference": "th13_11",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_16b.wav": {
+      "en": "Starry Sky of Small Desires",
+      "ja": "小さな欲望の星空",
+      "reference": "th13_12",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_20b.wav": {
+      "en": "Youkai's Temple Back Road",
+      "ja": "妖怪裏参道",
+      "reference": "th13_14",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th13_22b.wav": {
+      "en": "Futatsuiwa from Sado",
+      "ja": "佐渡の二ッ岩",
+      "reference": "th13_15",
+      "suffix_en": " (Spirit World Version)",
+      "suffix_ja": "（霊界バージョン）"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th13.5": {
+    "reimu1.ogg": {
+      "en": "Spring Lane ~ Colorful Path",
+      "ja": "春色小径　～ Colorful Path",
+      "reference": "th135_02"
+    },
+    "marisa1.ogg": {
+      "en": "Magus Night",
+      "ja": "メイガスナイト",
+      "reference": "th135_03"
+    },
+    "ichirin1.ogg": {
+      "en": "The Traditional Old Man and the Stylish Girl",
+      "ja": "時代親父とハイカラ少女",
+      "reference": "th135_04"
+    },
+    "hijiri1.ogg": {
+      "en": "Emotional Skyscraper ~ Cosmic Mind",
+      "ja": "感情の摩天楼　～ Cosmic Mind",
+      "reference": "th135_05"
+    },
+    "futo1.ogg": {
+      "en": "Omiwa Legend",
+      "ja": "大神神話伝",
+      "reference": "th135_06"
+    },
+    "miko1.ogg": {
+      "en": "Shoutoku Legend ~ True Administrator",
+      "ja": "聖徳伝説　～　True Administrator",
+      "reference": "th135_07"
+    },
+    "nitori1.ogg": {
+      "en": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "ja": "芥川龍之介の河童　～ Candid Friend",
+      "reference": "th135_08"
+    },
+    "koishi1.ogg": {
+      "en": "Hartmann's Youkai Girl",
+      "ja": "ハルトマンの妖怪少女",
+      "reference": "th135_09"
+    },
+    "mamizou1.ogg": {
+      "en": "Futatsuiwa from Sado",
+      "ja": "佐渡の二ッ岩",
+      "reference": "th135_10"
+    },
+    "chuboss1.ogg": {
+      "en": "Futatsuiwa from Gensokyo",
+      "ja": "幻想郷の二ッ岩",
+      "reference": "th135_11"
+    },
+    "kokoro1.ogg": {
+      "en": "The Lost Emotion",
+      "ja": "亡失のエモーション",
+      "reference": "th135_12"
+    },
+    "op.ogg": {
+      "en": "This Dull World's Unchanging Pessimism",
+      "ja": "塵界不変のペシミズム",
+      "reference": "th135_13"
+    },
+    "title.ogg": {
+      "en": "Shinkirou Orchestra",
+      "ja": "心綺楼囃子",
+      "reference": "th135_14"
+    },
+    "ed.ogg": {
+      "en": "Morning Clouds",
+      "ja": "暁雲",
+      "reference": "th135_15"
+    },
+    "staffroll.ogg": {
+      "en": "Officially-Sanctioned Twilight Newspaper",
+      "ja": "官板黄昏新聞",
+      "reference": "th135_16"
+    },
+    "win.ogg": {
+      "en": "Today's Front-Page Headline",
+      "ja": "本日の一面記事",
+      "reference": "th135_17"
+    },
+    "staffroll2.ogg": {
+      "en": "Shinkirou Festival Orchestra",
+      "ja": "心綺楼祭囃子",
+      "reference": "th135_18"
+    },
+    "kaiwa1.ogg": {
+      "en": "A Popular Location",
+      "ja": "人気のある場所",
+      "reference": "th135_19"
+    },
+    "kaiwa3.ogg": {
+      "en": "An Unpopular Location",
+      "ja": "人気のない場所",
+      "reference": "th135_20"
+    },
+    "kaiwa5.ogg": {
+      "en": "The Village in the Dead of Night",
+      "ja": "丑三つ時の里",
+      "reference": "th135_22"
+    },
+    "charasel.ogg": {
+      "en": "Performer Selection",
+      "ja": "演者選択",
+      "reference": "th135_23"
+    },
+    "reimu2.ogg": {
+      "en": "Popularity Boom / Reimu Hakurei",
+      "ja": "人気爆発／博麗霊夢",
+      "reference": "th135_24"
+    },
+    "marisa2.ogg": {
+      "en": "Popularity Boom / Marisa Kirisame",
+      "ja": "人気爆発／霧雨魔理沙",
+      "reference": "th135_25"
+    },
+    "ichirin2.ogg": {
+      "en": "Popularity Boom / Ichirin Kumoi & Unzan",
+      "ja": "人気爆発／雲居一輪＆雲山",
+      "reference": "th135_26"
+    },
+    "hijiri2.ogg": {
+      "en": "Popularity Boom / Byakuren Hijiri",
+      "ja": "人気爆発／聖白蓮",
+      "reference": "th135_27"
+    },
+    "futo2.ogg": {
+      "en": "Popularity Boom / Mononobe no Futo",
+      "ja": "人気爆発／物部布都",
+      "reference": "th135_28"
+    },
+    "miko2.ogg": {
+      "en": "Popularity Boom / Toyosatomimi no Miko",
+      "ja": "人気爆発／豊聡耳神子",
+      "reference": "th135_29"
+    },
+    "nitori2.ogg": {
+      "en": "Popularity Boom / Nitori Kawashiro",
+      "ja": "人気爆発／河城にとり",
+      "reference": "th135_30"
+    },
+    "koishi2.ogg": {
+      "en": "Popularity Boom / Koishi Komeiji",
+      "ja": "人気爆発／古明地こいし",
+      "reference": "th135_31"
+    },
+    "mamizou2.ogg": {
+      "en": "Popularity Boom / Mamizou Futatsuiwa",
+      "ja": "人気爆発／二ッ岩マミゾウ",
+      "reference": "th135_32"
+    },
+    "kokoro2.ogg": {
+      "en": "Popularity Boom / Hata no Kokoro",
+      "ja": "人気爆発／秦こころ",
+      "reference": "th135_33"
+    },
+    "maxwaza.ogg": {
+      "en": "Last Word Unleashed",
+      "ja": "ラストワード発動",
+      "reference": "th135_34"
+    }
+  },
+  "th14": {
+    "th14_01.wav": {
+      "en": "Mysterious Purification Rod",
+      "ja": "不思議なお祓い棒",
+      "reference": "th14_01"
+    },
+    "th14_02.wav": {
+      "en": "Mist Lake",
+      "ja": "ミストレイク",
+      "reference": "th14_02"
+    },
+    "th14_03.wav": {
+      "en": "Mermaid from the Uncharted Land",
+      "ja": "秘境のマーメイド",
+      "reference": "th14_03"
+    },
+    "th14_04.wav": {
+      "en": "Humans and Youkai Traversing the Canal",
+      "ja": "運河を行き交う人妖",
+      "reference": "th14_04"
+    },
+    "th14_05.wav": {
+      "en": "Dullahan Under the Willows",
+      "ja": "柳の下のデュラハン",
+      "reference": "th14_05"
+    },
+    "th14_06.wav": {
+      "en": "Bamboo Forest of the Full Moon",
+      "ja": "満月の竹林",
+      "reference": "th14_06"
+    },
+    "th14_07.wav": {
+      "en": "Lonesome Werewolf",
+      "ja": "孤独なウェアウルフ",
+      "reference": "th14_07"
+    },
+    "th14_09.wav": {
+      "en": "Magical Storm",
+      "ja": "マジカルストーム",
+      "reference": "th14_08"
+    },
+    "th14_10.wav": {
+      "en": "Illusionary Joururi",
+      "ja": "幻想浄瑠璃",
+      "reference": "th14_09"
+    },
+    "th14_11.wav": {
+      "en": "The Shining Needle Castle Sinking in the Air",
+      "ja": "空中に沈む輝針城",
+      "reference": "th14_10"
+    },
+    "th14_12.wav": {
+      "en": "Reverse Ideology",
+      "ja": "リバースイデオロギー",
+      "reference": "th14_11"
+    },
+    "th14_14.wav": {
+      "en": "The Exaggerated Castle Keep",
+      "ja": "針小棒大の天守閣",
+      "reference": "th14_12"
+    },
+    "th14_15.wav": {
+      "en": "Inchlings of the Shining Needle ~ Little Princess",
+      "ja": "輝く針の小人族　〜 Little Princess",
+      "reference": "th14_13"
+    },
+    "th14_16.wav": {
+      "en": "Magical Power of the Mallet",
+      "ja": "小槌の魔力",
+      "reference": "th14_16"
+    },
+    "th14_17.wav": {
+      "en": "Mysterious, Mysterious Tools",
+      "ja": "不思議な不思議な道具達",
+      "reference": "th14_17"
+    },
+    "th14_18.wav": {
+      "en": "Thunderclouds of Magical Power",
+      "ja": "魔力の雷雲",
+      "reference": "th14_14"
+    },
+    "th14_19.wav": {
+      "en": "Primordial Beat ~ Pristine Beat",
+      "ja": "始原のビート　〜 Pristine Beat",
+      "reference": "th14_15"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th14.3": {
+    "th143_01.wav": {
+      "en": "Raise the Signal Fire of Cheating",
+      "ja": "反則の狼煙を上げろ",
+      "reference": "th143_01"
+    },
+    "th143_02.wav": {
+      "en": "Cheat Against the Impossible Danmaku",
+      "ja": "不可能弾幕には反則を",
+      "reference": "th143_02"
+    },
+    "th143_05.wav": {
+      "en": "Midnight Spell Card",
+      "ja": "ミッドナイトスペルカード",
+      "reference": "th143_03"
+    },
+    "th143_07.wav": {
+      "en": "Eternal Transient Reign",
+      "ja": "永遠の三日天下",
+      "reference": "th143_05"
+    },
+    "th14_03.wav": {
+      "en": "Mermaid from the Uncharted Land",
+      "ja": "秘境のマーメイド",
+      "reference": "th143_06"
+    },
+    "th14_12.wav": {
+      "en": "Reverse Ideology",
+      "ja": "リバースイデオロギー",
+      "reference": "th143_07"
+    },
+    "th14_10.wav": {
+      "en": "Illusionary Joururi",
+      "ja": "幻想浄瑠璃",
+      "reference": "th143_08"
+    },
+    "th125_06.wav": {
+      "en": "Youkai Mountain ~ Mysterious Mountain",
+      "ja": "妖怪の山　～ Mysterious Mountain",
+      "reference": "th143_09"
+    },
+    "th143_06.wav": {
+      "en": "Romantic Escape Flight",
+      "ja": "ロマンチック逃旅行",
+      "reference": "th143_04"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th14.5": {
+    "title.ogg": {
+      "en": "Heart-Stirring Urban Legends",
+      "ja": "心揺さぶる都市伝説",
+      "reference": "th145_01"
+    },
+    "select.ogg": {
+      "en": "Gensokyo Mystery Discovery",
+      "ja": "幻想郷ふしぎ発見",
+      "reference": "th145_02"
+    },
+    "ta02.ogg": {
+      "en": "An Everyday Life with Balls",
+      "ja": "ボールのある日常",
+      "reference": "th145_03"
+    },
+    "st02_1.ogg": {
+      "en": "Occult à la Carte",
+      "ja": "オカルトアラカルト",
+      "reference": "th145_04"
+    },
+    "ta01.ogg": {
+      "en": "Forms of Manifested Folklore",
+      "ja": "顕現した伝承の形",
+      "reference": "th145_05"
+    },
+    "st01_1.ogg": {
+      "en": "Seven-Orb Collection Showdown",
+      "ja": "七玉蒐集ショウダウン",
+      "reference": "th145_06"
+    },
+    "ta04.ogg": {
+      "en": "Arrival of the Winds of the Era",
+      "ja": "時代の風の訪れ",
+      "reference": "th145_07"
+    },
+    "st03_1.ogg": {
+      "en": "Fair Scramble",
+      "ja": "公正なる奪い合い",
+      "reference": "th145_08"
+    },
+    "ta03.ogg": {
+      "en": "The Value Is Unrealized",
+      "ja": "価値がわからない",
+      "reference": "th145_09"
+    },
+    "st04_1.ogg": {
+      "en": "Bell of the Antipodes",
+      "ja": "対蹠地の鐘",
+      "reference": "th145_10"
+    },
+    "ta06.ogg": {
+      "en": "Believe in Possibilities",
+      "ja": "可能性を信じて",
+      "reference": "th145_11"
+    },
+    "st05_1.ogg": {
+      "en": "Bamboo Forest in Flames",
+      "ja": "竹林インフレイム",
+      "reference": "th145_12"
+    },
+    "ta05.ogg": {
+      "en": "Those Who Know the Truth",
+      "ja": "真実を知る者",
+      "reference": "th145_13"
+    },
+    "kasen1.ogg": {
+      "en": "Battlefield of the Flower Threshold",
+      "ja": "華狭間のバトルフィールド",
+      "reference": "th145_14"
+    },
+    "ta07.ogg": {
+      "en": "Outside World Folklore",
+      "ja": "外界フォークロア",
+      "reference": "th145_15"
+    },
+    "usami1.ogg": {
+      "en": "Last Occultism ~ Esotericist of the Present World",
+      "ja": "ラストオカルティズム　～　現し世の秘術師",
+      "reference": "th145_16"
+    },
+    "ed.ogg": {
+      "en": "Each Ending",
+      "ja": "各々の結末",
+      "reference": "th145_17"
+    },
+    "staffroll.ogg": {
+      "en": "The Arcane Is Revealed",
+      "ja": "明かされる深秘",
+      "reference": "th145_18"
+    },
+    "reimu1.ogg": {
+      "en": "Dichromatic Lotus Butterfly ~ Red and White",
+      "ja": "二色蓮花蝶 ～ Red And White",
+      "reference": "th145_19"
+    },
+    "marisa1.ogg": {
+      "en": "Love-Colored Master Spark",
+      "ja": "恋色マスタースパーク",
+      "reference": "th145_20"
+    },
+    "ichirin1.ogg": {
+      "en": "The Traditional Old Man and the Stylish Girl",
+      "ja": "時代親父とハイカラ少女",
+      "reference": "th145_21"
+    },
+    "hijiri1.ogg": {
+      "en": "Emotional Skyscraper ~ Cosmic Mind",
+      "ja": "感情の摩天楼　～ Cosmic Mind",
+      "reference": "th145_22"
+    },
+    "futo1.ogg": {
+      "en": "Omiwa Legend",
+      "ja": "大神神話伝",
+      "reference": "th145_23"
+    },
+    "miko1.ogg": {
+      "en": "Shoutoku Legend ~ True Administrator",
+      "ja": "聖徳伝説　～　True Administrator",
+      "reference": "th145_24"
+    },
+    "nitori1.ogg": {
+      "en": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "ja": "芥川龍之介の河童　～ Candid Friend",
+      "reference": "th145_25"
+    },
+    "koishi1.ogg": {
+      "en": "Hartmann's Youkai Girl",
+      "ja": "ハルトマンの妖怪少女",
+      "reference": "th145_26"
+    },
+    "mamizou1.ogg": {
+      "en": "Futatsuiwa from Gensokyo",
+      "ja": "幻想郷の二ッ岩",
+      "reference": "th145_27"
+    },
+    "kokoro1.ogg": {
+      "en": "The Lost Emotion",
+      "ja": "亡失のエモーション",
+      "reference": "th145_28"
+    },
+    "mokou1.ogg": {
+      "en": "Reach for the Moon, Immortal Smoke",
+      "ja": "月まで届け、不死の煙",
+      "reference": "th145_29"
+    },
+    "sinmyoumaru1.ogg": {
+      "en": "Inchlings of the Shining Needle ~ Little Princess",
+      "ja": "輝く針の小人族　〜 Little Princess",
+      "reference": "th145_30"
+    }
+  },
+  "th15": {
+    "th15_01.wav": {
+      "en": "The Space Shrine Maiden Appears",
+      "ja": "宇宙巫女現る",
+      "reference": "th15_01"
+    },
+    "th15_02.wav": {
+      "en": "Unforgettable, the Nostalgic Greenery",
+      "ja": "忘れがたき、よすがの緑",
+      "reference": "th15_02"
+    },
+    "th15_04.wav": {
+      "en": "The Rabbit Has Landed",
+      "ja": "兎は舞い降りた",
+      "reference": "th15_03"
+    },
+    "th15_03.wav": {
+      "en": "The Lake Reflects the Cleansed Moonlight",
+      "ja": "湖は浄めの月光を映して",
+      "reference": "th15_04"
+    },
+    "th15_05.wav": {
+      "en": "September Pumpkin",
+      "ja": "九月のパンプキン",
+      "reference": "th15_05"
+    },
+    "th15_06.wav": {
+      "en": "The Mysterious Shrine Maiden Flying Through Space",
+      "ja": "宇宙を飛ぶ不思議な巫女",
+      "reference": "th15_06"
+    },
+    "th15_07.wav": {
+      "en": "Eternal Spring Dream",
+      "ja": "永遠の春夢",
+      "reference": "th15_07"
+    },
+    "th15_08.wav": {
+      "en": "The Frozen Eternal Capital",
+      "ja": "凍り付いた永遠の都",
+      "reference": "th15_08"
+    },
+    "th15_09.wav": {
+      "en": "Reversed Wheel of Fortune",
+      "ja": "逆転するホイールオブフォーチュン",
+      "reference": "th15_09"
+    },
+    "th15_10.wav": {
+      "en": "Faraway Voyage of 380,000 Kilometers",
+      "ja": "遥か38万キロのボヤージュ",
+      "reference": "th15_10"
+    },
+    "th15_11.wav": {
+      "en": "Pierrot of the Star-Spangled Banner",
+      "ja": "星条旗のピエロ",
+      "reference": "th15_11"
+    },
+    "th15_12.wav": {
+      "en": "The Sea that Reflects One's Home Planet",
+      "ja": "故郷の星が映る海",
+      "reference": "th15_12"
+    },
+    "th15_13.wav": {
+      "en": "Pure Furies ~ Whereabouts of the Heart",
+      "ja": "ピュアヒューリーズ　～ 心の在処",
+      "reference": "th15_13"
+    },
+    "th15_16.wav": {
+      "en": "A World of Nightmares Never Seen Before",
+      "ja": "見た事も無い悪夢の世界",
+      "reference": "th15_14"
+    },
+    "th15_17.wav": {
+      "en": "Pandemonic Planet",
+      "ja": "パンデモニックプラネット",
+      "reference": "th15_15"
+    },
+    "th15_14.wav": {
+      "en": "The Moon as Seen from the Shrine",
+      "ja": "神社から見える月",
+      "reference": "th15_16"
+    },
+    "th15_15.wav": {
+      "en": "The Space Shrine Maiden Returns Home",
+      "ja": "宇宙巫女帰還する",
+      "reference": "th15_17"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th15.5": {
+    "155reimu1.ogg": {
+      "en": "Dichromatic Lotus Butterfly ~ Red and White",
+      "ja": "二色蓮花蝶 ～ Red And White",
+      "reference": "th155_01"
+    },
+    "155marisa1.ogg": {
+      "en": "Love-Colored Master Spark",
+      "ja": "恋色マスタースパーク",
+      "reference": "th155_02"
+    },
+    "155ichirin1.ogg": {
+      "en": "The Traditional Old Man and the Stylish Girl",
+      "ja": "時代親父とハイカラ少女",
+      "reference": "th155_03"
+    },
+    "155hijiri1.ogg": {
+      "en": "Emotional Skyscraper ~ Cosmic Mind",
+      "ja": "感情の摩天楼　～ Cosmic Mind",
+      "reference": "th155_04"
+    },
+    "155futo1.ogg": {
+      "en": "Omiwa Legend",
+      "ja": "大神神話伝",
+      "reference": "th155_05"
+    },
+    "155miko1.ogg": {
+      "en": "Shoutoku Legend ~ True Administrator",
+      "ja": "聖徳伝説　～　True Administrator",
+      "reference": "th155_06"
+    },
+    "155nitori1.ogg": {
+      "en": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "ja": "芥川龍之介の河童　～ Candid Friend",
+      "reference": "th155_07"
+    },
+    "155koishi1.ogg": {
+      "en": "Hartmann's Youkai Girl",
+      "ja": "ハルトマンの妖怪少女",
+      "reference": "th155_08"
+    },
+    "155mamizou1.ogg": {
+      "en": "Futatsuiwa from Gensokyo",
+      "ja": "幻想郷の二ッ岩",
+      "reference": "th155_09"
+    },
+    "155kokoro1.ogg": {
+      "en": "The Lost Emotion",
+      "ja": "亡失のエモーション",
+      "reference": "th155_10"
+    },
+    "155mokou1.ogg": {
+      "en": "Reach for the Moon, Immortal Smoke",
+      "ja": "月まで届け、不死の煙",
+      "reference": "th155_11"
+    },
+    "155sinmyoumaru1.ogg": {
+      "en": "Inchlings of the Shining Needle ~ Little Princess",
+      "ja": "輝く針の小人族　〜 Little Princess",
+      "reference": "th155_12"
+    },
+    "155kasen1.ogg": {
+      "en": "Battlefield of the Flower Threshold",
+      "ja": "華狭間のバトルフィールド",
+      "reference": "th155_13"
+    },
+    "155usami1.ogg": {
+      "en": "Last Occultism ~ Esotericist of the Present World",
+      "ja": "ラストオカルティズム　～　現し世の秘術師",
+      "reference": "th155_14"
+    },
+    "155udonge1.ogg": {
+      "en": "Lunatic Eyes ~ Invisible Full Moon",
+      "ja": "狂気の瞳　～ Invisible Full Moon",
+      "reference": "th155_15"
+    },
+    "155doremy1.ogg": {
+      "en": "Eternal Spring Dream",
+      "ja": "永遠の春夢",
+      "reference": "th155_16"
+    },
+    "155tenshi1.ogg": {
+      "en": "Catastrophe in Bhavaagra ~ Wonderful Heaven",
+      "ja": "有頂天変　～ Wonderful Heaven",
+      "reference": "th155_17"
+    },
+    "155yukari1.ogg": {
+      "en": "Night Falls ~ Evening Star",
+      "ja": "夜が降りてくる ～ Evening Star",
+      "reference": "th155_18"
+    },
+    "bgst01.ogg": {
+      "en": "The Ground's Color is Yellow ~ Primrose",
+      "ja": "地の色は黄色 ～ Primrose",
+      "reference": "th155_19"
+    },
+    "bgst02.ogg": {
+      "en": "Mushroom Waltz",
+      "ja": "マッシュルーム・ワルツ",
+      "reference": "th155_20"
+    },
+    "bgst03.ogg": {
+      "en": "The Palanquin Ship Flies in the Sky",
+      "ja": "聖輦船空を往く",
+      "reference": "th155_21"
+    },
+    "bgst04.ogg": {
+      "en": "Equality Under the Law of Dharma",
+      "ja": "法力の下の平等",
+      "reference": "th155_22"
+    },
+    "bgst05.ogg": {
+      "en": "Constant and Unchanging Temple of Worship",
+      "ja": "恒常不変の参廟祀",
+      "reference": "th155_23"
+    },
+    "bgst06.ogg": {
+      "en": "Shining Armillary Sphere",
+      "ja": "光輝く天球儀",
+      "reference": "th155_24"
+    },
+    "bgst07.ogg": {
+      "en": "The Ravine Kappa's Technological Prowess",
+      "ja": "沢の河童の技術力",
+      "reference": "th155_25"
+    },
+    "bgst08.ogg": {
+      "en": "A Rose Blooming in the Underworld",
+      "ja": "地底に咲く薔薇",
+      "reference": "th155_26"
+    },
+    "bgst09.ogg": {
+      "en": "In the Deep-Green Tanuki Forest",
+      "ja": "深緑の狸森にて",
+      "reference": "th155_27"
+    },
+    "bgst10.ogg": {
+      "en": "Shinkirou Theatrical",
+      "ja": "心綺楼演舞",
+      "reference": "th155_28"
+    },
+    "bgst11.ogg": {
+      "en": "Immortal Red Soul",
+      "ja": "不滅のレッドソウル",
+      "reference": "th155_29"
+    },
+    "bgst12.ogg": {
+      "en": "The Inverted Castle Lit by the Setting Sun",
+      "ja": "落日に映える逆さ城",
+      "reference": "th155_30"
+    },
+    "bgst13.ogg": {
+      "en": "Overcome a Thousand Trials",
+      "ja": "千の試練を超えて",
+      "reference": "th155_31"
+    },
+    "bgst14.ogg": {
+      "en": "Dream World Folklore",
+      "ja": "夢世界フォークロア",
+      "reference": "th155_32"
+    },
+    "bgst15.ogg": {
+      "en": "Corridor Stretching to Eternity",
+      "ja": "永遠に続く回廊",
+      "reference": "th155_33"
+    },
+    "bgst16.ogg": {
+      "en": "Sleep Sheep Parade",
+      "ja": "スリープシープ・パレード",
+      "reference": "th155_34"
+    },
+    "bgst17.ogg": {
+      "en": "Bhavaagra as Far as the Eye Can See",
+      "ja": "至る有頂天",
+      "reference": "th155_35"
+    },
+    "midboss.ogg": {
+      "en": "Yorimashi Between Dreams and Reality ~ Necro-Fantasia",
+      "ja": "憑坐は夢と現の間に ～ Necro-Fantasia",
+      "reference": "th155_36"
+    },
+    "lastboss.ogg": {
+      "en": "Tonight Stars an Easygoing Egoist (Live ver.) ~ Egoistic Flowers.",
+      "ja": "今宵は飄逸なエゴイスト(Live ver) ～ Egoistic Flowers.",
+      "reference": "th155_37"
+    },
+    "145st01.ogg": {
+      "en": "Occult Attract",
+      "ja": "オカルトアトラクト",
+      "reference": "th155_38"
+    },
+    "145st02.ogg": {
+      "en": "Neo Bamboo Forest in Flames",
+      "ja": "ネオ竹林インフレイム",
+      "reference": "th155_39"
+    },
+    "145st03.ogg": {
+      "en": "Bell of Aeons",
+      "ja": "億万劫の鐘",
+      "reference": "th155_40"
+    },
+    "145st04.ogg": {
+      "en": "Unknown X ~ Occultly Madness",
+      "ja": "アンノウンX ～ Occultly Madness",
+      "reference": "th155_41"
+    },
+    "story01.ogg": {
+      "en": "Being Things Eye To Eye",
+      "ja": "憑依投合",
+      "reference": "th155_42"
+    },
+    "story02.ogg": {
+      "en": "The One Jointly Responsible",
+      "ja": "連帯責人",
+      "reference": "th155_43"
+    },
+    "story03.ogg": {
+      "en": "An Odd Couple",
+      "ja": "合縁奇縁",
+      "reference": "th155_44"
+    },
+    "story04.ogg": {
+      "en": "Two Minds of One Body",
+      "ja": "異心同体",
+      "reference": "th155_45"
+    },
+    "story05.ogg": {
+      "en": "Grandiloquence",
+      "ja": "壮言大語",
+      "reference": "th155_46"
+    },
+    "story06.ogg": {
+      "en": "Scheming Outside the Box",
+      "ja": "知略縦横",
+      "reference": "th155_47"
+    },
+    "story07.ogg": {
+      "en": "In High Spirits",
+      "ja": "意気揚々",
+      "reference": "th155_48"
+    },
+    "story08.ogg": {
+      "en": "The Curtain Shall Rise Soon",
+      "ja": "開演間近",
+      "reference": "th155_49"
+    },
+    "story09.ogg": {
+      "en": "Flawless as Clothing of the Celestials ~ Yellow Lily",
+      "ja": "天衣無縫 ～ Yellow Lily",
+      "reference": "th155_50"
+    },
+    "th155op1.ogg": {
+      "en": "Seeds of the Incident",
+      "ja": "異変の種子",
+      "reference": "th155_51"
+    },
+    "th155op2.ogg": {
+      "en": "Sprouts of Suspicion",
+      "ja": "疑惑の芽生え",
+      "reference": "th155_52"
+    },
+    "th155op3.ogg": {
+      "en": "Branches Reaching to the Truth",
+      "ja": "真相へ繋がる枝葉",
+      "reference": "th155_53"
+    },
+    "th155op4.ogg": {
+      "en": "Blizzard of Scattering Possession Flowers",
+      "ja": "舞い散る憑依華吹雪",
+      "reference": "th155_54"
+    },
+    "ending.ogg": {
+      "en": "Floating with the Tide",
+      "ja": "行雲流水",
+      "reference": "th155_55"
+    },
+    "staffroll0.ogg": {
+      "en": "Possession Flowers Yet to Bud",
+      "ja": "未だ蕾む憑依華",
+      "reference": "th155_56"
+    },
+    "staffroll1.ogg": {
+      "en": "Possession Flowers in Full Bloom",
+      "ja": "咲き誇る憑依華",
+      "reference": "th155_57"
+    },
+    "staffroll2.ogg": {
+      "en": "The Eternal Steam Engine",
+      "ja": "悠久の蒸気機関",
+      "reference": "th155_58"
+    }
+  },
+  "th16": {
+    "th16_01.wav": {
+      "en": "The Sky Where Cherry Blossoms Flutter Down",
+      "ja": "桜舞い散る天空",
+      "reference": "th16_01"
+    },
+    "th16_02.wav": {
+      "en": "A Star of Hope Rises in the Blue Sky",
+      "ja": "希望の星は青霄に昇る",
+      "reference": "th16_02"
+    },
+    "th16_03.wav": {
+      "en": "A Midsummer Fairy's Dream",
+      "ja": "真夏の妖精の夢",
+      "reference": "th16_03"
+    },
+    "th16_04.wav": {
+      "en": "The Colorless Wind on Youkai Mountain",
+      "ja": "色無き風は妖怪の山に",
+      "reference": "th16_04"
+    },
+    "th16_05.wav": {
+      "en": "Deep-Mountain Encounter",
+      "ja": "山奥のエンカウンター",
+      "reference": "th16_05"
+    },
+    "th16_06.wav": {
+      "en": "Swim in a Cherry Blossom-Colored Sea",
+      "ja": "桜色の海を泳いで",
+      "reference": "th16_06"
+    },
+    "th16_07.wav": {
+      "en": "A Pair of Divine Beasts",
+      "ja": "一対の神獣",
+      "reference": "th16_07"
+    },
+    "th16_08.wav": {
+      "en": "Illusionary White Traveler",
+      "ja": "幻想のホワイトトラベラー",
+      "reference": "th16_08"
+    },
+    "th16_09.wav": {
+      "en": "The Magic Straw-Hat Jizo",
+      "ja": "魔法の笠地蔵",
+      "reference": "th16_09"
+    },
+    "th16_10.wav": {
+      "en": "Does the Forbidden Door Lead to This World, or the World Beyond?",
+      "ja": "禁断の扉の向こうは、この世かあの世か",
+      "reference": "th16_10"
+    },
+    "th16_11.wav": {
+      "en": "Crazy Backup Dancers",
+      "ja": "クレイジーバックダンサーズ",
+      "reference": "th16_11"
+    },
+    "th16_13.wav": {
+      "en": "Into Backdoor",
+      "ja": "イントゥ・バックドア",
+      "reference": "th16_12"
+    },
+    "th16_12.wav": {
+      "en": "The Concealed Four Seasons",
+      "ja": "秘匿されたフォーシーズンズ",
+      "reference": "th16_13"
+    },
+    "th16_14.wav": {
+      "en": "Unnatural Nature",
+      "ja": "不自然な自然",
+      "reference": "th16_16"
+    },
+    "th16_15.wav": {
+      "en": "White Traveler",
+      "ja": "白い旅人",
+      "reference": "th16_17"
+    },
+    "th16_16.wav": {
+      "en": "No More Going Through Doors",
+      "ja": "もうドアには入れない",
+      "reference": "th16_14"
+    },
+    "th16_17.wav": {
+      "en": "Secret God Matara ~ Hidden Star in All Seasons.",
+      "ja": "秘神マターラ　～ Hidden Star in All Seasons.",
+      "reference": "th16_15"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th16.5": {
+    "th165_01.wav": {
+      "en": "Diary of Nightmares",
+      "ja": "悪夢日記",
+      "reference": "th165_01"
+    },
+    "th165_02.wav": {
+      "en": "\"Old Adam\" Bar",
+      "ja": "バー・オールドアダム",
+      "reference": "th165_05"
+    },
+    "th165_04.wav": {
+      "en": "Lucid Dreamer",
+      "ja": "ルーシッドドリーマー",
+      "reference": "th165_02"
+    },
+    "th165_05.wav": {
+      "en": "The Darkness Brought In by Swallowstone Naturalis Historia",
+      "ja": "燕石博物誌が連れてきた闇",
+      "reference": "th165_06"
+    },
+    "th165_06.wav": {
+      "en": "Lunatic Dreamer",
+      "ja": "ルナティックドリーマー",
+      "reference": "th165_03"
+    },
+    "th165_07.wav": {
+      "en": "Nightmare Diary",
+      "ja": "ナイトメアダイアリー",
+      "reference": "th165_04"
+    },
+    "th15_07.wav": {
+      "en": "Eternal Spring Dream",
+      "ja": "永遠の春夢",
+      "reference": "th165_07"
+    },
+    "th16_12.wav": {
+      "en": "The Concealed Four Seasons",
+      "ja": "秘匿されたフォーシーズンズ",
+      "reference": "th165_08"
+    }
+  },
+  "th17": {
+    "th17_01.wav": {
+      "en": "Silent Beast Spirits",
+      "ja": "物言わぬ獣の霊",
+      "reference": "th17_01"
+    },
+    "th17_03.wav": {
+      "en": "The Lamentations Known Only to Jizo",
+      "ja": "地蔵だけが知る哀嘆",
+      "reference": "th17_02"
+    },
+    "th17_04.wav": {
+      "en": "Jelly Stone",
+      "ja": "ジェリーストーン",
+      "reference": "th17_03"
+    },
+    "th17_05.wav": {
+      "en": "Lost River",
+      "ja": "ロストリバー",
+      "reference": "th17_04"
+    },
+    "th17_06.wav": {
+      "en": "The Stone Baby and the Submerged Bovine",
+      "ja": "石の赤子と水中の牛",
+      "reference": "th17_05"
+    },
+    "th17_07.wav": {
+      "en": "Everlasting Red Spider Lily",
+      "ja": "不朽の曼珠沙華",
+      "reference": "th17_06"
+    },
+    "th17_08.wav": {
+      "en": "Seraphic Chicken",
+      "ja": "セラフィックチキン",
+      "reference": "th17_07"
+    },
+    "th17_09.wav": {
+      "en": "Unlocated Hell",
+      "ja": "アンロケイテッドヘル",
+      "reference": "th17_08"
+    },
+    "th17_10.wav": {
+      "en": "Tortoise Dragon ~ Fortune and Misfortune",
+      "ja": "トータスドラゴン　～ 幸運と不運",
+      "reference": "th17_09"
+    },
+    "th17_11.wav": {
+      "en": "Beast Metropolis",
+      "ja": "ビーストメトロポリス",
+      "reference": "th17_10"
+    },
+    "th17_12.wav": {
+      "en": "Joutoujin of Ceramics",
+      "ja": "セラミックスの杖刀人",
+      "reference": "th17_11"
+    },
+    "th17_14.wav": {
+      "en": "Electric Heritage",
+      "ja": "エレクトリックヘリテージ",
+      "reference": "th17_12"
+    },
+    "th17_13.wav": {
+      "en": "Entrust the World to Idols ~ Idolatrize World",
+      "ja": "偶像に世界を委ねて　～ Idoratrize World",
+      "reference": "th17_13"
+    },
+    "th17_17.wav": {
+      "en": "The Shining Law of the Strong Eating the Weak",
+      "ja": "輝かしき弱肉強食の掟",
+      "reference": "th17_14"
+    },
+    "th17_18.wav": {
+      "en": "Prince Shoutoku's Pegasus ~ Dark Pegasus",
+      "ja": "聖徳太子のペガサス　～ Dark Pegasus",
+      "reference": "th17_15"
+    },
+    "th17_15.wav": {
+      "en": "The Animals' Rest",
+      "ja": "畜生達の休息",
+      "reference": "th17_16"
+    },
+    "th17_16.wav": {
+      "en": "Returning Home from the Underground",
+      "ja": "地下からの帰還",
+      "reference": "th17_17"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th17.5": {
+    "op.ogg": {
+      "en": "Submerged Hell of Sunken Sorrow",
+      "ja": "水没した沈愁地獄",
+      "reference": "th175_01"
+    },
+    "staff_roll.ogg": {
+      "en": "Eastern Strange Tale of Avarice",
+      "ja": "東方剛欲異聞",
+      "reference": "th175_02"
+    },
+    "talk_ed.ogg": {
+      "en": "Laws of Heaven, Desires of Man",
+      "ja": "天理人欲",
+      "reference": "th175_03"
+    },
+    "talk_forest.ogg": {
+      "en": "Magician's Melancholy",
+      "ja": "魔法使いの憂鬱",
+      "reference": "th175_04"
+    },
+    "talk_underground.ogg": {
+      "en": "The Dark Blowhole",
+      "ja": "暗闇の風穴",
+      "reference": "th175_05"
+    },
+    "talk_town.ogg": {
+      "en": "Walking the Streets of a Former Hell",
+      "ja": "旧地獄街道を行く",
+      "reference": "th175_06"
+    },
+    "talk_inferno.ogg": {
+      "en": "Hellfire Mantle",
+      "ja": "業火マントル",
+      "reference": "th175_07"
+    },
+    "talk_reactor.ogg": {
+      "en": "Cemetery of Onbashira ~ Grave of Being",
+      "ja": "御柱の墓場　～ Grave of Being",
+      "reference": "th175_08"
+    },
+    "talk_oil.ogg": {
+      "en": "Depths of the Earth, Ocean of Avarice",
+      "ja": "大地の底、剛欲の海",
+      "reference": "th175_09"
+    },
+    "talk_waterhell.ogg": {
+      "en": "Everlasting Red Spider Lily",
+      "ja": "不朽の曼珠沙華",
+      "reference": "th175_10"
+    },
+    "talk_scarlet.ogg": {
+      "en": "The Centennial Festival for Magical Girls",
+      "ja": "魔法少女達の百年祭",
+      "reference": "th175_11"
+    },
+    "reimu1.ogg": {
+      "en": "Maiden's Capriccio ~ Dream Battle",
+      "ja": "少女綺想曲　～ Dream Battle",
+      "reference": "th175_12"
+    },
+    "marisa1.ogg": {
+      "en": "Love-Colored Master Spark",
+      "ja": "恋色マスタースパーク",
+      "reference": "th175_13"
+    },
+    "yamame1.ogg": {
+      "en": "The Sealed-Away Youkai ~ Lost Place",
+      "ja": "封じられた妖怪　～ Lost Place",
+      "reference": "th175_14"
+    },
+    "kogasa1.ogg": {
+      "en": "Beware the Umbrella Left There Forever",
+      "ja": "万年置き傘にご注意を",
+      "reference": "th175_15"
+    },
+    "murasa1.ogg": {
+      "en": "Captain Murasa",
+      "ja": "キャプテン・ムラサ",
+      "reference": "th175_16"
+    },
+    "kanako1.ogg": {
+      "en": "The Venerable Ancient Battlefield ~ Suwa Foughten Field",
+      "ja": "神さびた古戦場　～ Suwa Foughten Field",
+      "reference": "th175_17"
+    },
+    "jyoon1.ogg": {
+      "en": "Tonight Stars an Easygoing Egoist (Live ver.) ~ Egoistic Flowers.",
+      "ja": "今宵は飄逸なエゴイスト(Live ver) ～ Egoistic Flowers.",
+      "reference": "th175_18"
+    },
+    "yuugi1.ogg": {
+      "en": "A Flower-Studded Saké Dish on Mt. Ooe",
+      "ja": "華のさかづき大江山",
+      "reference": "th175_19"
+    },
+    "utuho1.ogg": {
+      "en": "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+      "ja": "霊知の太陽信仰　～ Nuclear Fusion",
+      "reference": "th175_20"
+    },
+    "niwatari1.ogg": {
+      "en": "Seraphic Chicken",
+      "ja": "セラフィックチキン",
+      "reference": "th175_21"
+    },
+    "flandre1.ogg": {
+      "en": "U.N. Owen was Her?",
+      "ja": "U.N.オーエンは彼女なのか？",
+      "reference": "th175_22"
+    },
+    "toutetu1.ogg": {
+      "en": "Memento of the Avaricious Beast",
+      "ja": "強欲な獣のメメント",
+      "reference": "th175_23"
+    },
+    "toutetu2.ogg": {
+      "en": "Memento of All Organisms ~ Memory of Fossil Energy.",
+      "ja": "有機体全てのメメント　～ Memory of Fossil Energy.",
+      "reference": "th175_24"
+    }
+  },
+  "th18": {
+    "th18_01.wav": {
+      "en": "A Rainbow Spanning Gensokyo",
+      "ja": "虹の架かる幻想郷",
+      "reference": "th18_01"
+    },
+    "th18_03.wav": {
+      "en": "A Shower of Strange Occurrences",
+      "ja": "妖異達の通り雨",
+      "reference": "th18_02"
+    },
+    "th18_04.wav": {
+      "en": "Kitten of Great Fortune",
+      "ja": "大吉キトゥン",
+      "reference": "th18_03"
+    },
+    "th18_05.wav": {
+      "en": "The Cliff Hidden in Deep Green",
+      "ja": "深緑に隠された断崖",
+      "reference": "th18_04"
+    },
+    "th18_06.wav": {
+      "en": "Banditry Technology",
+      "ja": "バンデットリィテクノロジー",
+      "reference": "th18_05"
+    },
+    "th18_07.wav": {
+      "en": "The Perpetual Snow of Komakusa Blossoms",
+      "ja": "駒草咲くパーペチュアルスノー",
+      "reference": "th18_06"
+    },
+    "th18_08.wav": {
+      "en": "Smoking Dragon",
+      "ja": "スモーキングドラゴン",
+      "reference": "th18_07"
+    },
+    "th18_09.wav": {
+      "en": "The Obsolescent Industrial Ruins",
+      "ja": "廃れゆく産業遺構",
+      "reference": "th18_08"
+    },
+    "th18_10.wav": {
+      "en": "Ore from the Age of the Gods",
+      "ja": "神代鉱石",
+      "reference": "th18_09"
+    },
+    "th18_11.wav": {
+      "en": "The Long-Awaited Oumagatoki",
+      "ja": "待ちわびた逢魔が時",
+      "reference": "th18_10"
+    },
+    "th18_12.wav": {
+      "en": "Starry Mountain of Tenma",
+      "ja": "星降る天魔の山",
+      "reference": "th18_11"
+    },
+    "th18_13.wav": {
+      "en": "Lunar Rainbow",
+      "ja": "ルナレインボー",
+      "reference": "th18_12"
+    },
+    "th18_14.wav": {
+      "en": "Where Is That Bustling Marketplace Now ~ Immemorial Marketeers",
+      "ja": "あの賑やかな市場は今どこに　～ Immemorial Marketeers",
+      "reference": "th18_13"
+    },
+    "th18_15.wav": {
+      "en": "The Sunday After the Storm",
+      "ja": "嵐の後の日曜日",
+      "reference": "th18_16"
+    },
+    "th18_16.wav": {
+      "en": "A Rainbow-Colored World",
+      "ja": "虹色の世界",
+      "reference": "th18_17"
+    },
+    "th18_17.wav": {
+      "en": "The Great Fantastic Underground Railway Network",
+      "ja": "幻想の地下大線路網",
+      "reference": "th18_14"
+    },
+    "th18_18.wav": {
+      "en": "The Princess Who Slays Dragon Kings",
+      "ja": "龍王殺しのプリンセス",
+      "reference": "th18_15"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  },
+  "th18.5": {
+    "th185_01.wav": {
+      "en": "The Collector's Melancholy Afternoon",
+      "ja": "コレクターの憂鬱な午後",
+      "reference": "th185_01"
+    },
+    "th185_02.wav": {
+      "en": "Youkai Hook On",
+      "ja": "妖怪フックオン",
+      "reference": "th185_03"
+    },
+    "th185_03.wav": {
+      "en": "An Exciting and Familiar Gensokyo",
+      "ja": "ワクワクする見慣れた幻想郷",
+      "reference": "th185_02"
+    },
+    "th185_04.wav": {
+      "en": "Black Markets Can Happen Anywhere, Anytime",
+      "ja": "闇市場は場所を選ばない",
+      "reference": "th185_04"
+    },
+    "th185_05.wav": {
+      "en": "Take Thy Danmaku In Hand, O Bulletphiles",
+      "ja": "弾幕を持て、バレットフィリア達よ",
+      "reference": "th185_05"
+    },
+    "th185_06.wav": {
+      "en": "The 100th Black Market",
+      "ja": "１００回目のブラックマーケット",
+      "reference": "th185_06"
+    },
+    "th18_13.wav": {
+      "en": "Lunar Rainbow",
+      "ja": "ルナレインボー",
+      "reference": "th185_08"
+    },
+    "th18_14.wav": {
+      "en": "Where Is That Bustling Marketplace Now ~ Immemorial Marketeers",
+      "ja": "あの賑やかな市場は今どこに　～ Immemorial Marketeers",
+      "reference": "th185_09"
+    },
+    "th18_16.wav": {
+      "en": "A Rainbow-Colored World",
+      "ja": "虹色の世界",
+      "reference": "th185_10"
+    },
+    "th165_06.wav": {
+      "en": "Lunatic Dreamer",
+      "ja": "ルナティックドリーマー",
+      "reference": "th185_07"
+    }
+  },
+  "th19": {
+    "th19_01.wav": {
+      "en": "A Beast's Intelligence",
+      "ja": "獣の知性",
+      "reference": "th19_01"
+    },
+    "th19_02.wav": {
+      "en": "The World Is Made in an Adorable Way",
+      "ja": "世界は可愛く出来ている",
+      "reference": "th19_02"
+    },
+    "th19_03.wav": {
+      "en": "Magical Beast Scramble",
+      "ja": "魔獣スクランブル",
+      "reference": "th19_03"
+    },
+    "th19_04.wav": {
+      "en": "At the Harbor of Spring",
+      "ja": "春の湊に",
+      "reference": "th19_13"
+    },
+    "th19_05.wav": {
+      "en": "Unforgettable, the Nostalgic Greenery",
+      "ja": "忘れがたき、よすがの緑",
+      "reference": "th19_14"
+    },
+    "th19_06.wav": {
+      "en": "A Pair of Divine Beasts",
+      "ja": "一対の神獣",
+      "reference": "th19_12"
+    },
+    "th19_07.wav": {
+      "en": "The Oni on the Perpetual Mountain",
+      "ja": "鬼は悠久の山に",
+      "reference": "th19_04"
+    },
+    "th19_08.wav": {
+      "en": "Tiny Shangri-La",
+      "ja": "タイニーシャングリラ",
+      "reference": "th19_05"
+    },
+    "th19_09.wav": {
+      "en": "A Brave and Leisurely Beast",
+      "ja": "勇敢で有閑な妖獣",
+      "reference": "th19_06"
+    },
+    "th19_10.wav": {
+      "en": "Vampiric Cryptid Chupacabra",
+      "ja": "吸血怪獣チュパカブラ",
+      "reference": "th19_07"
+    },
+    "th19_11.wav": {
+      "en": "The Path to Yomi Where None Turn Back",
+      "ja": "振り向かない黄泉の道",
+      "reference": "th19_08"
+    },
+    "th19_14.wav": {
+      "en": "Spiritual Domination ~ Who done it!",
+      "ja": "妖々跋扈　～ Who done it!",
+      "reference": "th19_11"
+    },
+    "th19_15.wav": {
+      "en": "Corpse Voyage ~ Be of good cheer!",
+      "ja": "死体旅行　～ Be of good cheer!",
+      "reference": "th19_15"
+    },
+    "th19_16.wav": {
+      "en": "The Long-Awaited Oumagatoki",
+      "ja": "待ちわびた逢魔が時",
+      "reference": "th19_16"
+    },
+    "th19_17.wav": {
+      "en": "Futatsuiwa from Sado",
+      "ja": "佐渡の二ッ岩",
+      "reference": "th19_17"
+    },
+    "th19_18.wav": {
+      "en": "Tortoise Dragon ~ Fortune and Misfortune",
+      "ja": "トータスドラゴン　～ 幸運と不運",
+      "reference": "th19_18"
+    },
+    "th19_19.wav": {
+      "en": "Prince Shoutoku's Pegasus ~ Dark Pegasus",
+      "ja": "聖徳太子のペガサス　～ Dark Pegasus",
+      "reference": "th19_19"
+    },
+    "th19_20.wav": {
+      "en": "Memento of the Avaricious Beast",
+      "ja": "強欲な獣のメメント",
+      "reference": "th19_20"
+    },
+    "th19_21.wav": {
+      "en": "The Beast Kings' Rest",
+      "ja": "獣王達の休息",
+      "reference": "th19_21"
+    },
+    "th19_22.wav": {
+      "en": "Do Beasts Have Intelligence?",
+      "ja": "獣に知性はあるか",
+      "reference": "th19_22"
+    },
+    "th19_12.wav": {
+      "en": "The Deviants' Unobstructed Light ~ Kingdom of Nothingness",
+      "ja": "逸脱者達の無礙光　〜 Kingdom of Nothingness.",
+      "reference": "th19_09"
+    },
+    "th19_13.wav": {
+      "en": "Faith Is for the Transient People",
+      "ja": "信仰は儚き人間の為に",
+      "reference": "th10_11"
+    },
+    "th19_90.wav": {
+      "en": "Conversation Theme 1",
+      "ja": "会話の曲1",
+      "reference": "foo_thbgm:東方獣王園.thxml"
+    },
+    "th19_91.wav": {
+      "en": "Conversation Theme 2",
+      "ja": "会話の曲2",
+      "reference": "foo_thbgm:東方獣王園.thxml"
+    }
+  },
+  "th20": {
+    "th20_01.wav": {
+      "en": "Shrine Maiden Atop Magnificence",
+      "ja": "錦の上の巫女",
+      "reference": "th20_01"
+    },
+    "th20_02.wav": {
+      "en": "Beloved Dwelling of Dust",
+      "ja": "愛おしき塵の住処",
+      "reference": "th20_02"
+    },
+    "th20_03.wav": {
+      "en": "Even if Forgotten by the World",
+      "ja": "例え世界から忘れられても",
+      "reference": "th20_03"
+    },
+    "th20_04.wav": {
+      "en": "Sacred Forest",
+      "ja": "セイクリッドフォレスト",
+      "reference": "th20_04"
+    },
+    "th20_05.wav": {
+      "en": "There's a Monster in the Woods",
+      "ja": "森にはお化けがいるよ",
+      "reference": "th20_05"
+    },
+    "th20_06.wav": {
+      "en": "Golden Land of Prester John",
+      "ja": "プレステ・ジョアンの黄金境",
+      "reference": "th20_06"
+    },
+    "th20_07.wav": {
+      "en": "Might as Well Stake Your Life to Solve the Riddle",
+      "ja": "どうせなら命を賭けて謎を解け",
+      "reference": "th20_07"
+    },
+    "th20_08.wav": {
+      "en": "Four-Color Labyrinth",
+      "ja": "フォーカラーラビリンス",
+      "reference": "th20_08"
+    },
+    "th20_09.wav": {
+      "en": "Reminiscence of Deer Hunting",
+      "ja": "鹿狩りのレミニセンス",
+      "reference": "th20_09"
+    },
+    "th20_10.wav": {
+      "en": "The Maiden Sinking into the Deep Sea of Memory",
+      "ja": "記憶の深海に沈む少女",
+      "reference": "th20_10"
+    },
+    "th20_11.wav": {
+      "en": "Watatsuki's Spell Card ~ Divine Sea Battle",
+      "ja": "綿月のスペルカード　～ 神海戦",
+      "reference": "th20_11"
+    },
+    "th20_13.wav": {
+      "en": "Sacred Precincts of the Pyramid",
+      "ja": "ピラミッドの神域",
+      "reference": "th20_12"
+    },
+    "th20_12.wav": {
+      "en": "Because the Last One Left is Used to It ~ Stone Goddess",
+      "ja": "最後の一人は慣れてるから　～ Stone Goddess",
+      "reference": "th20_13"
+    },
+    "th20_17.wav": {
+      "en": "Fantastic Drift",
+      "ja": "ファンタスティックドリフト",
+      "reference": "th20_14"
+    },
+    "th20_18.wav": {
+      "en": "Hallucination Atop a Bivalve",
+      "ja": "二枚貝の上のハルシネーション",
+      "reference": "th20_15"
+    },
+    "th20_15.wav": {
+      "en": "Unchanging Daily Life",
+      "ja": "不変の日常",
+      "reference": "th20_16"
+    },
+    "th20_14.wav": {
+      "en": "Beloved Daily Life",
+      "ja": "愛おしき日常",
+      "reference": "th20_17"
+    },
+    "th20_16.wav": {
+      "en": "To a World With Life and Death",
+      "ja": "生と死のある世界へ",
+      "reference": "th20_18"
+    },
+    "th128_08.wav": {
+      "en": "Player's Score",
+      "ja": "プレイヤーズスコア",
+      "reference": "th128_10"
+    }
+  }
+}

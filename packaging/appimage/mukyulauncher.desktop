@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Mukyu Launcher
+Comment= a Touhou Launcher for linux
+Exec=AppRun
+Icon=mukyulauncher
+Categories=Game;
+Terminal=false
+StartupWMClass=mukyulauncher

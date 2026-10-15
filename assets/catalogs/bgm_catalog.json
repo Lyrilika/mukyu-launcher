@@ -1,0 +1,1384 @@
+{
+  "th7.5": [
+    {
+      "file": "wave/bgm/sys00_op.wav",
+      "title": "Forgathering Dream",
+      "title_ja": "萃夢想",
+      "number": 1
+    },
+    {
+      "file": "wave/bgm/00a.wav",
+      "title": "Eastern Mystical Tale of Romance",
+      "title_ja": "東方妖恋談",
+      "number": 2
+    },
+    {
+      "file": "wave/bgm/00b.wav",
+      "title": "Maiden's Capriccio ~ Capriccio",
+      "title_ja": "少女綺想曲　～ Capriccio",
+      "number": 3
+    },
+    {
+      "file": "wave/bgm/01a.wav",
+      "title": "Love-Colored Magic",
+      "title_ja": "恋色マジック",
+      "number": 4
+    },
+    {
+      "file": "wave/bgm/01b.wav",
+      "title": "The Witches' Ball",
+      "title_ja": "魔女達の舞踏会",
+      "number": 5
+    },
+    {
+      "file": "wave/bgm/02a.wav",
+      "title": "The Maid and the Pocket Watch of Blood",
+      "title_ja": "メイドと血の懐中時計",
+      "number": 6
+    },
+    {
+      "file": "wave/bgm/02b.wav",
+      "title": "Lunar Clock ~ Luna Dial",
+      "title_ja": "月時計　～ ルナ・ダイアル",
+      "number": 7
+    },
+    {
+      "file": "wave/bgm/03a.wav",
+      "title": "The Doll Maker of București",
+      "title_ja": "ブクレシュティの人形師",
+      "number": 8
+    },
+    {
+      "file": "wave/bgm/03b.wav",
+      "title": "Doll Judgment",
+      "title_ja": "人形裁判",
+      "number": 9
+    },
+    {
+      "file": "wave/bgm/04a.wav",
+      "title": "Locked Girl ~ The Girl's Sealed Room",
+      "title_ja": "ラクトガール　～ 少女密室",
+      "number": 10
+    },
+    {
+      "file": "wave/bgm/04b.wav",
+      "title": "Voile, the Magic Library",
+      "title_ja": "ヴワル魔法図書館",
+      "number": 11
+    },
+    {
+      "file": "wave/bgm/05a.wav",
+      "title": "Hiroari Shoots a Strange Bird ~ Till When?",
+      "title_ja": "広有射怪鳥事　～ Till When?",
+      "number": 12
+    },
+    {
+      "file": "wave/bgm/05b.wav",
+      "title": "Eastern Ghostly Dream ~ Ancient Temple",
+      "title_ja": "東方妖々夢　～ Ancient Temple",
+      "number": 13
+    },
+    {
+      "file": "wave/bgm/06a.wav",
+      "title": "Septette for a Dead Princess",
+      "title_ja": "亡き王女の為のセプテット",
+      "number": 14
+    },
+    {
+      "file": "wave/bgm/07a.wav",
+      "title": "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+      "title_ja": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+      "number": 15
+    },
+    {
+      "file": "wave/bgm/00c.wav",
+      "title": "Demystify Feast",
+      "title_ja": "Demystify Feast",
+      "number": 16
+    },
+    {
+      "file": "wave/bgm/08a.wav",
+      "title": "Night Falls ~ Evening Star",
+      "title_ja": "夜が降りてくる ～ Evening Star",
+      "number": 17
+    },
+    {
+      "file": "wave/bgm/09a.wav",
+      "title": "The Fabled Land of Onigashima ~ Missing Power",
+      "title_ja": "御伽の国の鬼が島 ～ Missing Power",
+      "number": 18
+    },
+    {
+      "file": "wave/bgm/53.wav",
+      "title": "End of Summer",
+      "title_ja": "夏明き",
+      "number": 19
+    },
+    {
+      "file": "wave/bgm/sys99_ed.wav",
+      "title": "Eastern Forgathering Dream",
+      "title_ja": "東方萃夢想",
+      "number": 20
+    },
+    {
+      "file": "wave/bgm/51.wav",
+      "title": "Demonic Place",
+      "title_ja": "魔所",
+      "number": 21
+    },
+    {
+      "file": "wave/bgm/52.wav",
+      "title": "The Moon",
+      "title_ja": "月輪",
+      "number": 22
+    },
+    {
+      "file": "wave/bgm/54.wav",
+      "title": "Wanderings",
+      "title_ja": "遍参",
+      "number": 23
+    },
+    {
+      "file": "wave/bgm/56.wav",
+      "title": "Inner Heart",
+      "title_ja": "裏心",
+      "number": 24
+    },
+    {
+      "file": "wave/bgm/57.wav",
+      "title": "Intermezzo",
+      "title_ja": "Intermezzo",
+      "number": 25
+    },
+    {
+      "file": "wave/bgm/58.wav",
+      "title": "Eastern Wind",
+      "title_ja": "あゆのかぜ",
+      "number": 26
+    },
+    {
+      "file": "wave/bgm/67.wav",
+      "title": "Silence",
+      "title_ja": "森閑",
+      "number": 27
+    },
+    {
+      "file": "wave/bgm/62.wav",
+      "title": "Skygazer",
+      "title_ja": "仰空",
+      "number": 28
+    },
+    {
+      "file": "wave/bgm/59.wav",
+      "title": "Solitary Place",
+      "title_ja": "幽境",
+      "number": 29
+    },
+    {
+      "file": "wave/bgm/68.wav",
+      "title": "Unexpected Visitor",
+      "title_ja": "珍客",
+      "number": 30
+    },
+    {
+      "file": "wave/bgm/60.wav",
+      "title": "Scarlet Night",
+      "title_ja": "紅夜",
+      "number": 31
+    },
+    {
+      "file": "wave/bgm/61.wav",
+      "title": "Swift Battle",
+      "title_ja": "戦迅",
+      "number": 32
+    },
+    {
+      "file": "wave/bgm/65.wav",
+      "title": "Bad Omen",
+      "title_ja": "禍機",
+      "number": 33
+    },
+    {
+      "file": "wave/bgm/63.wav",
+      "title": "Broken Moon",
+      "title_ja": "砕月",
+      "number": 34
+    }
+  ],
+  "th10.5": [
+    {
+      "file": "data/bgm/op.ogg",
+      "title": "Heaven of Scarlet Perception",
+      "title_ja": "緋想天",
+      "number": 1
+    },
+    {
+      "file": "data/bgm/ta00.ogg",
+      "title": "Usual Days",
+      "title_ja": "日常坐臥",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/st00.ogg",
+      "title": "The Ground's Color is Yellow",
+      "title_ja": "地の色は黄色",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/ta01.ogg",
+      "title": "Argue for and Against",
+      "title_ja": "甲論乙駁",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/ta03.ogg",
+      "title": "Beautiful Nature Sight",
+      "title_ja": "風光明媚",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/st01.ogg",
+      "title": "Fragrant Plants",
+      "title_ja": "香る樹葉花",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/st02.ogg",
+      "title": "Dancing Water Spray",
+      "title_ja": "踊る水飛沫",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/ta05.ogg",
+      "title": "Swing a Fish to Drive Away Flies",
+      "title_ja": "以魚駆蠅",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/ta08.ogg",
+      "title": "Free and Easy",
+      "title_ja": "放縦不羈",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/st03.ogg",
+      "title": "Ridiculous Game",
+      "title_ja": "嘲りの遊戯",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/ta04.ogg",
+      "title": "Drunk as I Like",
+      "title_ja": "冷吟閑酔",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/ta02.ogg",
+      "title": "Skies Beyond the Clouds",
+      "title_ja": "雲外蒼天",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/st04.ogg",
+      "title": "Crimson in the Black Sea ~ Legendary Fish",
+      "title_ja": "黒い海に紅く　～ Legendary Fish",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/ta07.ogg",
+      "title": "Flawless as Clothing of the Celestials",
+      "title_ja": "天衣無縫",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/st05.ogg",
+      "title": "Catastrophe in Bhavaagra ~ Wonderful Heaven",
+      "title_ja": "有頂天変　～ Wonderful Heaven",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/st06.ogg",
+      "title": "Bhavaagra As Seen Through a Child's Mind",
+      "title_ja": "幼心地の有頂天",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/ta06.ogg",
+      "title": "Darkening Dusk",
+      "title_ja": "暮色蒼然",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/sr.ogg",
+      "title": "Eastern Heaven of Scarlet Perception",
+      "title_ja": "東方緋想天",
+      "number": 18
+    },
+    {
+      "file": "data/bgm/st10.ogg",
+      "title": "Eastern Mystical Tale of Romance",
+      "title_ja": "東方妖恋談",
+      "number": 19
+    },
+    {
+      "file": "data/bgm/st11.ogg",
+      "title": "Vessel of Stars ~ Casket of Star",
+      "title_ja": "星の器　～ Casket of Star",
+      "number": 20
+    },
+    {
+      "file": "data/bgm/st12.ogg",
+      "title": "Flowering Night",
+      "title_ja": "フラワリングナイト",
+      "number": 21
+    },
+    {
+      "file": "data/bgm/st13.ogg",
+      "title": "The Doll Maker of București",
+      "title_ja": "ブクレシュティの人形師",
+      "number": 22
+    },
+    {
+      "file": "data/bgm/st14.ogg",
+      "title": "Hiroari Shoots a Strange Bird ~ Till When?",
+      "title_ja": "広有射怪鳥事　～ Till When?",
+      "number": 23
+    },
+    {
+      "file": "data/bgm/st15.ogg",
+      "title": "Locked Girl ~ The Girl's Sealed Room",
+      "title_ja": "ラクトガール　～ 少女密室",
+      "number": 24
+    },
+    {
+      "file": "data/bgm/st16.ogg",
+      "title": "Bloom Nobly, Ink-Black Cherry Blossom ~ Border of Life",
+      "title_ja": "幽雅に咲かせ、墨染の桜　～ Border of Life",
+      "number": 25
+    },
+    {
+      "file": "data/bgm/st17.ogg",
+      "title": "Septette for a Dead Princess",
+      "title_ja": "亡き王女の為のセプテット",
+      "number": 26
+    },
+    {
+      "file": "data/bgm/st18.ogg",
+      "title": "Night Falls ~ Evening Star",
+      "title_ja": "夜が降りてくる ～ Evening Star",
+      "number": 27
+    },
+    {
+      "file": "data/bgm/st19.ogg",
+      "title": "Broken Moon",
+      "title_ja": "砕月",
+      "number": 28
+    },
+    {
+      "file": "data/bgm/st20.ogg",
+      "title": "Lunatic Eyes ~ Invisible Full Moon",
+      "title_ja": "狂気の瞳　～ Invisible Full Moon",
+      "number": 29
+    },
+    {
+      "file": "data/bgm/st21.ogg",
+      "title": "Wind God Girl",
+      "title_ja": "風神少女",
+      "number": 30
+    },
+    {
+      "file": "data/bgm/st22.ogg",
+      "title": "Higan Retour ~ Riverside View",
+      "title_ja": "彼岸帰航　～ Riverside View",
+      "number": 31
+    }
+  ],
+  "th12.3": [
+    {
+      "file": "data/bgm/op2.ogg",
+      "title": "Did You See That Shadow?",
+      "title_ja": "君はあの影を見たか？",
+      "number": 1
+    },
+    {
+      "file": "data/bgm/select.ogg",
+      "title": "Forgathering Dream",
+      "title_ja": "萃夢想",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/ta20.ogg",
+      "title": "The Legendary Titan",
+      "title_ja": "伝説の巨神",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/st30.ogg",
+      "title": "Faith Is for the Transient People",
+      "title_ja": "信仰は儚き人間の為に",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/st31.ogg",
+      "title": "Tomboyish Girl in Love",
+      "title_ja": "おてんば恋娘",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/ta22.ogg",
+      "title": "Scenery with Dolls",
+      "title_ja": "人形のある風景",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/st32.ogg",
+      "title": "Shanghai Scarlet Teahouse ~ Chinese Tea",
+      "title_ja": "上海紅茶館　～ Chinese Tea",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/st33.ogg",
+      "title": "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+      "title_ja": "霊知の太陽信仰　～ Nuclear Fusion",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/ta21.ogg",
+      "title": "Our Hisoutensoku",
+      "title_ja": "ぼくらの非想天則",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/st35.ogg",
+      "title": "Unknown X ~ Unfound Adventure",
+      "title_ja": "アンノウンＸ　～ Unfound Adventure",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/st36.ogg",
+      "title": "X, the Floating Object in the Sky",
+      "title_ja": "空に浮かぶ物体Ｘ",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/st40.ogg",
+      "title": "Dichromatic Lotus Butterfly ~ Ancients",
+      "title_ja": "二色蓮花蝶　～ Ancients",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/st41.ogg",
+      "title": "Love-Colored Magic",
+      "title_ja": "恋色マジック",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/st42.ogg",
+      "title": "the Grimoire of Alice",
+      "title_ja": "the Grimoire of Alice",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/st43.ogg",
+      "title": "Voile, the Magic Library",
+      "title_ja": "ヴワル魔法図書館",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/st34.ogg",
+      "title": "Tomorrow Will Be Special, Yesterday Was Not",
+      "title_ja": "明日ハレの日、ケの昨日",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/sr2.ogg",
+      "title": "The Eternal Steam Engine",
+      "title_ja": "悠久の蒸気機関",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/st99.ogg",
+      "title": "Eastern Mystical Tale of Romance (Century's End Version)",
+      "title_ja": "東方妖恋談 (世紀末バージョン)",
+      "number": 19
+    }
+  ],
+  "th13.5": [
+    {
+      "file": "data/bgm/reimu1.ogg",
+      "title": "Spring Lane ~ Colorful Path",
+      "title_ja": "春色小径　～ Colorful Path",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/marisa1.ogg",
+      "title": "Magus Night",
+      "title_ja": "メイガスナイト",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/ichirin1.ogg",
+      "title": "The Traditional Old Man and the Stylish Girl",
+      "title_ja": "時代親父とハイカラ少女",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/hijiri1.ogg",
+      "title": "Emotional Skyscraper ~ Cosmic Mind",
+      "title_ja": "感情の摩天楼　～ Cosmic Mind",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/futo1.ogg",
+      "title": "Omiwa Legend",
+      "title_ja": "大神神話伝",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/miko1.ogg",
+      "title": "Shoutoku Legend ~ True Administrator",
+      "title_ja": "聖徳伝説　～　True Administrator",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/nitori1.ogg",
+      "title": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "title_ja": "芥川龍之介の河童　～ Candid Friend",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/koishi1.ogg",
+      "title": "Hartmann's Youkai Girl",
+      "title_ja": "ハルトマンの妖怪少女",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/mamizou1.ogg",
+      "title": "Futatsuiwa from Sado",
+      "title_ja": "佐渡の二ッ岩",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/chuboss1.ogg",
+      "title": "Futatsuiwa from Gensokyo",
+      "title_ja": "幻想郷の二ッ岩",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/kokoro1.ogg",
+      "title": "The Lost Emotion",
+      "title_ja": "亡失のエモーション",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/op.ogg",
+      "title": "This Dull World's Unchanging Pessimism",
+      "title_ja": "塵界不変のペシミズム",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/title.ogg",
+      "title": "Shinkirou Orchestra",
+      "title_ja": "心綺楼囃子",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/ed.ogg",
+      "title": "Morning Clouds",
+      "title_ja": "暁雲",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/staffroll.ogg",
+      "title": "Officially-Sanctioned Twilight Newspaper",
+      "title_ja": "官板黄昏新聞",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/win.ogg",
+      "title": "Today's Front-Page Headline",
+      "title_ja": "本日の一面記事",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/staffroll2.ogg",
+      "title": "Shinkirou Festival Orchestra",
+      "title_ja": "心綺楼祭囃子",
+      "number": 18
+    },
+    {
+      "file": "data/bgm/kaiwa1.ogg",
+      "title": "A Popular Location",
+      "title_ja": "人気のある場所",
+      "number": 19
+    },
+    {
+      "file": "data/bgm/kaiwa3.ogg",
+      "title": "An Unpopular Location",
+      "title_ja": "人気のない場所",
+      "number": 20
+    },
+    {
+      "file": "data/bgm/kaiwa2.ogg",
+      "title": "An Unused Location",
+      "title_ja": "使われなかった場所",
+      "number": 21
+    },
+    {
+      "file": "data/bgm/kaiwa5.ogg",
+      "title": "The Village in the Dead of Night",
+      "title_ja": "丑三つ時の里",
+      "number": 22
+    },
+    {
+      "file": "data/bgm/charasel.ogg",
+      "title": "Performer Selection",
+      "title_ja": "演者選択",
+      "number": 23
+    },
+    {
+      "file": "data/bgm/reimu2.ogg",
+      "title": "Popularity Boom / Reimu Hakurei",
+      "title_ja": "人気爆発／博麗霊夢",
+      "number": 24
+    },
+    {
+      "file": "data/bgm/marisa2.ogg",
+      "title": "Popularity Boom / Marisa Kirisame",
+      "title_ja": "人気爆発／霧雨魔理沙",
+      "number": 25
+    },
+    {
+      "file": "data/bgm/ichirin2.ogg",
+      "title": "Popularity Boom / Ichirin Kumoi & Unzan",
+      "title_ja": "人気爆発／雲居一輪＆雲山",
+      "number": 26
+    },
+    {
+      "file": "data/bgm/hijiri2.ogg",
+      "title": "Popularity Boom / Byakuren Hijiri",
+      "title_ja": "人気爆発／聖白蓮",
+      "number": 27
+    },
+    {
+      "file": "data/bgm/futo2.ogg",
+      "title": "Popularity Boom / Mononobe no Futo",
+      "title_ja": "人気爆発／物部布都",
+      "number": 28
+    },
+    {
+      "file": "data/bgm/miko2.ogg",
+      "title": "Popularity Boom / Toyosatomimi no Miko",
+      "title_ja": "人気爆発／豊聡耳神子",
+      "number": 29
+    },
+    {
+      "file": "data/bgm/nitori2.ogg",
+      "title": "Popularity Boom / Nitori Kawashiro",
+      "title_ja": "人気爆発／河城にとり",
+      "number": 30
+    },
+    {
+      "file": "data/bgm/koishi2.ogg",
+      "title": "Popularity Boom / Koishi Komeiji",
+      "title_ja": "人気爆発／古明地こいし",
+      "number": 31
+    },
+    {
+      "file": "data/bgm/mamizou2.ogg",
+      "title": "Popularity Boom / Mamizou Futatsuiwa",
+      "title_ja": "人気爆発／二ッ岩マミゾウ",
+      "number": 32
+    },
+    {
+      "file": "data/bgm/kokoro2.ogg",
+      "title": "Popularity Boom / Hata no Kokoro",
+      "title_ja": "人気爆発／秦こころ",
+      "number": 33
+    },
+    {
+      "file": "data/bgm/maxwaza.ogg",
+      "title": "Last Word Unleashed",
+      "title_ja": "ラストワード発動",
+      "number": 34
+    }
+  ],
+  "th14.5": [
+    {
+      "file": "data/bgm/title.ogg",
+      "title": "Heart-Stirring Urban Legends",
+      "title_ja": "心揺さぶる都市伝説",
+      "number": 1
+    },
+    {
+      "file": "data/bgm/select.ogg",
+      "title": "Gensokyo Mystery Discovery",
+      "title_ja": "幻想郷ふしぎ発見",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/ta02.ogg",
+      "title": "An Everyday Life with Balls",
+      "title_ja": "ボールのある日常",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/st02_1.ogg",
+      "title": "Occult à la Carte",
+      "title_ja": "オカルトアラカルト",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/ta01.ogg",
+      "title": "Forms of Manifested Folklore",
+      "title_ja": "顕現した伝承の形",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/st01_1.ogg",
+      "title": "Seven-Orb Collection Showdown",
+      "title_ja": "七玉蒐集ショウダウン",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/ta04.ogg",
+      "title": "Arrival of the Winds of the Era",
+      "title_ja": "時代の風の訪れ",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/st03_1.ogg",
+      "title": "Fair Scramble",
+      "title_ja": "公正なる奪い合い",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/ta03.ogg",
+      "title": "The Value Is Unrealized",
+      "title_ja": "価値がわからない",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/st04_1.ogg",
+      "title": "Bell of the Antipodes",
+      "title_ja": "対蹠地の鐘",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/ta06.ogg",
+      "title": "Believe in Possibilities",
+      "title_ja": "可能性を信じて",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/st05_1.ogg",
+      "title": "Bamboo Forest in Flames",
+      "title_ja": "竹林インフレイム",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/ta05.ogg",
+      "title": "Those Who Know the Truth",
+      "title_ja": "真実を知る者",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/kasen1.ogg",
+      "title": "Battlefield of the Flower Threshold",
+      "title_ja": "華狭間のバトルフィールド",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/ta07.ogg",
+      "title": "Outside World Folklore",
+      "title_ja": "外界フォークロア",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/usami1.ogg",
+      "title": "Last Occultism ~ Esotericist of the Present World",
+      "title_ja": "ラストオカルティズム　～　現し世の秘術師",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/ed.ogg",
+      "title": "Each Ending",
+      "title_ja": "各々の結末",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/staffroll.ogg",
+      "title": "The Arcane Is Revealed",
+      "title_ja": "明かされる深秘",
+      "number": 18
+    },
+    {
+      "file": "data/bgm/reimu1.ogg",
+      "title": "Dichromatic Lotus Butterfly ~ Red and White",
+      "title_ja": "二色蓮花蝶 ～ Red And White",
+      "number": 19
+    },
+    {
+      "file": "data/bgm/marisa1.ogg",
+      "title": "Love-Colored Master Spark",
+      "title_ja": "恋色マスタースパーク",
+      "number": 20
+    },
+    {
+      "file": "data/bgm/ichirin1.ogg",
+      "title": "The Traditional Old Man and the Stylish Girl",
+      "title_ja": "時代親父とハイカラ少女",
+      "number": 21
+    },
+    {
+      "file": "data/bgm/hijiri1.ogg",
+      "title": "Emotional Skyscraper ~ Cosmic Mind",
+      "title_ja": "感情の摩天楼　～ Cosmic Mind",
+      "number": 22
+    },
+    {
+      "file": "data/bgm/futo1.ogg",
+      "title": "Omiwa Legend",
+      "title_ja": "大神神話伝",
+      "number": 23
+    },
+    {
+      "file": "data/bgm/miko1.ogg",
+      "title": "Shoutoku Legend ~ True Administrator",
+      "title_ja": "聖徳伝説　～　True Administrator",
+      "number": 24
+    },
+    {
+      "file": "data/bgm/nitori1.ogg",
+      "title": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "title_ja": "芥川龍之介の河童　～ Candid Friend",
+      "number": 25
+    },
+    {
+      "file": "data/bgm/koishi1.ogg",
+      "title": "Hartmann's Youkai Girl",
+      "title_ja": "ハルトマンの妖怪少女",
+      "number": 26
+    },
+    {
+      "file": "data/bgm/mamizou1.ogg",
+      "title": "Futatsuiwa from Gensokyo",
+      "title_ja": "幻想郷の二ッ岩",
+      "number": 27
+    },
+    {
+      "file": "data/bgm/kokoro1.ogg",
+      "title": "The Lost Emotion",
+      "title_ja": "亡失のエモーション",
+      "number": 28
+    },
+    {
+      "file": "data/bgm/mokou1.ogg",
+      "title": "Reach for the Moon, Immortal Smoke",
+      "title_ja": "月まで届け、不死の煙",
+      "number": 29
+    },
+    {
+      "file": "data/bgm/sinmyoumaru1.ogg",
+      "title": "Inchlings of the Shining Needle ~ Little Princess",
+      "title_ja": "輝く針の小人族　〜 Little Princess",
+      "number": 30
+    }
+  ],
+  "th15.5": [
+    {
+      "file": "data/bgm/155reimu1.ogg",
+      "title": "Dichromatic Lotus Butterfly ~ Red and White",
+      "title_ja": "二色蓮花蝶 ～ Red And White",
+      "number": 1
+    },
+    {
+      "file": "data/bgm/155marisa1.ogg",
+      "title": "Love-Colored Master Spark",
+      "title_ja": "恋色マスタースパーク",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/155ichirin1.ogg",
+      "title": "The Traditional Old Man and the Stylish Girl",
+      "title_ja": "時代親父とハイカラ少女",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/155hijiri1.ogg",
+      "title": "Emotional Skyscraper ~ Cosmic Mind",
+      "title_ja": "感情の摩天楼　～ Cosmic Mind",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/155futo1.ogg",
+      "title": "Omiwa Legend",
+      "title_ja": "大神神話伝",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/155miko1.ogg",
+      "title": "Shoutoku Legend ~ True Administrator",
+      "title_ja": "聖徳伝説　～　True Administrator",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/155nitori1.ogg",
+      "title": "Akutagawa Ryuunosuke's \"Kappa\" ~ Candid Friend",
+      "title_ja": "芥川龍之介の河童　～ Candid Friend",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/155koishi1.ogg",
+      "title": "Hartmann's Youkai Girl",
+      "title_ja": "ハルトマンの妖怪少女",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/155mamizou1.ogg",
+      "title": "Futatsuiwa from Gensokyo",
+      "title_ja": "幻想郷の二ッ岩",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/155kokoro1.ogg",
+      "title": "The Lost Emotion",
+      "title_ja": "亡失のエモーション",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/155mokou1.ogg",
+      "title": "Reach for the Moon, Immortal Smoke",
+      "title_ja": "月まで届け、不死の煙",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/155sinmyoumaru1.ogg",
+      "title": "Inchlings of the Shining Needle ~ Little Princess",
+      "title_ja": "輝く針の小人族　〜 Little Princess",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/155kasen1.ogg",
+      "title": "Battlefield of the Flower Threshold",
+      "title_ja": "華狭間のバトルフィールド",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/155usami1.ogg",
+      "title": "Last Occultism ~ Esotericist of the Present World",
+      "title_ja": "ラストオカルティズム　～　現し世の秘術師",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/155udonge1.ogg",
+      "title": "Lunatic Eyes ~ Invisible Full Moon",
+      "title_ja": "狂気の瞳　～ Invisible Full Moon",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/155doremy1.ogg",
+      "title": "Eternal Spring Dream",
+      "title_ja": "永遠の春夢",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/155tenshi1.ogg",
+      "title": "Catastrophe in Bhavaagra ~ Wonderful Heaven",
+      "title_ja": "有頂天変　～ Wonderful Heaven",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/155yukari1.ogg",
+      "title": "Night Falls ~ Evening Star",
+      "title_ja": "夜が降りてくる ～ Evening Star",
+      "number": 18
+    },
+    {
+      "file": "data/bgm/bgst01.ogg",
+      "title": "The Ground's Color is Yellow ~ Primrose",
+      "title_ja": "地の色は黄色 ～ Primrose",
+      "number": 19
+    },
+    {
+      "file": "data/bgm/bgst02.ogg",
+      "title": "Mushroom Waltz",
+      "title_ja": "マッシュルーム・ワルツ",
+      "number": 20
+    },
+    {
+      "file": "data/bgm/bgst03.ogg",
+      "title": "The Palanquin Ship Flies in the Sky",
+      "title_ja": "聖輦船空を往く",
+      "number": 21
+    },
+    {
+      "file": "data/bgm/bgst04.ogg",
+      "title": "Equality Under the Law of Dharma",
+      "title_ja": "法力の下の平等",
+      "number": 22
+    },
+    {
+      "file": "data/bgm/bgst05.ogg",
+      "title": "Constant and Unchanging Temple of Worship",
+      "title_ja": "恒常不変の参廟祀",
+      "number": 23
+    },
+    {
+      "file": "data/bgm/bgst06.ogg",
+      "title": "Shining Armillary Sphere",
+      "title_ja": "光輝く天球儀",
+      "number": 24
+    },
+    {
+      "file": "data/bgm/bgst07.ogg",
+      "title": "The Ravine Kappa's Technological Prowess",
+      "title_ja": "沢の河童の技術力",
+      "number": 25
+    },
+    {
+      "file": "data/bgm/bgst08.ogg",
+      "title": "A Rose Blooming in the Underworld",
+      "title_ja": "地底に咲く薔薇",
+      "number": 26
+    },
+    {
+      "file": "data/bgm/bgst09.ogg",
+      "title": "In the Deep-Green Tanuki Forest",
+      "title_ja": "深緑の狸森にて",
+      "number": 27
+    },
+    {
+      "file": "data/bgm/bgst10.ogg",
+      "title": "Shinkirou Theatrical",
+      "title_ja": "心綺楼演舞",
+      "number": 28
+    },
+    {
+      "file": "data/bgm/bgst11.ogg",
+      "title": "Immortal Red Soul",
+      "title_ja": "不滅のレッドソウル",
+      "number": 29
+    },
+    {
+      "file": "data/bgm/bgst12.ogg",
+      "title": "The Inverted Castle Lit by the Setting Sun",
+      "title_ja": "落日に映える逆さ城",
+      "number": 30
+    },
+    {
+      "file": "data/bgm/bgst13.ogg",
+      "title": "Overcome a Thousand Trials",
+      "title_ja": "千の試練を超えて",
+      "number": 31
+    },
+    {
+      "file": "data/bgm/bgst14.ogg",
+      "title": "Dream World Folklore",
+      "title_ja": "夢世界フォークロア",
+      "number": 32
+    },
+    {
+      "file": "data/bgm/bgst15.ogg",
+      "title": "Corridor Stretching to Eternity",
+      "title_ja": "永遠に続く回廊",
+      "number": 33
+    },
+    {
+      "file": "data/bgm/bgst16.ogg",
+      "title": "Sleep Sheep Parade",
+      "title_ja": "スリープシープ・パレード",
+      "number": 34
+    },
+    {
+      "file": "data/bgm/bgst17.ogg",
+      "title": "Bhavaagra as Far as the Eye Can See",
+      "title_ja": "至る有頂天",
+      "number": 35
+    },
+    {
+      "file": "data/bgm/midboss.ogg",
+      "title": "Yorimashi Between Dreams and Reality ~ Necro-Fantasia",
+      "title_ja": "憑坐は夢と現の間に ～ Necro-Fantasia",
+      "number": 36
+    },
+    {
+      "file": "data/bgm/lastboss.ogg",
+      "title": "Tonight Stars an Easygoing Egoist (Live ver.) ~ Egoistic Flowers.",
+      "title_ja": "今宵は飄逸なエゴイスト(Live ver) ～ Egoistic Flowers.",
+      "number": 37
+    },
+    {
+      "file": "data/bgm/145st01.ogg",
+      "title": "Occult Attract",
+      "title_ja": "オカルトアトラクト",
+      "number": 38
+    },
+    {
+      "file": "data/bgm/145st02.ogg",
+      "title": "Neo Bamboo Forest in Flames",
+      "title_ja": "ネオ竹林インフレイム",
+      "number": 39
+    },
+    {
+      "file": "data/bgm/145st03.ogg",
+      "title": "Bell of Aeons",
+      "title_ja": "億万劫の鐘",
+      "number": 40
+    },
+    {
+      "file": "data/bgm/145st04.ogg",
+      "title": "Unknown X ~ Occultly Madness",
+      "title_ja": "アンノウンX ～ Occultly Madness",
+      "number": 41
+    },
+    {
+      "file": "data/bgm/story01.ogg",
+      "title": "Being Things Eye To Eye",
+      "title_ja": "憑依投合",
+      "number": 42
+    },
+    {
+      "file": "data/bgm/story02.ogg",
+      "title": "The One Jointly Responsible",
+      "title_ja": "連帯責人",
+      "number": 43
+    },
+    {
+      "file": "data/bgm/story03.ogg",
+      "title": "An Odd Couple",
+      "title_ja": "合縁奇縁",
+      "number": 44
+    },
+    {
+      "file": "data/bgm/story04.ogg",
+      "title": "Two Minds of One Body",
+      "title_ja": "異心同体",
+      "number": 45
+    },
+    {
+      "file": "data/bgm/story05.ogg",
+      "title": "Grandiloquence",
+      "title_ja": "壮言大語",
+      "number": 46
+    },
+    {
+      "file": "data/bgm/story06.ogg",
+      "title": "Scheming Outside the Box",
+      "title_ja": "知略縦横",
+      "number": 47
+    },
+    {
+      "file": "data/bgm/story07.ogg",
+      "title": "In High Spirits",
+      "title_ja": "意気揚々",
+      "number": 48
+    },
+    {
+      "file": "data/bgm/story08.ogg",
+      "title": "The Curtain Shall Rise Soon",
+      "title_ja": "開演間近",
+      "number": 49
+    },
+    {
+      "file": "data/bgm/story09.ogg",
+      "title": "Flawless as Clothing of the Celestials ~ Yellow Lily",
+      "title_ja": "天衣無縫 ～ Yellow Lily",
+      "number": 50
+    },
+    {
+      "file": "data/bgm/th155op1.ogg",
+      "title": "Seeds of the Incident",
+      "title_ja": "異変の種子",
+      "number": 51
+    },
+    {
+      "file": "data/bgm/th155op2.ogg",
+      "title": "Sprouts of Suspicion",
+      "title_ja": "疑惑の芽生え",
+      "number": 52
+    },
+    {
+      "file": "data/bgm/th155op3.ogg",
+      "title": "Branches Reaching to the Truth",
+      "title_ja": "真相へ繋がる枝葉",
+      "number": 53
+    },
+    {
+      "file": "data/bgm/th155op4.ogg",
+      "title": "Blizzard of Scattering Possession Flowers",
+      "title_ja": "舞い散る憑依華吹雪",
+      "number": 54
+    },
+    {
+      "file": "data/bgm/ending.ogg",
+      "title": "Floating with the Tide",
+      "title_ja": "行雲流水",
+      "number": 55
+    },
+    {
+      "file": "data/bgm/staffroll0.ogg",
+      "title": "Possession Flowers Yet to Bud",
+      "title_ja": "未だ蕾む憑依華",
+      "number": 56
+    },
+    {
+      "file": "data/bgm/staffroll1.ogg",
+      "title": "Possession Flowers in Full Bloom",
+      "title_ja": "咲き誇る憑依華",
+      "number": 57
+    },
+    {
+      "file": "data/bgm/staffroll2.ogg",
+      "title": "The Eternal Steam Engine",
+      "title_ja": "悠久の蒸気機関",
+      "number": 58
+    }
+  ],
+  "th17.5": [
+    {
+      "file": "data/bgm/op.ogg",
+      "title": "Submerged Hell of Sunken Sorrow",
+      "title_ja": "水没した沈愁地獄",
+      "number": 1
+    },
+    {
+      "file": "data/bgm/staff_roll.ogg",
+      "title": "Eastern Strange Tale of Avarice",
+      "title_ja": "東方剛欲異聞",
+      "number": 2
+    },
+    {
+      "file": "data/bgm/talk_ed.ogg",
+      "title": "Laws of Heaven, Desires of Man",
+      "title_ja": "天理人欲",
+      "number": 3
+    },
+    {
+      "file": "data/bgm/talk_forest.ogg",
+      "title": "Magician's Melancholy",
+      "title_ja": "魔法使いの憂鬱",
+      "number": 4
+    },
+    {
+      "file": "data/bgm/talk_underground.ogg",
+      "title": "The Dark Blowhole",
+      "title_ja": "暗闇の風穴",
+      "number": 5
+    },
+    {
+      "file": "data/bgm/talk_town.ogg",
+      "title": "Walking the Streets of a Former Hell",
+      "title_ja": "旧地獄街道を行く",
+      "number": 6
+    },
+    {
+      "file": "data/bgm/talk_Inferno.ogg",
+      "title": "Hellfire Mantle",
+      "title_ja": "業火マントル",
+      "number": 7
+    },
+    {
+      "file": "data/bgm/talk_reactor.ogg",
+      "title": "Cemetery of Onbashira ~ Grave of Being",
+      "title_ja": "御柱の墓場　～ Grave of Being",
+      "number": 8
+    },
+    {
+      "file": "data/bgm/talk_oil.ogg",
+      "title": "Depths of the Earth, Ocean of Avarice",
+      "title_ja": "大地の底、剛欲の海",
+      "number": 9
+    },
+    {
+      "file": "data/bgm/talk_waterhell.ogg",
+      "title": "Everlasting Red Spider Lily",
+      "title_ja": "不朽の曼珠沙華",
+      "number": 10
+    },
+    {
+      "file": "data/bgm/talk_scarlet.ogg",
+      "title": "The Centennial Festival for Magical Girls",
+      "title_ja": "魔法少女達の百年祭",
+      "number": 11
+    },
+    {
+      "file": "data/bgm/reimu1.ogg",
+      "title": "Maiden's Capriccio ~ Dream Battle",
+      "title_ja": "少女綺想曲　～ Dream Battle",
+      "number": 12
+    },
+    {
+      "file": "data/bgm/marisa1.ogg",
+      "title": "Love-Colored Master Spark",
+      "title_ja": "恋色マスタースパーク",
+      "number": 13
+    },
+    {
+      "file": "data/bgm/yamame1.ogg",
+      "title": "The Sealed-Away Youkai ~ Lost Place",
+      "title_ja": "封じられた妖怪　～ Lost Place",
+      "number": 14
+    },
+    {
+      "file": "data/bgm/kogasa1.ogg",
+      "title": "Beware the Umbrella Left There Forever",
+      "title_ja": "万年置き傘にご注意を",
+      "number": 15
+    },
+    {
+      "file": "data/bgm/murasa1.ogg",
+      "title": "Captain Murasa",
+      "title_ja": "キャプテン・ムラサ",
+      "number": 16
+    },
+    {
+      "file": "data/bgm/kanako1.ogg",
+      "title": "The Venerable Ancient Battlefield ~ Suwa Foughten Field",
+      "title_ja": "神さびた古戦場　～ Suwa Foughten Field",
+      "number": 17
+    },
+    {
+      "file": "data/bgm/jyoon1.ogg",
+      "title": "Tonight Stars an Easygoing Egoist (Live ver.) ~ Egoistic Flowers.",
+      "title_ja": "今宵は飄逸なエゴイスト(Live ver) ～ Egoistic Flowers.",
+      "number": 18
+    },
+    {
+      "file": "data/bgm/yuugi1.ogg",
+      "title": "A Flower-Studded Saké Dish on Mt. Ooe",
+      "title_ja": "華のさかづき大江山",
+      "number": 19
+    },
+    {
+      "file": "data/bgm/utuho1.ogg",
+      "title": "Solar Sect of Mystic Wisdom ~ Nuclear Fusion",
+      "title_ja": "霊知の太陽信仰　～ Nuclear Fusion",
+      "number": 20
+    },
+    {
+      "file": "data/bgm/niwatari1.ogg",
+      "title": "Seraphic Chicken",
+      "title_ja": "セラフィックチキン",
+      "number": 21
+    },
+    {
+      "file": "data/bgm/flandre1.ogg",
+      "title": "U.N. Owen was Her?",
+      "title_ja": "U.N.オーエンは彼女なのか？",
+      "number": 22
+    },
+    {
+      "file": "data/bgm/toutetu1.ogg",
+      "title": "Memento of the Avaricious Beast",
+      "title_ja": "強欲な獣のメメント",
+      "number": 23
+    },
+    {
+      "file": "data/bgm/toutetu2.ogg",
+      "title": "Memento of All Organisms ~ Memory of Fossil Energy.",
+      "title_ja": "有機体全てのメメント　～ Memory of Fossil Energy.",
+      "number": 24
+    }
+  ]
+}
