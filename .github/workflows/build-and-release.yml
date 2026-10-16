@@ -21,6 +21,14 @@ name: Build and release
 permissions:
   contents: read
 jobs:
+  linux-sources:
+    name: Linux source check
+    if: inputs.operation == 'build'
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@v6
+    - name: Verify matching Linux dependency sources
+      run: python3 packaging/licenses/repository_sources.py verify --platform linux
   windows-tools:
     runs-on: windows-latest
     defaults:
@@ -147,6 +155,8 @@ jobs:
     name: Windows installer
     if: inputs.operation == 'build'
   linux:
+    needs:
+    - linux-sources
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
@@ -252,7 +262,7 @@ jobs:
           const {data: run} = await github.rest.actions.getWorkflowRun({...repo, run_id: Number(runId)});
           if (run.status !== 'completed' || run.conclusion !== 'success' || run.event !== 'workflow_dispatch' || run.path.split('@')[0] !== '.github/workflows/build-and-release.yml' || run.head_repository?.full_name !== `${repo.owner}/${repo.repo}`) throw new Error('Select a successful build from this repository and this combined workflow.');
           const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRunAttempt, {...repo, run_id: run.id, attempt_number: run.run_attempt, per_page: 100});
-          for (const name of ['Linux AppImage', 'Windows native tools', 'Windows installer', 'Ready to publish']) {
+          for (const name of ['Linux source check', 'Linux AppImage', 'Windows native tools', 'Windows installer', 'Ready to publish']) {
             if (!jobs.some(job => job.name === name && job.conclusion === 'success')) throw new Error(`The selected run has no successful ${name} job.`);
           }
           const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {...repo, run_id: run.id, per_page: 100});
