@@ -86,11 +86,6 @@ PREFIX_ROOT = os.path.join(
     "mukyulauncher",
     "prefixes",
 )
-UMU_DATA_ROOT = os.path.join(
-    data_home(),
-    "umu",
-)
-UMU_RUNTIME_NAME = "steamrt4"
 DOSBOX_ROOT = os.path.join(data_home(), "mukyulauncher", "dosbox-x")
 DOSBOX_BINARY = os.path.join(DOSBOX_ROOT, "dosbox-x.exe" if IS_WINDOWS else "dosbox-x")
 
@@ -431,14 +426,25 @@ def ge_proton_directory():
     return os.path.join(data_home(), "Steam", "compatibilitytools.d")
 
 
+def get_ge_proton_path():
+    directory = Path(ge_proton_directory())
+    if not directory.is_dir():
+        return None
+    candidates = [
+        path for path in directory.iterdir()
+        if path.name.startswith("GE-Proton") and path.is_dir()
+        and (path / "proton").is_file()
+        and (path / "toolmanifest.vdf").is_file()
+        and os.access(path / "files/bin/wine", os.X_OK)
+    ]
+    if not candidates:
+        return None
+    selected = max(candidates, key=lambda path: (tuple(int(n) for n in re.findall(r"\d+", path.name)), path.name))
+    return str(selected.resolve())
+
+
 def ge_proton_installed():
-    directory = ge_proton_directory()
-    if not os.path.isdir(directory):
-        return False
-    return any(
-        name.startswith("GE-Proton") and os.path.isdir(os.path.join(directory, name))
-        for name in os.listdir(directory)
-    )
+    return get_ge_proton_path() is not None
 
 
 def latest_ge_proton_info():
@@ -1106,9 +1112,12 @@ def build_launch_command(exe_path, launch_options, runner, game_key):
         env = os.environ.copy()
         env["WINEPREFIX"] = prefix
         env["GAMEID"] = "0"
-        env["PROTONPATH"] = "GE-Proton"
+        proton = get_ge_proton_path()
+        if not proton:
+            raise FileNotFoundError("GE-Proton is not installed or its installation is incomplete")
+        env["PROTONPATH"] = proton
+        env["PYTHONNOUSERSITE"] = "1"
         env["STEAM_COMPAT_INSTALL_PATH"] = game_dir
-        env["STEAM_COMPAT_LIBRARY_PATHS"] = game_dir
         umu = get_umu_path()
         base_command = [umu, exe_path]
         if "%command%" in options:
@@ -1176,24 +1185,13 @@ def show_running_error(card, title, launch_callback):
     )
 
 
-def umu_runtime_installed():
-    runtime_dir = os.path.join(UMU_DATA_ROOT, UMU_RUNTIME_NAME)
-    if not os.path.isdir(runtime_dir):
-        return False
-    try:
-        with os.scandir(runtime_dir) as entries:
-            return next(entries, None) is not None
-    except OSError:
-        return False
-
-
 def create_umu_setup_window(card):
     root = card.get_root()
     parent = root if isinstance(root, Gtk.Window) else None
 
     window = Gtk.Window()
-    window.set_title("UMU Setup")
-    window.set_modal(True)
+    window.set_title("Starting GE-Proton")
+    window.set_modal(False)
     window.set_deletable(False)
     window.set_resizable(False)
     if parent is not None:
@@ -1205,19 +1203,19 @@ def create_umu_setup_window(card):
     box.set_margin_top(20)
     box.set_margin_bottom(20)
 
-    title = Gtk.Label(label="UMU is setting up")
+    title = Gtk.Label(label="Starting your game")
     title.add_css_class("popover-heading")
     title.set_halign(Gtk.Align.START)
     box.append(title)
 
-    runtime = Gtk.Label(label=f"Installing runtime: {UMU_RUNTIME_NAME}")
+    runtime = Gtk.Label(label="Checking GE-Proton and its runtime")
     runtime.set_halign(Gtk.Align.START)
     box.append(runtime)
 
     progress = Gtk.ProgressBar()
     progress.set_show_text(True)
     progress.set_fraction(0)
-    progress.set_text("0%")
+    progress.set_text("Preparing…")
     box.append(progress)
 
     status = Gtk.Label(label="Preparing…")
@@ -1228,71 +1226,91 @@ def create_umu_setup_window(card):
     window.set_child(box)
     window.present()
 
-    while GLib.MainContext.default().pending():
-        GLib.MainContext.default().iteration(False)
-
     return window, runtime, progress, status
 
 
 def monitor_umu_setup(process, window, runtime_label, progress_bar, status_label):
+    state = {"finished": False, "determinate": False}
+    parent = window.get_transient_for()
+
+    def pulse():
+        if state["finished"] or not window.get_visible():
+            return False
+        if not state["determinate"]:
+            progress_bar.pulse()
+        return True
+
+    GLib.timeout_add(100, pulse)
+
     def worker():
-        finished = False
         announced = False
-        log = _open_launch_log(process.args if isinstance(process.args, list) else [str(process.args)], "ge-proton (first run)", getattr(process, "_mukyu_game_key", "?"))
+        recent = []
+        log = _open_launch_log(process.args if isinstance(process.args, list) else [str(process.args)], "ge-proton", getattr(process, "_mukyu_game_key", "?"))
         try:
-            while True:
-                line = process.stdout.readline()
-                if not line:
-                    break
+            for raw in process.stdout:
                 if log is not None:
                     try:
-                        log.write(line.encode("utf-8", "replace"))
+                        log.write(raw.encode("utf-8", "replace"))
                     except OSError:
                         pass
+                line = re.sub(r"\x1b\[[0-9;]*m", "", raw).strip()
+                if line:
+                    recent.append(line)
+                    recent = recent[-12:]
                 if announced:
-
                     continue
-                line = line.strip()
-                runtime_match = re.search(r"runtime ['\"]([^'\"]+)['\"]", line)
                 percent_matches = re.findall(r"(?<!\d)(\d{1,3})%", line)
                 percent = int(percent_matches[-1]) if percent_matches else None
+                finished = "Running '" in line and "using runtime" in line
+                activity = "Downloading runtime…" if "Downloading" in line else "Updating runtime…" if "Updating" in line else None
+                runtime_match = re.search(r"(steamrt[0-9]+|sniper|soldier)", line)
                 runtime_name = runtime_match.group(1) if runtime_match else None
-                if "Running '" in line and "using runtime" in line:
-                    finished = True
 
-                def update(runtime_name=runtime_name, percent=percent, finished=finished):
+                def update(percent=percent, finished=finished, activity=activity, runtime_name=runtime_name):
+                    if state["finished"]:
+                        return False
                     if runtime_name:
-                        runtime_label.set_text(f"Installing runtime: {runtime_name}")
+                        runtime_label.set_text(f"Runtime: {runtime_name}")
                     if percent is not None:
+                        state["determinate"] = True
                         value = min(100, percent)
                         progress_bar.set_fraction(value / 100.0)
                         progress_bar.set_text(f"{value}%")
+                    elif activity:
+                        state["determinate"] = False
+                        progress_bar.set_text(activity)
+                    if activity:
+                        status_label.set_text("This may take a few minutes. The game will start automatically.")
                     if finished:
-                        progress_bar.set_fraction(1.0)
-                        progress_bar.set_text("100%")
-                        status_label.set_text("Setup complete")
+                        state["finished"] = True
                         window.close()
-                    elif percent is not None:
-                        status_label.set_text("Downloading…")
                     return False
 
                 GLib.idle_add(update)
-                if finished:
-                    announced = True
+                announced = finished
+            result = process.wait()
         finally:
             if log is not None:
                 log.close()
-            def close_if_needed():
-                if window.get_visible() and process.poll() is not None:
-                    if process.returncode == 0:
-                        progress_bar.set_fraction(1.0)
-                        progress_bar.set_text("100%")
-                        status_label.set_text("Setup complete")
-                    else:
-                        status_label.set_text("Setup finished with an error")
-                    window.close()
-                return False
-            GLib.idle_add(close_if_needed)
+            process.stdout.close()
+
+        def complete():
+            state["finished"] = True
+            window.close()
+            if result and not getattr(process, "_mukyu_stopping", False):
+                details = "\n".join(recent[-6:])[-2000:]
+                show_dialog(
+                    parent,
+                    "GE-Proton exited with an error",
+                    f"GE-Proton exited with code {result}.\n\n{details}\n\nFull log: {launch_log_path()}",
+                    [("OK", ACCENT)],
+                    heading="GE-Proton error",
+                    default=0,
+                    cancel=0,
+                )
+            return False
+
+        GLib.idle_add(complete)
 
     threading.Thread(target=worker, daemon=True).start()
 
@@ -1498,6 +1516,7 @@ def process_tree_exists(process):
 
 
 def send_process_group_signal(process, signal):
+    process._mukyu_stopping = True
     if IS_WINDOWS:
         job = getattr(process, "_mukyu_job", None)
         if signal == 15:
@@ -1604,13 +1623,16 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
         if runner == "dosbox-x":
             show_dosbox_missing(card)
             return
+        if runner == "ge-proton":
+            show_runner_error(card, title)
+            return
         raise
     session_token = os.urandom(8).hex()
     env = host_env(env)
     env[SESSION_ENV_VAR] = session_token
     setup_window = None
     setup_widgets = None
-    if runner == "ge-proton" and not umu_runtime_installed():
+    if runner == "ge-proton":
         setup_window, runtime_label, progress_bar, status_label = create_umu_setup_window(card)
         setup_widgets = (setup_window, runtime_label, progress_bar, status_label)
     start_time = time.time()
@@ -1624,6 +1646,7 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
             stdout=subprocess.PIPE if setup_window else log_handle,
             stderr=subprocess.STDOUT if setup_window else (log_handle if log_handle else None),
             text=True if setup_window else False,
+            **({"encoding": "utf-8", "errors": "replace"} if setup_window else {}),
             bufsize=1 if setup_window else -1,
         )
     except OSError as exc:
@@ -1632,8 +1655,8 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
                 log_handle.write(f"Could not start: {exc}\n".encode())
             except OSError:
                 pass
-        if not IS_WINDOWS:
-            raise
+        if setup_window is not None:
+            setup_window.close()
         root = card.get_root()
         detail = str(exc)
         if getattr(exc, "winerror", None) == 740:
