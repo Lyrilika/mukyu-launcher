@@ -27,8 +27,10 @@ Verify the source snapshot:
 Restore the archives to a separate working directory:
   python packaging/licenses/repository_sources.py restore --output build/sources
 
-Files larger than 95 MiB are split into numbered .partNNN files to fit GitHub's
-regular-file size limit. The restore command joins these parts automatically.
+Archives can be split into consecutive .part000, .part001 and later files for
+browser uploads. Keep every part beside the original archive's expected path.
+The checker verifies their combined size and SHA-256 against the original
+archive's manifest entry. The restore command joins these parts automatically.
 Never strip comments or license headers from upstream source archives.
 
 Runtime updates must update the package lock and corresponding sources together.
