@@ -3,7 +3,7 @@ name: Build and release
   workflow_dispatch:
     inputs:
       operation:
-        description: Build both platforms and publish successful builds
+        description: Build both platforms, or publish an already successful build
         required: true
         default: build
         type: choice
@@ -21,6 +21,131 @@ name: Build and release
 permissions:
   contents: read
 jobs:
+  windows-tools:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: Keep LF line endings (the runner defaults to CRLF, which breaks bash scripts)
+      shell: pwsh
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: 'false'
+        suppress-deprecation-warnings: msystem-mingw64
+        install: git make flex bison mingw-w64-x86_64-python mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-zlib
+    - run: bash ./packaging/windows/build_tools_msys2.sh all
+    - uses: actions/upload-artifact@v7
+      with:
+        name: win-tools
+        path: |
+          tools/thtk/bin/thdat.exe
+          tools/pc98/bin/pmd_render.exe
+          tools/pc98/bin/mdt_render.exe
+          tools/pc98/BUILD_INFO.txt
+          tools/thtk/REVISION
+          tools/licenses
+        if-no-files-found: error
+    name: Windows native tools
+    if: inputs.operation == 'build'
+  windows-installer:
+    needs:
+    - windows-tools
+    runs-on: windows-latest
+    steps:
+    - name: Keep LF line endings (the runner defaults to CRLF, which breaks bash scripts)
+      shell: pwsh
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+    - uses: msys2/setup-msys2@v2
+      id: msys
+      with:
+        msystem: MINGW64
+        update: 'false'
+        suppress-deprecation-warnings: msystem-mingw64
+        install: gcc
+    - name: Download pinned runtime packages
+      shell: pwsh
+      run: |-
+        python packaging/licenses/repository_sources.py fetch --platform windows --output build/runtime-packages
+        if ($LASTEXITCODE -ne 0) { throw "Pinned runtime download or source verification failed" }
+    - name: Install pinned runtime packages
+      shell: msys2 {0}
+      run: |-
+        pacman --noconfirm -U build/runtime-packages/*.pkg.tar.zst
+        python packaging/licenses/repository_sources.py check-windows --database "$(cygpath -m /var/lib/pacman/local)"
+    - name: Install PDF runtime
+      shell: msys2 {0}
+      env:
+        CPP: gcc -E -D_WIN32
+      run: python -m pip install --break-system-packages pypdfium2==5.14.0
+    - uses: actions/download-artifact@v8
+      with:
+        name: win-tools
+        path: win-tools
+    - name: Stage files
+      shell: pwsh
+      run: |
+        $mingw = Join-Path "${{ steps.msys.outputs.msys2-location }}" "mingw64"
+        $stage = "build\stage"
+        New-Item -ItemType Directory -Force "$stage\runtime", "$stage\app" | Out-Null
+        robocopy $mingw "$stage\runtime" /E /NFL /NDL /NJH /NJS /NP `
+          /XD include man info locale gtk-doc cmake pkgconfig aclocal `
+              "$mingw\share\man" "$mingw\share\locale" "$mingw\share\info" `
+              "$mingw\share\gtk-doc" "$mingw\share\bash-completion" "$mingw\share\vala" `
+          /XF *.a *.la *.h *.pdb | Out-Null
+        $global:LASTEXITCODE = 0
+        Copy-Item "$stage\runtime\bin\pythonw.exe" "$stage\runtime\bin\MukyuLauncher.exe"
+        Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe" -OutFile rcedit.exe
+        .\rcedit.exe "$stage\runtime\bin\MukyuLauncher.exe" --set-icon packaging\windows\icon.ico `
+          --set-version-string ProductName "Mukyu Launcher" --set-version-string FileDescription "Mukyu Launcher"
+        robocopy . "$stage\app" /E /NFL /NDL /NJH /NJS /NP `
+          /XD .git .github .agents .aws .codex build dist win-tools third_party __pycache__ appimage `
+          /XF rcedit.exe *.AppImage "Mukyu Launcher.bat" thdat pmd_render mdt_render umu-run runtime-x86_64 | Out-Null
+        $global:LASTEXITCODE = 0
+        Copy-Item win-tools\tools\* -Destination "$stage\app\tools" -Recurse -Force
+        New-Item -ItemType Directory -Force "$stage\app\tools\thtk\bin","$stage\app\tools\pc98\bin" | Out-Null
+        Get-ChildItem -Recurse win-tools -Filter thdat.exe      | Copy-Item -Destination "$stage\app\tools\thtk\bin" -Force
+        Get-ChildItem -Recurse win-tools -Filter pmd_render.exe | Copy-Item -Destination "$stage\app\tools\pc98\bin" -Force
+        Get-ChildItem -Recurse win-tools -Filter mdt_render.exe | Copy-Item -Destination "$stage\app\tools\pc98\bin" -Force
+        New-Item -ItemType Directory -Force "$stage\app\assets\icons\hicolor\256x256\apps" | Out-Null
+        Copy-Item assets\icons\hicolor\scalable\apps\mukyulauncher.png "$stage\app\assets\icons\hicolor\256x256\apps\mukyulauncher.png"
+        if (Test-Path "$stage\app\third_party") { throw "Dependency sources must not be packaged" }
+    - name: Build Windows media integration
+      shell: pwsh
+      run: ./packaging/windows/build_smtc.ps1 -OutputDirectory build/stage/app/tools/windows
+    - name: Smoke test (GTK 4, GStreamer and PDF rendering)
+      shell: pwsh
+      run: |
+        $env:PATH = "$PWD\build\stage\runtime\bin;C:\Windows\System32;C:\Windows"
+        & "$PWD\build\stage\runtime\bin\python.exe" -c "import sys; sys.path.insert(0, 'build/stage/app'); import pypdfium2; pdf = pypdfium2.PdfDocument.new(); page = pdf.new_page(72, 72); bitmap = page.render(); assert bitmap.width == 72 and bitmap.height == 72; bitmap.close(); page.close(); pdf.close(); import gi; gi.require_version('Gtk','4.0'); gi.require_version('Gst','1.0'); from gi.repository import Gtk, Gst; Gst.init(None); import mukyu.app, mukyu.pages.games, mukyu.pages.music, mukyu.pages.printworks, mukyu.music.desktop.windows; print('GTK', Gtk.get_major_version(), Gtk.get_minor_version(), 'OK')"
+        if ($LASTEXITCODE -ne 0) { throw "bundled runtime failed its GTK, GStreamer or PDF smoke test" }
+    - name: Verify Windows media integration
+      shell: pwsh
+      run: |
+        $env:PATH = "$PWD\build\stage\runtime\bin;C:\Windows\System32;C:\Windows"
+        & "$PWD\build\stage\runtime\bin\python.exe" build/stage/app/packaging/windows/check_smtc.py
+        if ($LASTEXITCODE -ne 0) { throw "Windows media integration verification failed" }
+    - name: Build installer
+      shell: pwsh
+      run: |
+        choco install innosetup -y --no-progress | Out-Null
+        Copy-Item "${env:ProgramFiles(x86)}\Inno Setup 6\License.txt" "build\stage\app\tools\licenses\Inno-Setup-LICENSE.txt"
+        $v = "0.0.${{ github.run_number }}"
+        & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" packaging\windows\installer.iss
+        if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+    - uses: actions/upload-artifact@v7
+      with:
+        name: Windows-Installer
+        path: dist/Mukyu_Launcher_Setup.exe
+        if-no-files-found: error
+        compression-level: 0
+      name: Upload runnable Windows installer
+    name: Windows installer
+    if: inputs.operation == 'build'
   linux:
     runs-on: ubuntu-24.04
     steps:
@@ -53,175 +178,27 @@ jobs:
         from mukyu.paths import ASSETS_DIR, TOOLS_DIR, ICON_PATH
         assert (ASSETS_DIR / 'styles/style.css').is_file()
         assert ICON_PATH.is_file()
+        assert not Path('usr/share/mukyulauncher/third_party').exists()
         assert all((TOOLS_DIR / item).is_file() for item in ('thtk/bin/thdat', 'pc98/bin/pmd_render', 'pc98/bin/mdt_render', 'umu/umu-run'))
         print(ssl.OPENSSL_VERSION)
         print('GTK', Gtk.get_major_version(), Gtk.get_minor_version(), '| OK')"
-    - name: Report download sizes
+    - name: Report AppImage size
       run: |
         python3 - <<'PYTHON' >> "$GITHUB_STEP_SUMMARY"
         from pathlib import Path
         image = Path("dist/Mukyu_Launcher-x86_64.AppImage")
-        sources = sorted(Path("dist").glob("Mukyu-linux-*"))
-        if not image.is_file() or not list(Path("dist").glob("Mukyu-linux-sources.tar.part*")):
-            raise SystemExit("The AppImage or its matching source archive is missing")
-        print("## Linux downloads\n")
-        print("| Download | Size | Purpose |")
-        print("| --- | ---: | --- |")
-        print(f"| Mukyu-Launcher-AppImage | {image.stat().st_size / 1048576:.1f} MiB | Run the launcher |")
-        print(f"| Mukyu-Launcher-Linux-Sources | {sum(p.stat().st_size for p in sources) / 1048576:.1f} MiB | Corresponding sources, checksums and notices |")
-        print("\nOnly the AppImage download is needed to run the launcher. The separate sources remain available for rebuilding and redistribution.")
+        if not image.is_file():
+            raise SystemExit("The AppImage is missing")
+        print(f"AppImage: {image.stat().st_size / 1048576:.1f} MiB")
         PYTHON
     - name: Upload runnable AppImage
       uses: actions/upload-artifact@v7
       with:
-        name: Mukyu-Launcher-AppImage
+        name: Linux-AppImage
         path: dist/Mukyu_Launcher-x86_64.AppImage
         compression-level: 0
         if-no-files-found: error
-    - name: Upload corresponding sources
-      uses: actions/upload-artifact@v7
-      with:
-        name: Mukyu-Launcher-Linux-Sources
-        path: dist/Mukyu-linux-*
-        compression-level: 0
-        if-no-files-found: error
     name: Linux AppImage
-    if: inputs.operation == 'build'
-  windows-tools:
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-    - name: Keep LF line endings (the runner defaults to CRLF, which breaks bash scripts)
-      shell: pwsh
-      run: git config --global core.autocrlf false
-    - uses: actions/checkout@v6
-    - uses: msys2/setup-msys2@v2
-      with:
-        msystem: MINGW64
-        update: 'false'
-        suppress-deprecation-warnings: msystem-mingw64
-        install: git make flex bison mingw-w64-x86_64-python mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
-          mingw-w64-x86_64-zlib
-    - run: bash ./packaging/windows/build_tools_msys2.sh all
-    - name: Collect native toolchain sources
-      run: python packaging/licenses/collect_sources.py msys --database "$(cygpath -m /var/lib/pacman/local)" --label tools
-        --output build/dependency-sources
-    - uses: actions/upload-artifact@v7
-      with:
-        name: win-tools
-        path: |
-          tools/thtk/bin/thdat.exe
-          tools/pc98/bin/pmd_render.exe
-          tools/pc98/bin/mdt_render.exe
-          tools/pc98/BUILD_INFO.txt
-          tools/thtk/REVISION
-          tools/licenses
-          build/dependency-sources
-        if-no-files-found: error
-    name: Windows native tools
-    if: inputs.operation == 'build'
-  windows-installer:
-    needs: windows-tools
-    runs-on: windows-latest
-    steps:
-    - name: Keep LF line endings (the runner defaults to CRLF, which breaks bash scripts)
-      shell: pwsh
-      run: git config --global core.autocrlf false
-    - uses: actions/checkout@v6
-    - uses: msys2/setup-msys2@v2
-      id: msys
-      with:
-        msystem: MINGW64
-        update: 'false'
-        suppress-deprecation-warnings: msystem-mingw64
-        install: mingw-w64-x86_64-python mingw-w64-x86_64-python-pip mingw-w64-x86_64-python-gobject mingw-w64-x86_64-python-cairo
-          mingw-w64-x86_64-gtk4 mingw-w64-x86_64-gdk-pixbuf2 mingw-w64-x86_64-librsvg mingw-w64-x86_64-adwaita-icon-theme
-          mingw-w64-x86_64-gstreamer mingw-w64-x86_64-gst-plugins-base mingw-w64-x86_64-gst-plugins-good mingw-w64-x86_64-gst-plugins-bad
-          mingw-w64-x86_64-gst-libav mingw-w64-x86_64-ffmpeg
-    - name: Install pypdfium2
-      shell: msys2 {0}
-      run: pip install --break-system-packages pypdfium2
-    - uses: actions/download-artifact@v8
-      with:
-        name: win-tools
-        path: win-tools
-    - name: Collect matching runtime and launcher sources
-      shell: msys2 {0}
-      run: |
-        python packaging/licenses/collect_sources.py msys --database "$(cygpath -m /var/lib/pacman/local)" --label runtime --output build/sources
-        python packaging/licenses/collect_sources.py common --platform windows --output build/sources
-    - name: Stage files
-      shell: pwsh
-      run: |
-        $mingw = Join-Path "${{ steps.msys.outputs.msys2-location }}" "mingw64"
-        $stage = "build\stage"
-        New-Item -ItemType Directory -Force "$stage\runtime", "$stage\app" | Out-Null
-        robocopy $mingw "$stage\runtime" /E /NFL /NDL /NJH /NJS /NP `
-          /XD include man info locale gtk-doc cmake pkgconfig aclocal `
-              "$mingw\share\man" "$mingw\share\locale" "$mingw\share\info" `
-              "$mingw\share\gtk-doc" "$mingw\share\bash-completion" "$mingw\share\vala" `
-          /XF *.a *.la *.h *.pdb | Out-Null
-        $global:LASTEXITCODE = 0
-        Copy-Item "$stage\runtime\bin\pythonw.exe" "$stage\runtime\bin\MukyuLauncher.exe"
-        Invoke-WebRequest "https://github.com/electron/rcedit/releases/download/v2.0.0/rcedit-x64.exe" -OutFile rcedit.exe
-        .\rcedit.exe "$stage\runtime\bin\MukyuLauncher.exe" --set-icon packaging\windows\icon.ico `
-          --set-version-string ProductName "Mukyu Launcher" --set-version-string FileDescription "Mukyu Launcher"
-        robocopy . "$stage\app" /E /NFL /NDL /NJH /NJS /NP `
-          /XD .git .github .agents .aws .codex build dist win-tools __pycache__ appimage `
-          /XF rcedit.exe *.AppImage "Mukyu Launcher.bat" thdat pmd_render mdt_render umu-run | Out-Null
-        $global:LASTEXITCODE = 0
-        Copy-Item win-tools\tools\* -Destination "$stage\app\tools" -Recurse -Force
-        New-Item -ItemType Directory -Force "$stage\app\tools\thtk\bin","$stage\app\tools\pc98\bin" | Out-Null
-        Get-ChildItem -Recurse win-tools -Filter thdat.exe      | Copy-Item -Destination "$stage\app\tools\thtk\bin" -Force
-        Get-ChildItem -Recurse win-tools -Filter pmd_render.exe | Copy-Item -Destination "$stage\app\tools\pc98\bin" -Force
-        Get-ChildItem -Recurse win-tools -Filter mdt_render.exe | Copy-Item -Destination "$stage\app\tools\pc98\bin" -Force
-        New-Item -ItemType Directory -Force "$stage\app\assets\icons\hicolor\256x256\apps" | Out-Null
-        Copy-Item assets\icons\hicolor\scalable\apps\mukyulauncher.png "$stage\app\assets\icons\hicolor\256x256\apps\mukyulauncher.png"
-    - name: Build Windows media integration
-      shell: pwsh
-      run: ./packaging/windows/build_smtc.ps1 -OutputDirectory build/stage/app/tools/windows
-    - name: Smoke test (runtime can import GTK 4 / GStreamer)
-      shell: pwsh
-      run: |
-        $env:PATH = "$PWD\build\stage\runtime\bin;C:\Windows\System32;C:\Windows"
-        & "$PWD\build\stage\runtime\bin\python.exe" -c "import sys; sys.path.insert(0, 'build/stage/app'); import pypdfium2; import gi; gi.require_version('Gtk','4.0'); gi.require_version('Gst','1.0'); from gi.repository import Gtk, Gst; Gst.init(None); import mukyu.app, mukyu.pages.games, mukyu.pages.music, mukyu.pages.printworks, mukyu.music.desktop.windows; print('GTK', Gtk.get_major_version(), Gtk.get_minor_version(), 'OK')"
-        if ($LASTEXITCODE -ne 0) { throw "bundled runtime failed to import GTK 4" }
-    - name: Verify Windows media integration
-      shell: pwsh
-      run: |
-        $env:PATH = "$PWD\build\stage\runtime\bin;C:\Windows\System32;C:\Windows"
-        & "$PWD\build\stage\runtime\bin\python.exe" build/stage/app/packaging/windows/check_smtc.py
-        if ($LASTEXITCODE -ne 0) { throw "Windows media integration verification failed" }
-    - name: Build installer
-      shell: pwsh
-      run: |
-        choco install innosetup -y --no-progress | Out-Null
-        Copy-Item "${env:ProgramFiles(x86)}\Inno Setup 6\License.txt" "build\stage\app\tools\licenses\Inno-Setup-LICENSE.txt"
-        $v = "0.0.${{ github.run_number }}"
-        & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" packaging\windows\installer.iss
-        if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
-    - name: Package matching sources
-      shell: msys2 {0}
-      run: |
-        python packaging/licenses/collect_sources.py pack --platform windows --sources build/sources --output dist
-        cp tools/licenses/THIRD_PARTY_NOTICES.txt dist/Mukyu-windows-THIRD-PARTY-NOTICES.txt
-    - uses: actions/upload-artifact@v7
-      with:
-        name: Mukyu-Launcher-Windows-Installer
-        path: dist/Mukyu_Launcher_Setup.exe
-        if-no-files-found: error
-        compression-level: 0
-      name: Upload runnable Windows installer
-    - name: Upload corresponding Windows sources
-      uses: actions/upload-artifact@v7
-      with:
-        name: Mukyu-Launcher-Windows-Sources
-        path: dist/Mukyu-windows-*
-        compression-level: 0
-        if-no-files-found: error
-    name: Windows installer
     if: inputs.operation == 'build'
   ready:
     name: Ready to publish
@@ -244,7 +221,7 @@ jobs:
         print(f"When ready, open [Run workflow](https://github.com/{repo}/actions/workflows/build-and-release.yml), select **publish**, and enter:")
         print(f"- Successful build run ID: `{os.environ['BUILD_ID']}`")
         print("- New release tag: your chosen `v1.2.3`-style version")
-        print(f"\nThe tag will point to tested commit `{os.environ['BUILD_SHA']}`. Both binaries and their matching sources will be published together without rebuilding.")
+        print(f"\nThe tag will point to tested commit `{os.environ['BUILD_SHA']}`. Both binaries will be published without rebuilding. Matching dependency sources are in third_party/ at that commit and included in GitHub’s automatic source downloads.")
         print("The installer internal version uses the original build run number; choosing a release tag does not rewrite the tested installer.")
         PYTHON
   publish:
@@ -255,7 +232,7 @@ jobs:
       actions: read
       contents: write
     concurrency:
-      group: mukyu-release
+      group: verified-release
       cancel-in-progress: false
     steps:
     - name: Validate successful build and new tag
@@ -279,7 +256,7 @@ jobs:
             if (!jobs.some(job => job.name === name && job.conclusion === 'success')) throw new Error(`The selected run has no successful ${name} job.`);
           }
           const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {...repo, run_id: run.id, per_page: 100});
-          for (const name of ['Mukyu-Launcher-AppImage', 'Mukyu-Launcher-Linux-Sources', 'Mukyu-Launcher-Windows-Installer', 'Mukyu-Launcher-Windows-Sources']) {
+          for (const name of ['Linux-AppImage', 'Windows-Installer']) {
             if (!artifacts.some(artifact => artifact.name === name && !artifact.expired)) throw new Error(`Missing or expired artifact: ${name}`);
           }
           for (const request of [() => github.rest.git.getRef({...repo, ref: `tags/${tag}`}), () => github.rest.repos.getReleaseByTag({...repo, tag})]) {
@@ -289,31 +266,24 @@ jobs:
           core.setOutput('run-id', runId);
           core.setOutput('sha', run.head_sha);
           core.setOutput('tag', tag);
-    - name: Download Mukyu-Launcher-AppImage
+    - uses: actions/checkout@v6
+      with:
+        ref: ${{ steps.validate.outputs.sha }}
+    - name: Verify sources in the release commit
+      run: |-
+        python3 packaging/licenses/repository_sources.py verify --platform linux
+        python3 packaging/licenses/repository_sources.py verify --platform windows
+    - name: Download Linux-AppImage
       uses: actions/download-artifact@v8
       with:
-        name: Mukyu-Launcher-AppImage
+        name: Linux-AppImage
         path: release
         run-id: ${{ steps.validate.outputs.run-id }}
         github-token: ${{ github.token }}
-    - name: Download Mukyu-Launcher-Linux-Sources
+    - name: Download Windows-Installer
       uses: actions/download-artifact@v8
       with:
-        name: Mukyu-Launcher-Linux-Sources
-        path: release
-        run-id: ${{ steps.validate.outputs.run-id }}
-        github-token: ${{ github.token }}
-    - name: Download Mukyu-Launcher-Windows-Installer
-      uses: actions/download-artifact@v8
-      with:
-        name: Mukyu-Launcher-Windows-Installer
-        path: release
-        run-id: ${{ steps.validate.outputs.run-id }}
-        github-token: ${{ github.token }}
-    - name: Download Mukyu-Launcher-Windows-Sources
-      uses: actions/download-artifact@v8
-      with:
-        name: Mukyu-Launcher-Windows-Sources
+        name: Windows-Installer
         path: release
         run-id: ${{ steps.validate.outputs.run-id }}
         github-token: ${{ github.token }}
@@ -321,13 +291,6 @@ jobs:
       run: |-
         test -s release/Mukyu_Launcher-x86_64.AppImage
         test -s release/Mukyu_Launcher_Setup.exe
-        cd release
-        for platform in linux windows; do
-          test -s "Mukyu-$platform-sources-README.txt"
-          test -s "Mukyu-$platform-THIRD-PARTY-NOTICES.txt"
-          test -s "Mukyu-$platform-sources-SHA256SUMS.txt"
-          sha256sum --check "Mukyu-$platform-sources-SHA256SUMS.txt"
-        done
     - name: Create draft, upload both builds, then publish
       env:
         GH_TOKEN: ${{ github.token }}
@@ -336,5 +299,5 @@ jobs:
         BUILD_SHA: ${{ steps.validate.outputs.sha }}
       run: |-
         gh release create "$RELEASE_TAG" --target "$BUILD_SHA" --title "$RELEASE_TAG" --draft --generate-notes
-        gh release upload "$RELEASE_TAG" release/*
+        gh release upload "$RELEASE_TAG" release/Mukyu_Launcher-x86_64.AppImage release/Mukyu_Launcher_Setup.exe
         gh release edit "$RELEASE_TAG" --draft=false
