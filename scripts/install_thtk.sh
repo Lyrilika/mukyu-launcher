@@ -197,8 +197,6 @@ for license in COPYING COPYING.zlib COPYING.libpng; do
 done
 
 printf '%s\n' "$REVISION" > "$TARGET_DIR/REVISION"
-mkdir -p "$SCRIPT_DIR/build/dependency-sources"
-tar --exclude=.git -czf "$SCRIPT_DIR/build/dependency-sources/thtk-$REVISION.tar.gz" -C "$TMP_ROOT" source
 
 if ! "$THDAT" --help >/dev/null 2>&1; then
     if ! file "$THDAT" | grep -q 'ELF'; then

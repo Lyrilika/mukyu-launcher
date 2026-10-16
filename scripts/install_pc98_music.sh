@@ -41,7 +41,7 @@ if [[ -n "$EXT" ]]; then
     sed -i 's|^#if defined(__i386__) \|\| defined (__x86_64__)$|#if (defined(__i386__) \|\| defined (__x86_64__)) \&\& !defined(_WIN32)|' "$X86/mem.c"
     grep -q '!defined(_WIN32)' "$X86/mem.c" || { echo "libx86emu Windows patch failed" >&2; exit 1; }
 fi
-mkdir -p "$TMP_ROOT/obj" "$BIN" "$ROOT/tools/licenses" "$ROOT/build/dependency-sources"
+mkdir -p "$TMP_ROOT/obj" "$BIN" "$ROOT/tools/licenses"
 FM_OBJECTS=()
 for file in opna opnafm opnassg opnassg-sinc-c opnassg-sinc-sse2 opnadrum opnaadpcm; do
     gcc -std=c11 -O3 -flto -I"$FM" -c "$FM/libopna/$file.c" -o "$TMP_ROOT/obj/$file.o"
@@ -66,8 +66,6 @@ install -m 755 "$TMP_ROOT/pmd_render$EXT" "$BIN/pmd_render$EXT"
 install -m 755 "$TMP_ROOT/mdt_render$EXT" "$BIN/mdt_render$EXT"
 install -m 644 "$FM/LICENSE" "$ROOT/tools/licenses/98fmplayer-LICENSE"
 install -m 644 "$X86/LICENSE" "$ROOT/tools/licenses/libx86emu-LICENSE"
-tar --exclude=.git -czf "$ROOT/build/dependency-sources/98fmplayer-$FM_REV.tar.gz" -C "$TMP_ROOT" 98fmplayer
-tar --exclude=.git -czf "$ROOT/build/dependency-sources/libx86emu-$X86_REV${EXT:+-windows}.tar.gz" -C "$TMP_ROOT" libx86emu
 {
     printf '98fmplayer %s\nlibx86emu %s\n' "$FM_REV" "$X86_REV"
     printf 'Build recipe: scripts/install_pc98_music.sh\n'
@@ -75,4 +73,4 @@ tar --exclude=.git -czf "$ROOT/build/dependency-sources/libx86emu-$X86_REV${EXT:
     gcc --version | head -1
     g++ --version | head -1
 } > "$ROOT/tools/pc98/BUILD_INFO.txt"
-echo "Built BSD-licensed PC-98 dependencies and saved matching sources in build/dependency-sources."
+echo "Built BSD-licensed PC-98 helpers."
