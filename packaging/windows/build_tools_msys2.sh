@@ -30,8 +30,6 @@ build_thtk() {
         [[ -f "$TMP_ROOT/thtk/$l" ]] && install -m 0644 "$TMP_ROOT/thtk/$l" "$ROOT/tools/licenses/thtk/$l"
     done
     printf '%s\n' "$rev" > "$target/REVISION"
-    mkdir -p "$ROOT/build/dependency-sources"
-    tar --exclude=.git -czf "$ROOT/build/dependency-sources/thtk-$rev-windows.tar.gz" -C "$TMP_ROOT" thtk
     echo "== thdat.exe -> $bin/thdat.exe"
 }
 
