@@ -75,7 +75,8 @@ License, version 3 or any later version (AGPL-3.0-or-later)**.
 Third-party code, libraries and artwork retain their own copyrights and licenses.
 
 See [third-party notices](tools/licenses/THIRD_PARTY_NOTICES.txt) for credits,
-license locations, upstream source downloads and outstanding redistribution issues.
+license locations and upstream projects. Matching dependency sources are stored
+in [third_party](third_party/) and included in GitHub’s automatic source downloads.
 
 ## Acknowledgements
 
