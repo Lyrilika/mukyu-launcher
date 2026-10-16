@@ -9,23 +9,21 @@ files, sound recordings, cover art, printwork thumbnails, trademarks or other
 third-party artwork. Original copyright and license notices remain applicable.
 The bundled helper executables are not covered by a blanket AGPL declaration.
 
-Sources accompanying releases
-=============================
-The GitHub Actions builders generate platform-specific source archives split
-into numbered Mukyu-*-sources.tar.partNNN files, plus SHA256 checksums and
-reassembly instructions. They are uploaded with the matching AppImage or
-Windows installer to workflow artifacts and tagged releases:
-https://github.com/Lyrilika/mukyu-launcher/releases
+Dependency sources
+==================
+Matching dependency sources and distribution build patches are committed under
+third_party/sources, indexed by third_party/manifest.json:
+https://github.com/Lyrilika/mukyu-launcher/tree/main/third_party
 
-These archives include the launcher's source/build recipes, native helper
-sources, exact Ubuntu or MSYS2 source packages with package-version records,
-and applicable bundled copyleft components. Missing source downloads fail the
-build. Keep every source part accessible with its matching binary. The links
-below identify upstream projects and supplement those release archives.
+Use the same Git tag as the downloaded application. GitHub's automatic source
+ZIP and tar.gz include this directory. The AppImage and Windows installer do
+not contain these dependency source archives, and no separate source release
+assets are needed. The builders verify the source checksums and use the pinned
+runtime packages identified by the manifest. Original licenses remain inside
+the source archives and the packaged distributions' license directories.
 
-Legacy releases built before this source-collection workflow are not covered
-retroactively; their dependency versions and corresponding sources must be
-recovered separately. Third-party licenses remain applicable independently.
+The repository snapshot covers the versions recorded in its manifest; older
+builds with different dependency versions need their own corresponding sources.
 
 Direct runtime components:
 Python / Python Software Foundation and contributors
@@ -88,8 +86,8 @@ thtk / thtk contributors
   Source: https://github.com/myon98/98fmplayer
   Revision: 4fa914e4b2b994cb3ccf92d571a20a7cdf1fe36a.
   The launcher supplies its own command-line adapters, timer integration,
-  WAV rhythm loading and output resampling. The upstream source is retained
-  unchanged in the matching native-dependency source archive.
+  WAV rhythm loading and output resampling. The helper build scripts download
+  the pinned upstream revision without modifying its source files.
 
 Earlier PC-98 implementations used pmdmini, PMDWin (C60), PMD (M. Kajihara / KAJA),
 PPZ8 (Ukky) and FMGEN (cisc). Those inherited PMDWin/FMGEN implementations have
@@ -154,12 +152,12 @@ AppImage / AppImage contributors
   The type2 runtime is MIT; its embedded dependencies retain their licenses.
   Local texts: appimage/ (type2-runtime, libfuse LGPL, squashfuse BSD, musl MIT,
   zstd BSD, zlib and mimalloc MIT). The selected runtime binary's commit and
-  checksum are verified and recorded in the source bundle, with the libfuse
+  checksum are verified and recorded in third_party/manifest.json, with the libfuse
   source and runtime build patches. appimagetool is a build-time tool.
   Sources: https://github.com/AppImage/appimagetool
            https://github.com/AppImage/type2-runtime
-  The exact embedded runtime's license and source must accompany releases as
-  required by that runtime's terms; the packaging tool is not launcher code.
+  Matching runtime and libfuse sources are in third_party/sources/common.
+  The packaging tool is not launcher code.
 
 MSYS2 / MSYS2 and upstream package contributors
   Each runtime package retains its own license, including GTK's transitive
@@ -181,5 +179,5 @@ Inno Setup / Jordan Russell and Martijn Laan
   Review the exact version's license when distributing an installer.
 
 This inventory identifies the direct components and known research sources.
-Runtime package inventories are generated for each build in the source bundle.
+Pinned runtime package inventories are recorded in third_party/manifest.json.
 The distributions' own package notices remain in every build.
