@@ -26,6 +26,32 @@ def relative_path(root, name):
     return path
 
 
+def source_files(record):
+    path = relative_path(ROOT / "third_party", record["path"])
+    if path.is_file():
+        return [path]
+    parts = sorted(path.parent.glob(path.name + ".part*"))
+    expected = [path.with_name(f"{path.name}.part{index:03d}") for index in range(len(parts))]
+    if not parts or parts != expected or any(not part.is_file() for part in parts):
+        raise RuntimeError(f"Missing source archive or incomplete numbered parts: {path}")
+    return [relative_path(ROOT / "third_party", str(part.relative_to(ROOT / "third_party"))) for part in parts]
+
+
+def verify_source(record):
+    paths = source_files(record)
+    size = 0
+    checksum = hashlib.sha256()
+    for path in paths:
+        if path.stat().st_size >= 100 * 1024 * 1024:
+            raise RuntimeError(f"Source file exceeds GitHub's regular-file limit: {path}")
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                size += len(block)
+                checksum.update(block)
+    if size != record["size"] or checksum.hexdigest() != record["sha256"]:
+        raise RuntimeError(f"Missing or changed dependency source: {record['path']}")
+
+
 def catalog():
     data = json.loads(CATALOG.read_text())
     if data.get("schema") != 1:
@@ -47,11 +73,7 @@ def verify(platform):
         if key not in sources or not sources[key]["files"]:
             raise RuntimeError(f"Missing source record: {key}")
         for record in sources[key]["files"]:
-            path = relative_path(ROOT / "third_party", record["path"])
-            if not path.is_file() or path.stat().st_size != record["size"] or digest(path) != record["sha256"]:
-                raise RuntimeError(f"Missing or changed dependency source: {path}")
-            if path.stat().st_size >= 100 * 1024 * 1024:
-                raise RuntimeError(f"Source file exceeds GitHub's regular-file limit: {path}")
+            verify_source(record)
     if platform == "linux":
         for item in (data["appimage_runtime"], data["umu"]):
             path = relative_path(ROOT, item["path"])
@@ -131,8 +153,9 @@ def restore(output):
             target.parent.mkdir(parents=True, exist_ok=True)
             with target.open("wb") as stream:
                 for part in sorted(parts, key=lambda item: item.get("part", 0)):
-                    with relative_path(ROOT / "third_party", part["path"]).open("rb") as chunk:
-                        shutil.copyfileobj(chunk, stream)
+                    for path in source_files(part):
+                        with path.open("rb") as chunk:
+                            shutil.copyfileobj(chunk, stream)
     print(f"Restored source archives and recipes to {output}")
 
 
