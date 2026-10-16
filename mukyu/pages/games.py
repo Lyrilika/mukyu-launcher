@@ -1185,65 +1185,8 @@ def show_running_error(card, title, launch_callback):
     )
 
 
-def create_umu_setup_window(card):
-    root = card.get_root()
-    parent = root if isinstance(root, Gtk.Window) else None
-
-    window = Gtk.Window()
-    window.set_title("Starting GE-Proton")
-    window.set_modal(False)
-    window.set_deletable(False)
-    window.set_resizable(False)
-    if parent is not None:
-        window.set_transient_for(parent)
-
-    box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
-    box.set_margin_start(24)
-    box.set_margin_end(24)
-    box.set_margin_top(20)
-    box.set_margin_bottom(20)
-
-    title = Gtk.Label(label="Starting your game")
-    title.add_css_class("popover-heading")
-    title.set_halign(Gtk.Align.START)
-    box.append(title)
-
-    runtime = Gtk.Label(label="Checking GE-Proton and its runtime")
-    runtime.set_halign(Gtk.Align.START)
-    box.append(runtime)
-
-    progress = Gtk.ProgressBar()
-    progress.set_show_text(True)
-    progress.set_fraction(0)
-    progress.set_text("Preparing…")
-    box.append(progress)
-
-    status = Gtk.Label(label="Preparing…")
-    status.set_halign(Gtk.Align.START)
-    status.add_css_class("running-status")
-    box.append(status)
-
-    window.set_child(box)
-    window.present()
-
-    return window, runtime, progress, status
-
-
-def monitor_umu_setup(process, window, runtime_label, progress_bar, status_label):
-    state = {"finished": False, "determinate": False}
-    parent = window.get_transient_for()
-
-    def pulse():
-        if state["finished"] or not window.get_visible():
-            return False
-        if not state["determinate"]:
-            progress_bar.pulse()
-        return True
-
-    GLib.timeout_add(100, pulse)
-
+def monitor_proton_launch(process, parent):
     def worker():
-        announced = False
         recent = []
         log = _open_launch_log(process.args if isinstance(process.args, list) else [str(process.args)], "ge-proton", getattr(process, "_mukyu_game_key", "?"))
         try:
@@ -1256,49 +1199,18 @@ def monitor_umu_setup(process, window, runtime_label, progress_bar, status_label
                 line = re.sub(r"\x1b\[[0-9;]*m", "", raw).strip()
                 if line:
                     recent.append(line)
-                    recent = recent[-12:]
-                if announced:
-                    continue
-                percent_matches = re.findall(r"(?<!\d)(\d{1,3})%", line)
-                percent = int(percent_matches[-1]) if percent_matches else None
-                finished = "Running '" in line and "using runtime" in line
-                activity = "Downloading runtime…" if "Downloading" in line else "Updating runtime…" if "Updating" in line else None
-                runtime_match = re.search(r"(steamrt[0-9]+|sniper|soldier)", line)
-                runtime_name = runtime_match.group(1) if runtime_match else None
-
-                def update(percent=percent, finished=finished, activity=activity, runtime_name=runtime_name):
-                    if state["finished"]:
-                        return False
-                    if runtime_name:
-                        runtime_label.set_text(f"Runtime: {runtime_name}")
-                    if percent is not None:
-                        state["determinate"] = True
-                        value = min(100, percent)
-                        progress_bar.set_fraction(value / 100.0)
-                        progress_bar.set_text(f"{value}%")
-                    elif activity:
-                        state["determinate"] = False
-                        progress_bar.set_text(activity)
-                    if activity:
-                        status_label.set_text("This may take a few minutes. The game will start automatically.")
-                    if finished:
-                        state["finished"] = True
-                        window.close()
-                    return False
-
-                GLib.idle_add(update)
-                announced = finished
+                    recent = recent[-6:]
             result = process.wait()
         finally:
             if log is not None:
                 log.close()
             process.stdout.close()
 
-        def complete():
-            state["finished"] = True
-            window.close()
-            if result and not getattr(process, "_mukyu_stopping", False):
-                details = "\n".join(recent[-6:])[-2000:]
+        if result and not getattr(process, "_mukyu_stopping", False):
+            def report_error():
+                if getattr(process, "_mukyu_stopping", False):
+                    return False
+                details = "\n".join(recent)[-2000:]
                 show_dialog(
                     parent,
                     "GE-Proton exited with an error",
@@ -1308,9 +1220,9 @@ def monitor_umu_setup(process, window, runtime_label, progress_bar, status_label
                     default=0,
                     cancel=0,
                 )
-            return False
+                return False
 
-        GLib.idle_add(complete)
+            GLib.idle_add(report_error)
 
     threading.Thread(target=worker, daemon=True).start()
 
@@ -1630,24 +1542,20 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
     session_token = os.urandom(8).hex()
     env = host_env(env)
     env[SESSION_ENV_VAR] = session_token
-    setup_window = None
-    setup_widgets = None
-    if runner == "ge-proton":
-        setup_window, runtime_label, progress_bar, status_label = create_umu_setup_window(card)
-        setup_widgets = (setup_window, runtime_label, progress_bar, status_label)
+    monitor_proton = runner == "ge-proton"
     start_time = time.time()
-    log_handle = None if (IS_WINDOWS or setup_window) else _open_launch_log(command, runner, game_key)
+    log_handle = None if (IS_WINDOWS or monitor_proton) else _open_launch_log(command, runner, game_key)
     try:
         process = subprocess.Popen(
             command,
             cwd=game_dir,
             env=env,
             **({} if IS_WINDOWS else {"start_new_session": True}),
-            stdout=subprocess.PIPE if setup_window else log_handle,
-            stderr=subprocess.STDOUT if setup_window else (log_handle if log_handle else None),
-            text=True if setup_window else False,
-            **({"encoding": "utf-8", "errors": "replace"} if setup_window else {}),
-            bufsize=1 if setup_window else -1,
+            stdout=subprocess.PIPE if monitor_proton else log_handle,
+            stderr=subprocess.STDOUT if monitor_proton else (log_handle if log_handle else None),
+            text=True if monitor_proton else False,
+            **({"encoding": "utf-8", "errors": "replace"} if monitor_proton else {}),
+            bufsize=1 if monitor_proton else -1,
         )
     except OSError as exc:
         if log_handle is not None:
@@ -1655,8 +1563,6 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
                 log_handle.write(f"Could not start: {exc}\n".encode())
             except OSError:
                 pass
-        if setup_window is not None:
-            setup_window.close()
         root = card.get_root()
         detail = str(exc)
         if getattr(exc, "winerror", None) == 740:
@@ -1671,16 +1577,18 @@ def launch_game(exe_path, launch_options, runner, game_key, card, title, running
             cancel=0,
         )
         return
-    if log_handle is not None:
-        log_handle.close()
+    finally:
+        if log_handle is not None:
+            log_handle.close()
     if IS_WINDOWS:
         process._mukyu_job = GameJob(process)
     process._mukyu_tree_pids = {process.pid}
     process._mukyu_session = session_token
     process._mukyu_start_time = start_time
     process._mukyu_game_key = game_key
-    if setup_widgets:
-        monitor_umu_setup(process, *setup_widgets)
+    if monitor_proton:
+        root = card.get_root()
+        monitor_proton_launch(process, root if isinstance(root, Gtk.Window) else None)
     show_running_game(running_bar, process, title)
     _set_running_card(card)
 
