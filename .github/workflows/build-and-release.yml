@@ -1,9 +1,9 @@
-name: Build and release Mukyu
+name: Build and release
 'on':
   workflow_dispatch:
     inputs:
       operation:
-        description: Build both platforms, or publish an already successful build
+        description: Build both platforms and publish successful builds
         required: true
         default: build
         type: choice
