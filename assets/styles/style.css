@@ -781,6 +781,10 @@ flowbox.game-library > flowboxchild:selected {
         opacity 0.18s ease, transform 0.14s ease;
 }
 
+.tab-switcher button label {
+    color: inherit;
+}
+
 .tab-switcher button:hover,
 .tab-switcher button:focus-visible {
     background-color: alpha(@app_fg, 0.07);
