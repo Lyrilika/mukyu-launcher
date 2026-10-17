@@ -419,6 +419,11 @@ class ThemeManager:
                 f"@define-color {gtk_name} {palette[ours]};"
                 for gtk_name, ours in GTK_NAMED_COLORS.items()
             ]
+        if not self._palette_is_dark(palette):
+            lines += [
+                "stackswitcher.tab-switcher button { opacity: 1; }",
+                "stackswitcher.tab-switcher button label { color: #000000; }",
+            ]
         return "\n".join(lines) + "\n\n"
 
     def _render_css(self):
