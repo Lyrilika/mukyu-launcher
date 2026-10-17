@@ -717,9 +717,9 @@ class MusicPage:
 
         controls = Gtk.Box(spacing=14)
         controls.set_halign(Gtk.Align.CENTER)
-        self.shuffle_btn = _button(_image("media-playlist-shuffle-symbolic", 22), "mu-toggle")
+        self.shuffle_btn = _button(_image("media-playlist-shuffle-symbolic", 22), "mu-toggle", "mu-shuffle")
         self.shuffle_btn.connect("clicked", self._on_shuffle)
-        self.prev_btn = _button(_image("media-skip-backward-symbolic", 28), "mu-toggle")
+        self.prev_btn = _button(_image("media-skip-backward-symbolic", 28), "mu-toggle", "mu-previous")
         self.prev_btn.connect("clicked", self._on_previous)
 
         self.play_icons = Gtk.Overlay()
@@ -768,10 +768,12 @@ class MusicPage:
         play_holder.add_overlay(self.play_ripple)
         play_holder.add_overlay(self.play_ring)
 
-        self.next_btn = _button(_image("media-skip-forward-symbolic", 28), "mu-toggle")
+        self.next_btn = _button(_image("media-skip-forward-symbolic", 28), "mu-toggle", "mu-next")
         self.next_btn.connect("clicked", self._on_next)
-        self.repeat_btn = _button(_image("media-playlist-repeat-symbolic", 22), "mu-toggle")
+        self.repeat_btn = _button(_image("media-playlist-repeat-symbolic", 22), "mu-toggle", "mu-repeat")
         self.repeat_btn.connect("clicked", self._on_repeat)
+        for button in (self.shuffle_btn, self.prev_btn, self.next_btn, self.repeat_btn):
+            button.connect("clicked", self._on_control_clicked)
         for widget in (self.shuffle_btn, self.prev_btn, play_holder, self.next_btn, self.repeat_btn):
             widget.set_valign(Gtk.Align.CENTER)
             controls.append(widget)
@@ -2247,6 +2249,9 @@ class MusicPage:
                 widget.set_sensitive(False)
             self.progress.set_sensitive(False)
 
+    def _on_control_clicked(self, button):
+        self._retrigger(button, "mu-control-pulse")
+
     def _on_shuffle(self, button):
         if self.mode != "game":
             return
@@ -2260,7 +2265,7 @@ class MusicPage:
     def _on_repeat(self, button):
         if self.mode != "game":
             return
-        self._set_repeat_mode({0: 2, 2: 1, 1: 0}[self._repeat_mode])
+        self._set_repeat_mode(0 if self._repeat_mode else 2)
 
     def _set_repeat_mode(self, mode):
         if self.mode != "game" or mode == self._repeat_mode:

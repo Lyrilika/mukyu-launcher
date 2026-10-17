@@ -1510,12 +1510,45 @@ window.dialog.message {
 .mu-toggle {
     min-width: 46px;
     min-height: 46px;
-    border-radius: 999px;
+    border-radius: 23px;
     background-color: transparent;
     color: @mu_text_dim;
+    transition: background-color 180ms ease, color 180ms ease,
+        border-radius 260ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
 }
-.mu-toggle:hover { background-color: alpha(@mu_primary, 0.14); }
+.mu-toggle:hover {
+    background-color: alpha(@mu_primary, 0.14);
+    color: @mu_primary;
+    border-radius: 16px;
+}
+.mu-toggle:hover image { transform: scale(1.12); }
+.mu-previous:hover image { transform: translateX(-2px) scale(1.12); }
+.mu-next:hover image { transform: translateX(2px) scale(1.12); }
+.mu-shuffle:hover image { transform: rotate(-12deg) scale(1.12); }
+.mu-repeat:hover image { transform: rotate(24deg) scale(1.12); }
+.mu-toggle:active {
+    background-color: alpha(@mu_primary, 0.26);
+    border-radius: 12px;
+    transition-duration: 70ms;
+}
+.mu-toggle:active image { transform: scale(0.82); transition-duration: 70ms; }
 .mu-toggle.mu-active { background-color: @mu_primary_container; color: @mu_on_primary_container; }
+.mu-toggle.mu-active:hover { background-color: mix(@mu_primary_container, @mu_primary, 0.14); }
+.mu-toggle.mu-active:active { background-color: mix(@mu_primary_container, @mu_primary, 0.28); }
+@keyframes mu-control-pulse-a {
+    from { box-shadow: 0 0 0 0 alpha(@mu_primary, 0.32); }
+    to { box-shadow: 0 0 0 10px alpha(@mu_primary, 0); }
+}
+@keyframes mu-control-pulse-b {
+    from { box-shadow: 0 0 0 0 alpha(@mu_primary, 0.32); }
+    to { box-shadow: 0 0 0 10px alpha(@mu_primary, 0); }
+}
+.mu-control-pulse-a, .mu-control-pulse-b {
+    animation-duration: 360ms;
+    animation-timing-function: ease-out;
+}
+.mu-control-pulse-a { animation-name: mu-control-pulse-a; }
+.mu-control-pulse-b { animation-name: mu-control-pulse-b; }
 
 .mu-play-holder {
     min-width: 76px;
