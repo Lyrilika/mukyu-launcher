@@ -51,7 +51,7 @@ DESCRIPTIONS = {'Touhou Sangetsusei ~ Eastern and Little Nature Deity': 'The sto
 'Touhou Gumonshiki ~ Perfect Memento in Strict Sense': "An encyclopedia written by Hieda no Akyuu documenting Gensokyo's people, youkai, and history.",
 'The Grimoire of Marisa': 'spell card album of many characters with screen shots of that spell card from the games and comments written in the perspective of Marisa Kirisame.',
 'Touhou Gumonkuju ~ Symposium of Post-mysticism': 'A collection of discussions covering incidents, history, and supernatural topics.',
-'Alternative Facts in Eastern Utopia': "Aya Shameimaru's attempt to create a tabloid magazine in the style of those from the Outside World, which she eventually cancelled and left unpublished.[2] The book features in-universe articles, interviews and advertisements similar to the earlier Bohemian Archive in Japanese Red, but in a significantly more chaotic and haphazard format.",
+'Alternative Facts in Eastern Utopia': "Aya Shameimaru's attempt to create a tabloid magazine in the style of those from the Outside World, which she eventually cancelled and left unpublished. The book features in-universe articles, interviews and advertisements similar to the earlier Bohemian Archive in Japanese Red, but in a significantly more chaotic and haphazard format.",
 'The Grimoire of Usami': 'features a large selection of Spell Cards which are commented and judged by various characters during a firework festival.',
 'Strange Creators of Outer World': 'An official Touhou magazine supervised by ZUN featuring interviews, creator spotlights, comics, and information about Touhou works.',
 'Strange Articles of the Outer World': 'An official online magazine covering Touhou news, interviews, reviews, and related articles.',
