@@ -128,7 +128,6 @@ in [third_party](third_party/) and included in GitHub’s automatic source downl
 Mukyu Launcher builds on the work of open-source projects and services, such as:
 
 - [umu-launcher](https://github.com/Open-Wine-Components/umu-launcher)
-- [GE-Proton](https://github.com/GloriousEggroll/proton-ge-custom)
 - [thtk](https://github.com/thpatch/thtk)
 - [98fmplayer](https://github.com/myon98/98fmplayer)
 - [libx86emu](https://github.com/wfeldt/libx86emu)
