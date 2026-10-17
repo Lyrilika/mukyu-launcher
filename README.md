@@ -6,7 +6,6 @@
 
 <p align="center">
   <a href="../../releases/latest"><img alt="Latest release" src="https://flat.badgen.net/github/release/Lyrilika/mukyu-launcher/latest?color=d96bc8&label=release"></a>
-  <a href="../../releases"><img alt="Downloads" src="https://flat.badgen.net/github/assets-dl/Lyrilika/mukyu-launcher/total?color=d96bc8&label=downloads"></a>
   <img alt="Platforms" src="https://img.shields.io/badge/platform-Linux%20%7C%20Windows-d96bc8?style=flat-square">
 </p>
 
