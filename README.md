@@ -16,6 +16,52 @@
 
 Mukyu Launcher brings your Touhou collection and related media into one app: launch your games, listen to [Gensokyo Radio](https://gensokyoradio.net/) or the music from your own game files, and download and read official Touhou print works.
 
+
+Screenshots:
+
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/game-library.jpg"><img src=".github/screenshots/game-library.jpg" alt="Game library showing Touhou mainline games and spin-offs" width="100%"></a>
+      <br><b>Game library</b>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/game-settings.jpg"><img src=".github/screenshots/game-settings.jpg" alt="Windows game settings and PC-98 settings side by side, with GE-Proton launch options and DOSBox-X controls" width="100%"></a>
+      <br><b>Per-game settings</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/game-music.jpg"><img src=".github/screenshots/game-music.jpg" alt="Game BGM player with album art, track list and English or Japanese titles" width="100%"></a>
+      <br><b>Game soundtracks</b>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/gensokyo-radio.jpg"><img src=".github/screenshots/gensokyo-radio.jpg" alt="Gensokyo Radio player showing live song information and album art" width="100%"></a>
+      <br><b>Gensokyo Radio</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/printworks-library.jpg"><img src=".github/screenshots/printworks-library.jpg" alt="Print Works library with book covers, descriptions and reading controls" width="100%"></a>
+      <br><b>Print Works library</b>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/printworks-reader.jpg"><img src=".github/screenshots/printworks-reader.jpg" alt="Built-in fullscreen reader displaying Eastern and Little Nature Deity" width="100%"></a>
+      <br><b>Built-in reader</b>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/theme-settings.jpg"><img src=".github/screenshots/theme-settings.jpg" alt="Theme settings with dark and light modes, desktop theme integration and accent colors" width="100%"></a>
+      <br><b>Theming</b>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href=".github/screenshots/desktop-media.jpg"><img src=".github/screenshots/desktop-media.jpg" alt="Hyprland desktop media widget displaying the current game soundtrack and playback controls" width="100%"></a>
+      <br><b>Media control widget support</b>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 - **Game library** — Launch every mainline and spin-off game from one library. Wine, GE-Proton and DOSBox-X are handled for you, with per-game launch options and playtime tracking.
