@@ -5,8 +5,8 @@
 <h1 align="center">Mukyu Launcher</h1>
 
 <p align="center">
-  <a href="../../releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/Lyrilika/mukyu-launcher?style=flat-square&label=release&color=d96bc8"></a>
-  <a href="../../releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/Lyrilika/mukyu-launcher/total?style=flat-square&color=d96bc8"></a>
+  <a href="../../releases/latest"><img alt="Latest release" src="https://flat.badgen.net/github/release/Lyrilika/mukyu-launcher/latest?color=d96bc8&label=release"></a>
+  <a href="../../releases"><img alt="Downloads" src="https://flat.badgen.net/github/assets-dl/Lyrilika/mukyu-launcher/total?color=d96bc8&label=downloads"></a>
   <img alt="Platforms" src="https://img.shields.io/badge/platform-Linux%20%7C%20Windows-d96bc8?style=flat-square">
 </p>
 
