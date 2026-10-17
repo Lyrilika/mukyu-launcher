@@ -1228,7 +1228,9 @@ class MusicPage:
 
     def _on_progress_change_value(self, scale, _scroll, value):
 
-        if self.mode != "game" or self._selected_track is None or not self.playing:
+        if self.mode != "game" or self._selected_track is None or self.player is None:
+            return True
+        if self.player.get_state(0)[1] not in (Gst.State.PAUSED, Gst.State.PLAYING):
             return True
         duration = max(self._selected_track.duration, 0.01)
         value = min(max(value, 0.0), duration)
