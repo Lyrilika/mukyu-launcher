@@ -14,11 +14,11 @@
 #include <mutex>
 #include <string>
 
-using namespace winrt;
-using namespace Windows::Foundation;
-using namespace Windows::Media;
-using namespace Windows::Storage;
-using namespace Windows::Storage::Streams;
+using namespace ::winrt;
+using namespace ::winrt::Windows::Foundation;
+using namespace ::winrt::Windows::Media;
+using namespace ::winrt::Windows::Storage;
+using namespace ::winrt::Windows::Storage::Streams;
 
 struct Session {
     SystemMediaTransportControls controls{nullptr};
