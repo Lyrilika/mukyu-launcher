@@ -76,7 +76,7 @@ make it executable and run it.
 
 **Requirements**
 
-- glibc 2.35 or newer, a Wayland or X11 session, ALSA/PipeWire/PulseAudio audio.
+- glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, Arch and other bleeding edge distros), ```getconf GNU_LIBC_VERSION``` to check glibc version
 - Optional: Wine, DOSBox-X (both can also be set up from the game settings).
 
 #### Build from source
