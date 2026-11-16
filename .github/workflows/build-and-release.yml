@@ -184,3 +184,13 @@ jobs:
         gh release create "$TAG" --title "$TAG" --draft "${notes[@]}"
         gh release upload "$TAG" release/Mukyu_Launcher-x86_64.AppImage release/Mukyu_Launcher-x86_64.AppImage.zsync release/Mukyu_Launcher_Setup.exe
         gh release edit "$TAG" --draft=false
+    - name: Refresh README badges
+      continue-on-error: true
+      env:
+        GH_REPO: ${{ github.repository }}
+      run: |
+        sleep 10
+        curl -fsSL "https://github.com/$GH_REPO" \
+          | grep -oE 'https://camo\.githubusercontent\.com/[0-9a-f]+/[0-9a-f]+' \
+          | sort -u \
+          | while read -r url; do curl -s -o /dev/null -X PURGE "$url" || true; done
