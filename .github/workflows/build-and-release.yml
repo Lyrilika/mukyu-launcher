@@ -22,9 +22,6 @@ name: Build and release
         description: 'Publish only: release description (Markdown)'
         required: false
         type: string
-  push:
-    branches: [main]
-  pull_request:
 permissions:
   contents: read
 env:
