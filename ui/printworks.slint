@@ -1,0 +1,218 @@
+import { Theme, Ease, Icons } from "theme.slint";
+import { Ico, Btn, ScrollBox, WrapText } from "widgets.slint";
+
+export struct PrintWorkData {
+    name: string,
+    title: string,
+    ongoing: bool,
+    cover: image,
+    loaded: bool,
+    year: string,
+    author: string,
+    chapters: string,
+    description: string,
+    artist: string,
+    downloaded: bool,
+}
+
+export global PrintApi {
+    in-out property <[PrintWorkData]> items;
+    in-out property <bool> appeared: false;
+    callback read(int);
+    callback delete(int);
+}
+
+component Chip inherits Rectangle {
+    in property <string> text;
+    in property <bool> hot;
+    height: label.preferred-height + 4px;
+    width: label.preferred-width + 20px;
+    border-radius: self.height / 2;
+    background: hot ? Theme.alpha(Theme.accent, 0.22) : Theme.alpha(Theme.fg, 0.08);
+    animate background { duration: 200ms; }
+    label := Text {
+        text: root.text;
+        color: Theme.fg;
+        font-size: Theme.base * 0.85;
+    }
+}
+
+component PrintCard inherits Rectangle {
+    in property <PrintWorkData> data;
+    in property <int> index;
+    callback read();
+    callback delete();
+    property <bool> hot: ta.has-hover;
+    property <bool> shown: PrintApi.appeared;
+    min-height: 332px;
+    preferred-height: max(332px, info.preferred-height + 32px);
+    opacity: shown ? 1 : 0;
+    property <length> rise: shown ? 0px : 18px;
+    animate opacity { duration: 450ms; delay: 60ms + min(index, 6) * 70ms; easing: ease; }
+    animate rise { duration: 420ms; delay: 60ms + min(index, 6) * 70ms; easing: Ease.standard; }
+
+    ta := TouchArea { }
+    card := Rectangle {
+        y: root.rise;
+        border-radius: 16px;
+        border-width: 1px;
+        border-color: root.hot ? Theme.alpha(Theme.accent, 0.55) : Theme.alpha(Theme.fg, 0.07);
+        background: root.hot ? Theme.alpha(Theme.fg, 0.07) : Theme.alpha(Theme.fg, 0.035);
+        animate background, border-color { duration: 200ms; }
+
+        cover := Rectangle {
+            x: 16px;
+            y: 16px;
+            width: 220px;
+            height: 300px;
+            border-radius: 10px;
+            drop-shadow-blur: 20px;
+            drop-shadow-offset-y: 8px;
+            drop-shadow-color: #00000073;
+            background: Theme.alpha(Theme.fg, 0.05);
+            transform-scale: root.hot ? 1.025 : 1;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate transform-scale { duration: 380ms; easing: Ease.standard; }
+            Rectangle {
+                border-radius: 10px;
+                clip: true;
+                Image {
+                    width: parent.width;
+                    height: parent.height;
+                    source: data.cover;
+                    image-fit: ImageFit.cover;
+                    opacity: data.loaded ? 1 : 0;
+                    animate opacity { duration: 300ms; }
+                }
+            }
+        }
+
+        info := VerticalLayout {
+            x: cover.x + cover.width + 18px;
+            y: 16px;
+            width: parent.width - self.x - 16px;
+            height: parent.height - 32px;
+            spacing: 8px;
+            HorizontalLayout {
+                spacing: 10px;
+                Text {
+                    text: data.title;
+                    font-size: Theme.base * 1.2;
+                    font-weight: 700;
+                    color: Theme.fg;
+                    wrap: word-wrap;
+                    horizontal-stretch: 1;
+                }
+                if data.ongoing: Rectangle {
+                    width: ongoing.preferred-width + 20px;
+                    height: ongoing.preferred-height + 2px;
+                    border-radius: self.height / 2;
+                    background: #ff55551f;
+                    border-width: 1px;
+                    border-color: #ff555573;
+                    ongoing := Text {
+                        text: "Ongoing";
+                        color: Theme.danger;
+                        font-weight: 700;
+                        font-size: Theme.base * 0.85;
+                    }
+                }
+            }
+            HorizontalLayout {
+                spacing: 6px;
+                alignment: start;
+                Chip { text: data.year; hot: root.hot; }
+                Chip { text: "by " + data.author; hot: root.hot; }
+                if data.chapters != "": Chip { text: "Chapters: " + data.chapters; hot: root.hot; }
+            }
+            WrapText {
+                text: data.description;
+                ink: Theme.alpha(Theme.fg, 0.8);
+                font-size: Theme.base;
+            }
+            WrapText {
+                text: "Art  ·  " + data.artist;
+                ink: Theme.alpha(Theme.fg, 0.65);
+                font-size: Theme.base;
+            }
+            Rectangle { vertical-stretch: 1; }
+            HorizontalLayout {
+                spacing: 8px;
+                alignment: start;
+                Btn {
+                    text: "Read";
+                    h: 32px;
+                    pad: 22px;
+                    radius: 16px;
+                    weight: 500;
+                    bg: transparent;
+                    bg-hover: Theme.accent;
+                    bg-pressed: Theme.alpha(Theme.accent, 0.75);
+                    fg: Theme.fg;
+                    fg-hover: Theme.on-accent;
+                    border: Theme.alpha(Theme.fg, 0.25);
+                    border-hover: Theme.accent;
+                    pressed-scale: 0.95;
+                    clicked => { root.read(); }
+                }
+                if data.downloaded: trash := Rectangle {
+                    y: (parent.height - self.height) / 2;
+                    width: 34px;
+                    height: 26px;
+                    border-radius: 13px;
+                    border-width: 1px;
+                    border-color: tta.has-hover ? #ff55558c : Theme.alpha(Theme.fg, 0.18);
+                    background: tta.has-hover ? #ff55551f : transparent;
+                    opacity: tta.has-hover ? 1 : 0.6;
+                    transform-scale: tta.pressed ? 0.9 : 1;
+                    animate border-color, background, opacity { duration: 180ms; }
+                    animate transform-scale { duration: 160ms; }
+                    Ico {
+                        source: Icons.trash;
+                        size: 14px;
+                        color: tta.has-hover ? Theme.danger : Theme.fg;
+                    }
+                    tta := TouchArea {
+                        mouse-cursor: pointer;
+                        clicked => { root.delete(); }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component PrintWorksPage inherits Rectangle {
+    background: Theme.bg;
+    animate background { duration: 300ms; }
+    property <length> gap: 14px;
+    header := Text {
+        y: 14px;
+        width: root.width;
+        horizontal-alignment: center;
+        text: "Print Works";
+        font-size: Theme.base * 1.45;
+        font-weight: 700;
+        color: Theme.fg;
+    }
+    ScrollBox {
+        y: header.y + header.preferred-height + 10px;
+        height: root.height - self.y;
+        content-height: col.preferred-height;
+        col := VerticalLayout {
+            width: root.width;
+            padding-left: 18px;
+            padding-right: 18px;
+            padding-top: 7px;
+            padding-bottom: 20px;
+            spacing: root.gap;
+            alignment: start;
+            for item[i] in PrintApi.items: PrintCard {
+                data: item;
+                index: i;
+                read => { PrintApi.read(i); }
+                delete => { PrintApi.delete(i); }
+            }
+        }
+    }
+}

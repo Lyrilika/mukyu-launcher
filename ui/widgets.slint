@@ -1,0 +1,553 @@
+import { Theme, Ease, Icons } from "theme.slint";
+
+export component Ico inherits Image {
+    in property <color> color: Theme.fg;
+    in property <length> size: 18px;
+    width: size;
+    height: size;
+    colorize: color;
+    image-fit: ImageFit.contain;
+    image-rendering: smooth;
+}
+
+export component Btn inherits Rectangle {
+    in property <string> text;
+    in property <image> icon;
+    in property <bool> has-icon: false;
+    in property <length> icon-size: 16px;
+    in property <bool> enabled: true;
+    in property <color> bg: Theme.alpha(Theme.accent, 0.14);
+    in property <color> bg-hover: Theme.alpha(Theme.accent, 0.26);
+    in property <color> bg-pressed: bg-hover;
+    in property <color> fg: Theme.fg;
+    in property <color> fg-hover: fg;
+    in property <color> border: transparent;
+    in property <color> border-hover: border;
+    in property <length> radius: 10px;
+    in property <length> radius-pressed: radius;
+    in property <float> pressed-scale: 0.96;
+    in property <length> h: 36px;
+    in property <length> pad: 14px;
+    in property <length> font-size: Theme.base;
+    in property <int> weight: 600;
+    in property <float> disabled-opacity: 0.5;
+    in property <TextHorizontalAlignment> align: center;
+    callback clicked();
+    out property <bool> hovered: ta.has-hover && enabled;
+    out property <bool> pressed: ta.pressed && enabled;
+
+    min-height: h;
+    preferred-width: lay.preferred-width;
+    min-width: min(lay.preferred-width, 2 * pad + 32px);
+    horizontal-stretch: 0;
+    border-radius: pressed ? radius-pressed : radius;
+    background: pressed ? bg-pressed : hovered ? bg-hover : bg;
+    border-width: border == transparent && border-hover == transparent ? 0px : 1px;
+    border-color: hovered ? border-hover : border;
+    opacity: enabled ? 1.0 : disabled-opacity;
+    transform-scale: pressed ? pressed-scale : 1.0;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate background, border-color { duration: 180ms; easing: ease; }
+    animate border-radius { duration: 220ms; easing: ease; }
+    animate transform-scale { duration: 240ms; easing: Ease.spring; }
+    animate opacity { duration: 160ms; }
+
+    lay := HorizontalLayout {
+        padding-left: pad;
+        padding-right: pad;
+        spacing: 8px;
+        alignment: align == TextHorizontalAlignment.center ? LayoutAlignment.center : LayoutAlignment.start;
+        if has-icon: Ico {
+            source: icon;
+            size: icon-size;
+            color: hovered ? fg-hover : fg;
+            y: (parent.height - self.height) / 2;
+        }
+        if text != "": Text {
+            min-width: 0px;
+            text: root.text;
+            color: hovered ? fg-hover : fg;
+            font-size: root.font-size;
+            font-weight: weight;
+            vertical-alignment: center;
+            horizontal-alignment: align;
+            overflow: elide;
+            animate color { duration: 180ms; }
+        }
+        @children
+    }
+
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: root.enabled ? pointer : default;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component IconBtn inherits Rectangle {
+    in property <image> icon;
+    in property <length> size: 36px;
+    in property <length> icon-size: 18px;
+    in property <color> fg: Theme.fg;
+    in property <color> fg-hover: fg;
+    in property <color> bg: transparent;
+    in property <color> bg-hover: Theme.alpha(Theme.fg, 0.09);
+    in property <length> radius: 8px;
+    in property <bool> enabled: true;
+    in property <bool> checked: false;
+    in property <color> bg-checked: Theme.alpha(Theme.accent, 0.22);
+    in property <color> fg-checked: Theme.accent;
+    callback clicked();
+    out property <bool> hovered: ta.has-hover;
+    width: size;
+    height: size;
+    border-radius: radius;
+    background: checked ? bg-checked : (ta.has-hover && enabled) ? bg-hover : bg;
+    opacity: enabled ? 1 : 0.3;
+    transform-scale: ta.pressed && enabled ? 0.9 : 1;
+    animate background { duration: 140ms; }
+    animate transform-scale { duration: 160ms; easing: Ease.spring; }
+    Ico {
+        source: icon;
+        size: icon-size;
+        color: checked ? fg-checked : ta.has-hover ? fg-hover : fg;
+    }
+    ta := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+export component Switch inherits Rectangle {
+    in-out property <bool> checked;
+    in property <bool> enabled: true;
+    callback toggled(bool);
+    width: 42px;
+    height: 24px;
+    border-radius: 12px;
+    background: checked ? Theme.accent : Theme.alpha(Theme.fg, 0.18);
+    animate background { duration: 160ms; }
+    knob := Rectangle {
+        width: 18px;
+        height: 18px;
+        y: 3px;
+        x: root.checked ? root.width - self.width - 3px : 3px;
+        border-radius: 9px;
+        background: root.checked ? Theme.on-accent : Theme.fg-dim;
+        animate x { duration: 220ms; easing: Ease.soft-spring; }
+        animate background { duration: 160ms; }
+    }
+    TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: pointer;
+        clicked => {
+            root.checked = !root.checked;
+            root.toggled(root.checked);
+        }
+    }
+}
+
+export component Field inherits Rectangle {
+    in-out property <string> text;
+    in property <string> placeholder;
+    in property <length> h: 36px;
+    in property <length> radius: 10px;
+    in property <bool> mono: false;
+    in property <color> bg: Theme.alpha(Theme.fg, 0.07);
+    in property <color> bg-focus: Theme.alpha(Theme.accent, 0.10);
+    in property <bool> error: false;
+    in property <length> font-size: Theme.base;
+    callback accepted(string);
+    callback edited(string);
+    out property <bool> has-focus: input.has-focus;
+    public function focus-input() { input.focus(); }
+    public function select-all() { input.select-all(); }
+    height: h;
+    border-radius: radius;
+    background: input.has-focus ? bg-focus : bg;
+    border-width: error ? 1px : 0px;
+    border-color: Theme.danger-text;
+    animate background { duration: 180ms; }
+    ring := Rectangle {
+        border-radius: root.radius;
+        border-width: 2px;
+        border-color: Theme.accent;
+        opacity: input.has-focus ? 1 : 0;
+        animate opacity { duration: 180ms; }
+    }
+    Text {
+        x: 10px;
+        width: parent.width - 20px;
+        text: root.placeholder;
+        visible: input.text == "";
+        color: Theme.alpha(Theme.fg, 0.32);
+        font-italic: true;
+        font-size: root.font-size;
+        vertical-alignment: center;
+        overflow: elide;
+    }
+    input := TextInput {
+        x: 10px;
+        width: parent.width - 20px;
+        text <=> root.text;
+        color: Theme.fg;
+        font-size: root.font-size;
+        font-family: mono ? "monospace" : "";
+        vertical-alignment: center;
+        single-line: true;
+        selection-background-color: Theme.alpha(Theme.accent, 0.45);
+        selection-foreground-color: Theme.fg;
+        accepted => { root.accepted(self.text); }
+        edited => { root.edited(self.text); }
+    }
+}
+
+export component ProgressTrack inherits Rectangle {
+    in property <float> value;
+    in property <bool> pulse: false;
+    in property <color> track: Theme.alpha(Theme.fg, 0.10);
+    in property <color> fill: Theme.accent;
+    height: 6px;
+    border-radius: 3px;
+    background: track;
+    clip: true;
+    property <float> shown: max(0, min(1, value));
+    animate shown { duration: 240ms; easing: ease-out; }
+    Rectangle {
+        x: pulse ? (parent.width + self.width) * mod(animation-tick() / 1400ms, 1.0) - self.width : 0;
+        width: pulse ? parent.width * 0.3 : parent.width * root.shown;
+        height: parent.height;
+        border-radius: 3px;
+        background: root.fill;
+    }
+}
+
+export component Spinner inherits Rectangle {
+    in property <color> fg: white;
+    in property <length> size: 48px;
+    in property <length> thickness: 4px;
+    in property <bool> running: true;
+    width: size;
+    height: size;
+    Rectangle {
+        border-radius: self.width / 2;
+        border-width: root.thickness;
+        border-color: root.fg.with-alpha(0.18);
+    }
+    Path {
+        width: root.size;
+        height: root.size;
+        viewbox-width: 100;
+        viewbox-height: 100;
+        stroke: root.fg;
+        stroke-width: root.thickness;
+        stroke-line-cap: round;
+        commands: "M 50 4 A 46 46 0 0 1 96 50";
+        transform-rotation: root.running ? mod(animation-tick() / 900ms, 1.0) * 360deg : 0deg;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+    }
+}
+
+export component Marquee inherits Rectangle {
+    in property <string> text;
+    in property <color> fg: Theme.fg;
+    in property <length> font-size: Theme.base;
+    in property <int> weight: 400;
+    in property <bool> active: false;
+    in property <TextHorizontalAlignment> align: left;
+    property <string> gap: "      ·      ";
+    property <length> text-w: probe.preferred-width;
+    property <bool> overflowing: text-w > root.width + 0.5px;
+    property <bool> running: active && overflowing;
+    property <duration> started: 0ms;
+    property <length> period: probe2.preferred-width;
+    height: probe.preferred-height;
+    min-width: 0px;
+    preferred-width: 0px;
+    horizontal-stretch: 1;
+    clip: true;
+    changed running => {
+        started = animation-tick();
+    }
+    probe := Text {
+        visible: false;
+        text: root.text;
+        font-size: root.font-size;
+        font-weight: root.weight;
+    }
+    probe2 := Text {
+        visible: false;
+        text: root.text + root.gap;
+        font-size: root.font-size;
+        font-weight: root.weight;
+    }
+    if !running: Text {
+        width: root.width;
+        text: root.text;
+        color: root.fg;
+        font-size: root.font-size;
+        font-weight: root.weight;
+        horizontal-alignment: root.align;
+        overflow: elide;
+        animate color { duration: 500ms; }
+    }
+    if running: Text {
+        property <float> elapsed: max(0, (animation-tick() - root.started) / 1s - 0.9);
+        x: -1px * mod(elapsed * 30, root.period / 1px);
+        width: self.preferred-width;
+        text: root.text + root.gap + root.text;
+        color: root.fg;
+        font-size: root.font-size;
+        font-weight: root.weight;
+    }
+}
+
+export struct MenuItem {
+    text: string,
+    enabled: bool,
+}
+
+export component Dropdown inherits Rectangle {
+    in property <[MenuItem]> items;
+    in-out property <int> current: 0;
+    in property <length> h: 38px;
+    in property <length> radius: h / 2;
+    in property <color> bg: Theme.mu-secondary-container;
+    in property <color> fg: Theme.mu-on-primary-container;
+    in property <color> hover-tint: Theme.alpha(Theme.mu-primary, 0.10);
+    in property <color> popup-bg: Theme.mu-surface-high;
+    in property <color> popup-fg: Theme.mu-text;
+    in property <color> popup-selected: Theme.mu-secondary-container;
+    in property <color> popup-selected-fg: Theme.mu-on-primary-container;
+    in property <color> popup-hover: Theme.alpha(Theme.mu-primary, 0.10);
+    in property <bool> centered: true;
+    in property <length> font-size: Theme.base;
+    in property <length> popup-radius: 22px;
+    in property <length> row-radius: 20px;
+    in property <length> min-popup-width: 200px;
+    callback selected(int);
+    property <bool> open: false;
+    property <int> pending: -1;
+    changed pending => {
+        if root.pending >= 0 {
+            root.selected(root.pending);
+            root.pending = -1;
+        }
+    }
+    height: h;
+    border-radius: radius;
+    background: bg;
+    animate background { duration: 300ms; }
+    Rectangle {
+        border-radius: root.radius;
+        background: ta.pressed || root.open ? Theme.alpha(Theme.mu-primary, 0.16) : ta.has-hover ? root.hover-tint : transparent;
+        animate background { duration: 200ms; }
+    }
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 14px;
+        spacing: 8px;
+        if centered: Rectangle { width: 16px; }
+        Text {
+            text: root.current >= 0 && root.current < root.items.length ? root.items[root.current].text : "";
+            color: root.fg;
+            font-weight: 700;
+            font-size: root.font-size;
+            vertical-alignment: center;
+            horizontal-alignment: root.centered ? center : left;
+            overflow: elide;
+            animate color { duration: 300ms; }
+        }
+        Ico {
+            y: (parent.height - self.height) / 2;
+            source: Icons.chevron-down;
+            size: 16px;
+            color: root.fg;
+            opacity: 0.8;
+            transform-rotation: root.open ? 180deg : 0deg;
+            animate transform-rotation { duration: 220ms; easing: cubic-bezier(0.2, 0, 0, 1); }
+        }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => {
+            root.open = true;
+            popup.show();
+        }
+    }
+    popup := PopupWindow {
+        x: 0;
+        y: root.height + 6px;
+        width: max(root.min-popup-width, root.width);
+        close-policy: close-on-click-outside;
+        forward-focus: pfs;
+        property <bool> reveal: false;
+        init => { reveal = true; }
+        pfs := FocusScope {
+            focus-changed-event => { root.open = self.has-focus; }
+            key-pressed(e) => {
+                if e.text == Key.Escape { popup.close(); return accept; }
+                reject
+            }
+            Rectangle {
+                border-radius: root.popup-radius;
+                background: root.popup-bg;
+                border-width: 1px;
+                border-color: Theme.alpha(root.popup-fg, 0.10);
+                drop-shadow-blur: 24px;
+                drop-shadow-offset-y: 10px;
+                drop-shadow-color: #00000057;
+                opacity: popup.reveal ? 1 : 0;
+                transform-scale: popup.reveal ? 1 : 0.97;
+                transform-origin: { x: self.width / 2, y: 0 };
+                animate opacity, transform-scale { duration: 240ms; easing: Ease.emphasized; }
+                VerticalLayout {
+                    padding: 6px;
+                    spacing: 4px;
+                    for item[i] in root.items: Rectangle {
+                        height: max(40px, label.preferred-height + 12px);
+                        border-radius: root.row-radius;
+                        background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
+                        animate background { duration: 150ms; }
+                        label := Text {
+                            x: 12px;
+                            width: parent.width - 24px;
+                            text: item.text;
+                            color: !item.enabled ? Theme.alpha(root.popup-fg, 0.6) : i == root.current ? root.popup-selected-fg : root.popup-fg;
+                            font-size: item.enabled ? root.font-size : root.font-size * 0.92;
+                            font-weight: item.enabled ? 700 : 500;
+                            horizontal-alignment: root.centered ? center : left;
+                            vertical-alignment: center;
+                            wrap: word-wrap;
+                        }
+                        rta := TouchArea {
+                            enabled: item.enabled;
+                            mouse-cursor: item.enabled ? pointer : default;
+                            clicked => {
+                                root.current = i;
+                                root.pending = i;
+                                root.open = false;
+                                popup.close();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+export component ScrollBox inherits Rectangle {
+    in property <length> content-height;
+    in-out property <length> offset: 0px;
+    out property <length> max-offset: max(0px, content-height - self.height);
+    in property <color> bar-color: Theme.fg;
+    property <bool> dragging: false;
+    property <length> drag-start-offset;
+    clip: true;
+
+    public function scroll-to(y: length) {
+        root.offset = max(0px, min(root.max-offset, y));
+    }
+
+    changed max-offset => {
+        if root.offset > root.max-offset { root.offset = root.max-offset; }
+    }
+    property <bool> smooth: false;
+    animate offset { duration: root.dragging || !root.smooth ? 0ms : 160ms; easing: ease-out; }
+
+    wheel := TouchArea {
+        scroll-event(e) => {
+            if root.max-offset <= 0 { return reject; }
+            if abs(e.delta-y) >= 59px && Math.mod(Math.round(abs(e.delta-y) / 1px), 60) == 0 {
+                root.smooth = true;
+                root.offset = max(0px, min(root.max-offset, root.offset - e.delta-y * 2.2));
+            } else {
+                root.smooth = false;
+                root.offset = max(0px, min(root.max-offset, root.offset - e.delta-y * 1.4));
+            }
+            accept
+        }
+        Rectangle {
+            x: 0;
+            y: -root.offset;
+            width: root.width;
+            height: max(root.height, root.content-height);
+            @children
+        }
+    }
+    bar := Rectangle {
+        property <float> ratio: root.height / max(1px, root.content-height);
+        visible: root.max-offset > 0;
+        x: root.width - self.width - 3px;
+        width: bta.has-hover || root.dragging ? 8px : 5px;
+        height: max(32px, root.height * ratio);
+        y: root.max-offset > 0 ? (root.height - self.height) * (root.offset / root.max-offset) : 0;
+        border-radius: self.width / 2;
+        background: Theme.alpha(root.bar-color, bta.has-hover || root.dragging ? 0.45 : (wheel.has-hover ? 0.22 : 0.0));
+        animate background, width { duration: 200ms; }
+        bta := TouchArea {
+            mouse-cursor: default;
+            pointer-event(e) => {
+                if e.kind == PointerEventKind.down {
+                    root.dragging = true;
+                    root.drag-start-offset = root.offset;
+                } else if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
+                    root.dragging = false;
+                }
+            }
+            moved => {
+                if root.dragging {
+                    root.offset = max(0px, min(root.max-offset,
+                        root.drag-start-offset + (self.mouse-y - self.pressed-y) * root.max-offset / max(1px, root.height - bar.height)));
+                }
+            }
+        }
+    }
+}
+
+export component Scrim inherits Rectangle {
+    in property <bool> shown;
+    in property <float> strength: 0.42;
+    callback dismiss();
+    background: black;
+    opacity: shown ? strength : 0;
+    visible: self.opacity > 0.001;
+    animate opacity { duration: 220ms; easing: ease-out; }
+    TouchArea {
+        enabled: root.shown;
+        clicked => { root.dismiss(); }
+        scroll-event(e) => { accept }
+    }
+}
+
+export component WrapText inherits Rectangle {
+    in property <string> text;
+    in property <length> font-size: Theme.base;
+    in property <int> weight: 400;
+    in property <color> ink: Theme.fg;
+    in property <TextHorizontalAlignment> align: left;
+    property <float> lines: max(1, ceil(probe.preferred-width * 1.08 / max(1px, root.width)));
+    preferred-height: probe.preferred-height * lines;
+    min-height: probe.preferred-height * lines;
+    Text {
+        x: 0;
+        y: 0;
+        width: root.width;
+        height: root.height;
+        text: root.text;
+        font-size: root.font-size;
+        font-weight: root.weight;
+        color: root.ink;
+        wrap: word-wrap;
+        horizontal-alignment: root.align;
+        vertical-alignment: top;
+    }
+    probe := Text {
+        visible: false;
+        text: root.text;
+        font-size: root.font-size;
+        font-weight: root.weight;
+    }
+}

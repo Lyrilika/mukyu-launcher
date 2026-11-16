@@ -1,0 +1,7 @@
+License files copied verbatim from the bundled tools/umu/umu-run zipapp.
+
+urllib3-2.7.0.dist-info/licenses/LICENSE.txt
+python_xlib-0.33.dist-info/LICENSE
+six-1.17.0.dist-info/LICENSE
+umu_launcher-1.4.4.dist-info/licenses/LICENSE
+truststore-0.10.4.dist-info/licenses/LICENSE

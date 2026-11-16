@@ -1,0 +1,64 @@
+[package]
+name = "mukyulauncher"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.92"
+license = "AGPL-3.0-or-later"
+description = "A multi-purpose Touhou launcher"
+build = "build.rs"
+
+[[bin]]
+name = "mukyulauncher"
+path = "src/main.rs"
+
+[dependencies]
+slint = { version = "1.18", features = ["unstable-winit-030", "raw-window-handle-06"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+dirs = "5"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+ureq = { version = "2.12", features = ["json"] }
+url = "2"
+sha1 = "0.10"
+sha2 = "0.10"
+hex = "0.4"
+num-bigint = "0.4"
+encoding_rs = "0.8"
+flate2 = "1"
+tar = "0.4"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+rand = "0.8"
+rodio = { version = "0.20", default-features = false }
+symphonia = { version = "0.5", default-features = false, features = ["mp3", "ogg", "vorbis", "wav", "pcm"] }
+pdfium-render = { version = "0.8", default-features = false, features = ["image_025", "thread_safe", "pdfium_latest"] }
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
+shlex = "1"
+regex = "1"
+open = "5"
+log = "0.4"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
+libc = "0.2"
+
+[target.'cfg(windows)'.dependencies]
+rfd = "0.15"
+raw-window-handle = "0.6"
+windows = { version = "0.58", features = [
+  "Win32_Foundation", "Win32_Security", "Win32_System_JobObjects", "Win32_System_Threading",
+  "Win32_UI_WindowsAndMessaging", "Win32_System_WinRT", "Media", "Media_Playback",
+  "Foundation", "Storage", "Storage_Streams", "Win32_System_Com",
+] }
+
+[build-dependencies]
+slint-build = "1.18"
+
+[target.'cfg(windows)'.build-dependencies]
+winresource = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 4
+strip = true

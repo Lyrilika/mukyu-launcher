@@ -1,0 +1,457 @@
+
+use std::collections::{HashMap, HashSet};
+use std::process::{Child, Command};
+
+pub fn host_env() -> HashMap<String, String> {
+    let mut env: HashMap<String, String> = std::env::vars().collect();
+    if std::env::var_os("TL_APPIMAGE").is_none() {
+        return env;
+    }
+    let keys: Vec<String> = env.keys().filter(|k| k.starts_with("TL_ORIG_")).cloned().collect();
+    for key in keys {
+        let name = key["TL_ORIG_".len()..].to_string();
+        let value = env.remove(&key).unwrap_or_default();
+        if value == "__TL_UNSET__" {
+            env.remove(&name);
+        } else {
+            env.insert(name, value);
+        }
+    }
+    env.remove("TL_APPIMAGE");
+    env
+}
+
+pub fn host_env_var(name: &str) -> Option<String> {
+    if std::env::var_os("TL_APPIMAGE").is_some() {
+        if let Ok(orig) = std::env::var(format!("TL_ORIG_{name}")) {
+            return if orig == "__TL_UNSET__" { None } else { Some(orig) };
+        }
+    }
+    std::env::var(name).ok()
+}
+
+pub fn no_window(cmd: &mut Command) -> &mut Command {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000);
+    }
+    cmd
+}
+
+pub fn split_launch_options(text: &str) -> Vec<String> {
+    let mut parts = Vec::new();
+    let mut current = String::new();
+    let mut quote: Option<char> = None;
+    let mut has = false;
+    for ch in text.chars() {
+        match quote {
+            Some(q) if ch == q => {
+                quote = None;
+                current.push(ch);
+            }
+            Some(_) => current.push(ch),
+            None if ch == '"' || ch == '\'' => {
+                quote = Some(ch);
+                current.push(ch);
+                has = true;
+            }
+            None if ch.is_whitespace() => {
+                if has {
+                    parts.push(std::mem::take(&mut current));
+                    has = false;
+                }
+            }
+            None => {
+                current.push(ch);
+                has = true;
+            }
+        }
+    }
+    if has {
+        parts.push(current);
+    }
+    parts
+        .into_iter()
+        .map(|p| {
+            let b = p.as_bytes();
+            if b.len() >= 2 && b[0] == b[b.len() - 1] && (b[0] == b'"' || b[0] == b'\'') {
+                p[1..p.len() - 1].to_string()
+            } else {
+                p
+            }
+        })
+        .collect()
+}
+
+pub fn shell_split(text: &str) -> Vec<String> {
+    if text.trim().is_empty() {
+        return Vec::new();
+    }
+    shlex::split(text).unwrap_or_else(|| text.split_whitespace().map(String::from).collect())
+}
+
+pub fn shell_join(args: &[String]) -> String {
+    args.iter()
+        .map(|a| shlex::try_quote(a).map(|c| c.into_owned()).unwrap_or_else(|_| a.clone()))
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
+pub const SESSION_ENV_VAR: &str = "MUKYU_LAUNCHER_SESSION";
+
+const WINE_SYSTEM_EXES: &[&str] = &[
+    "services.exe", "winedevice.exe", "plugplay.exe", "svchost.exe", "explorer.exe",
+    "rpcss.exe", "conhost.exe", "start.exe", "winemenubuilder.exe", "wineboot.exe",
+    "rundll32.exe", "mscorsvw.exe", "tabtip.exe", "steam.exe", "iexplore.exe",
+    "winedbg.exe", "cmd.exe",
+];
+
+#[cfg(target_os = "linux")]
+mod procfs {
+    use super::*;
+
+    fn stat_fields(pid: u32) -> Option<Vec<String>> {
+        let data = std::fs::read_to_string(format!("/proc/{pid}/stat")).ok()?;
+        let closing = data.rfind(')')?;
+        Some(data.get(closing + 2..)?.split_whitespace().map(String::from).collect())
+    }
+
+    pub fn exists(pid: u32) -> bool {
+        match std::fs::read_to_string(format!("/proc/{pid}/stat")) {
+            Ok(data) => match data.rfind(')') {
+                None => true,
+                Some(c) => data.get(c + 2..).and_then(|s| s.split_whitespace().next()).map_or(true, |s| s != "Z"),
+            },
+            Err(_) => false,
+        }
+    }
+
+    pub fn children(pid: u32) -> Vec<u32> {
+        std::fs::read_to_string(format!("/proc/{pid}/task/{pid}/children"))
+            .map(|s| s.split_whitespace().filter_map(|v| v.parse().ok()).collect())
+            .unwrap_or_default()
+    }
+
+    pub fn tree(root: u32, known: &HashSet<u32>) -> HashSet<u32> {
+        let mut pids = known.clone();
+        if exists(root) {
+            pids.insert(root);
+            let mut pending = vec![root];
+            let mut seen = HashSet::new();
+            while let Some(pid) = pending.pop() {
+                if !seen.insert(pid) || !exists(pid) {
+                    continue;
+                }
+                for child in children(pid) {
+                    pids.insert(child);
+                    if !seen.contains(&child) {
+                        pending.push(child);
+                    }
+                }
+            }
+        }
+        pids
+    }
+
+    fn all_pids() -> Vec<u32> {
+        std::fs::read_dir("/proc")
+            .map(|it| it.flatten().filter_map(|e| e.file_name().to_str()?.parse().ok()).collect())
+            .unwrap_or_default()
+    }
+
+    pub fn group_alive(pgid: u32) -> bool {
+        all_pids().into_iter().any(|pid| {
+            stat_fields(pid).map_or(false, |f| f.len() >= 3 && f[0] != "Z" && f[2].parse::<u32>().ok() == Some(pgid))
+        })
+    }
+
+    pub fn session_pids(token: &str) -> Vec<u32> {
+        let marker = format!("{SESSION_ENV_VAR}={token}");
+        let own = std::process::id();
+        all_pids()
+            .into_iter()
+            .filter(|&pid| pid != own)
+            .filter(|&pid| {
+                std::fs::read(format!("/proc/{pid}/environ"))
+                    .map(|env| env.split(|&b| b == 0).any(|e| e == marker.as_bytes()))
+                    .unwrap_or(false)
+                    && exists(pid)
+            })
+            .collect()
+    }
+
+    pub fn windows_exe_name(pid: u32) -> Option<String> {
+        let raw = std::fs::read(format!("/proc/{pid}/cmdline")).ok()?;
+        for arg in raw.split(|&b| b == 0).take(2) {
+            let text = String::from_utf8_lossy(arg);
+            let base = text.trim().rsplit(['\\', '/']).next().unwrap_or("").to_lowercase();
+            if base.ends_with(".exe") {
+                return Some(base);
+            }
+        }
+        None
+    }
+
+    pub fn session_game_alive(token: &str) -> bool {
+        session_pids(token)
+            .into_iter()
+            .any(|pid| windows_exe_name(pid).map_or(false, |exe| !WINE_SYSTEM_EXES.contains(&exe.as_str())))
+    }
+}
+
+#[cfg(windows)]
+mod job {
+    use std::os::windows::io::AsRawHandle;
+    use windows::Win32::Foundation::{CloseHandle, BOOL, HANDLE, HWND, LPARAM, WPARAM};
+    use windows::Win32::System::JobObjects::*;
+    use windows::Win32::UI::WindowsAndMessaging::{EnumWindows, GetWindowThreadProcessId, PostMessageW, WM_CLOSE};
+
+    pub struct Job(HANDLE);
+    unsafe impl Send for Job {}
+
+    #[repr(C)]
+    struct PidList {
+        assigned: u32,
+        in_list: u32,
+        ids: [usize; 256],
+    }
+
+    impl Job {
+        pub fn new(child: &std::process::Child) -> Option<Job> {
+            unsafe {
+                let handle = CreateJobObjectW(None, None).ok()?;
+                let process = HANDLE(child.as_raw_handle() as _);
+                if AssignProcessToJobObject(handle, process).is_err() {
+                    let _ = CloseHandle(handle);
+                    return None;
+                }
+                Some(Job(handle))
+            }
+        }
+
+        pub fn active_count(&self) -> Option<u32> {
+            unsafe {
+                let mut info = JOBOBJECT_BASIC_ACCOUNTING_INFORMATION::default();
+                QueryInformationJobObject(
+                    self.0,
+                    JobObjectBasicAccountingInformation,
+                    &mut info as *mut _ as *mut _,
+                    std::mem::size_of_val(&info) as u32,
+                    None,
+                )
+                .ok()?;
+                Some(info.ActiveProcesses)
+            }
+        }
+
+        pub fn pids(&self) -> Vec<u32> {
+            unsafe {
+                let mut list = PidList { assigned: 0, in_list: 0, ids: [0; 256] };
+                if QueryInformationJobObject(
+                    self.0,
+                    JobObjectBasicProcessIdList,
+                    &mut list as *mut _ as *mut _,
+                    std::mem::size_of::<PidList>() as u32,
+                    None,
+                )
+                .is_err()
+                {
+                    return Vec::new();
+                }
+                list.ids[..(list.in_list as usize).min(256)].iter().map(|&p| p as u32).collect()
+            }
+        }
+
+        pub fn request_close(&self) {
+            let pids = self.pids();
+            if pids.is_empty() {
+                return;
+            }
+            unsafe extern "system" fn on_window(hwnd: HWND, lparam: LPARAM) -> BOOL {
+                let pids = &*(lparam.0 as *const Vec<u32>);
+                let mut owner = 0u32;
+                GetWindowThreadProcessId(hwnd, Some(&mut owner));
+                if pids.contains(&owner) {
+                    let _ = PostMessageW(hwnd, WM_CLOSE, WPARAM(0), LPARAM(0));
+                }
+                BOOL(1)
+            }
+            unsafe {
+                let _ = EnumWindows(Some(on_window), LPARAM(&pids as *const Vec<u32> as isize));
+            }
+        }
+
+        pub fn terminate(&self) {
+            unsafe {
+                let _ = TerminateJobObject(self.0, 1);
+            }
+        }
+    }
+
+    impl Drop for Job {
+        fn drop(&mut self) {
+            unsafe {
+                let _ = CloseHandle(self.0);
+            }
+        }
+    }
+}
+
+pub struct GameProcess {
+    pub child: Child,
+    pub session: String,
+    #[allow(dead_code)]
+    tree: HashSet<u32>,
+    pub stopping: bool,
+    pub exit_status: Option<i32>,
+    #[cfg(windows)]
+    job: Option<job::Job>,
+}
+
+impl GameProcess {
+    pub fn new(child: Child, session: String) -> Self {
+        let pid = child.id();
+        #[cfg(windows)]
+        let job = job::Job::new(&child);
+        GameProcess {
+            child,
+            session,
+            tree: HashSet::from([pid]),
+            stopping: false,
+            exit_status: None,
+            #[cfg(windows)]
+            job,
+        }
+    }
+
+    fn poll_child(&mut self) -> bool {
+        match self.child.try_wait() {
+            Ok(None) => true,
+            Ok(Some(status)) => {
+                if self.exit_status.is_none() {
+                    self.exit_status = Some(status.code().unwrap_or(-1));
+                }
+                false
+            }
+            Err(_) => false,
+        }
+    }
+
+    pub fn alive(&mut self) -> bool {
+        let child_alive = self.poll_child();
+        #[cfg(windows)]
+        {
+            if let Some(count) = self.job.as_ref().and_then(|j| j.active_count()) {
+                return count > 0;
+            }
+            return child_alive;
+        }
+        #[cfg(target_os = "linux")]
+        {
+            if child_alive {
+                return true;
+            }
+            let pid = self.child.id();
+            if procfs::group_alive(pid) {
+                return true;
+            }
+            let known: HashSet<u32> = self.tree.iter().copied().filter(|&p| procfs::exists(p)).collect();
+            let mut tree = procfs::tree(pid, &known);
+            tree.remove(&pid);
+            self.tree = tree.clone();
+            if tree.iter().any(|&p| procfs::exists(p)) {
+                return true;
+            }
+            return procfs::session_game_alive(&self.session);
+        }
+        #[allow(unreachable_code)]
+        child_alive
+    }
+
+    pub fn snapshot_tree(&mut self) {
+        #[cfg(target_os = "linux")]
+        {
+            self.tree = procfs::tree(self.child.id(), &self.tree);
+        }
+    }
+
+    pub fn signal(&mut self, force: bool) {
+        self.stopping = true;
+        #[cfg(windows)]
+        {
+            if !force {
+                match &self.job {
+                    Some(job) => job.request_close(),
+                    None => {
+                        let _ = self.child.kill();
+                    }
+                }
+            } else {
+                if let Some(job) = &self.job {
+                    job.terminate();
+                }
+                let _ = self.child.kill();
+            }
+        }
+        #[cfg(unix)]
+        {
+            let sig = if force { libc::SIGKILL } else { libc::SIGTERM };
+            let pid = self.child.id() as i32;
+            unsafe {
+                if libc::killpg(pid, sig) != 0 && std::io::Error::last_os_error().raw_os_error() == Some(libc::EPERM) {
+                    libc::kill(pid, sig);
+                }
+            }
+            #[cfg(target_os = "linux")]
+            for p in procfs::session_pids(&self.session) {
+                unsafe {
+                    libc::kill(p as i32, sig);
+                }
+            }
+            if force {
+                for &p in &self.tree {
+                    unsafe {
+                        libc::kill(p as i32, libc::SIGKILL);
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub fn detach(cmd: &mut Command) -> &mut Command {
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        unsafe {
+            cmd.pre_exec(|| {
+                libc::setsid();
+                Ok(())
+            });
+        }
+    }
+    cmd
+}
+
+pub fn trim_memory() {
+    #[cfg(all(target_os = "linux", target_env = "gnu"))]
+    unsafe {
+        libc::malloc_trim(0);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn windows_split() {
+        assert_eq!(split_launch_options(r#"-a "b c" 'd'"#), vec!["-a", "b c", "d"]);
+    }
+
+    #[test]
+    fn posix_split() {
+        assert_eq!(shell_split("mangohud %command% -x"), vec!["mangohud", "%command%", "-x"]);
+    }
+}

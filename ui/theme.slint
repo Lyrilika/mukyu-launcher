@@ -1,0 +1,87 @@
+
+export global Theme {
+    in-out property <color> bg: #181317;
+    in-out property <color> surface: #211a22;
+    in-out property <color> surface-alt: #2a222b;
+    in-out property <color> surface-high: #332a34;
+    in-out property <color> popover: #2e2530;
+    in-out property <color> fg: #f7edf5;
+    in-out property <color> fg-dim: #cbbbc8;
+    in-out property <color> fg-disabled: #8f808e;
+    in-out property <color> accent: #d96bc8;
+    in-out property <color> accent-hover: #bf5eb0;
+    in-out property <color> on-accent: #1a1a1a;
+    in-out property <bool> dark: true;
+
+    in-out property <color> mu-primary: #cfbcff;
+    in-out property <color> mu-on-primary: #381e72;
+    in-out property <color> mu-primary-container: #4f378b;
+    in-out property <color> mu-on-primary-container: #eaddff;
+    in-out property <color> mu-secondary-container: #3b3550;
+    in-out property <color> mu-surface: #17131f;
+    in-out property <color> mu-surface-container: #221d2c;
+    in-out property <color> mu-surface-high: #2d2738;
+    in-out property <color> mu-text: #e8e0f0;
+    in-out property <color> mu-text-dim: #b3a9c2;
+    in-out property <color> mu-track: #4a4360;
+
+    in-out property <float> scale: 1.0;
+    out property <float> dpi: 1.12;
+    out property <length> base: 12px * scale * dpi;
+
+    pure public function px(v: length) -> length {
+        return v * dpi;
+    }
+
+    pure public function alpha(c: color, a: float) -> color {
+        return c.with-alpha(a);
+    }
+
+    pure public function mix(a: color, b: color, t: float) -> color {
+        return a.mix(b, 1.0 - t);
+    }
+
+    out property <color> danger: #ff5555;
+    out property <color> danger-text: #ff6b6b;
+    out property <color> running-green: rgb(74, 222, 128);
+}
+
+export global Ease {
+    out property <easing> standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+    out property <easing> emphasized: cubic-bezier(0.05, 0.7, 0.1, 1);
+    out property <easing> spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    out property <easing> lift: cubic-bezier(0.2, 0.9, 0.3, 1.12);
+    out property <easing> soft-spring: cubic-bezier(0.2, 0.9, 0.3, 1.1);
+}
+
+export global Icons {
+    out property <image> play: @image-url("icons/play.svg");
+    out property <image> pause: @image-url("icons/pause.svg");
+    out property <image> skip-back: @image-url("icons/skip-back.svg");
+    out property <image> skip-forward: @image-url("icons/skip-forward.svg");
+    out property <image> shuffle: @image-url("icons/shuffle.svg");
+    out property <image> repeat: @image-url("icons/repeat.svg");
+    out property <image> repeat-one: @image-url("icons/repeat-one.svg");
+    out property <image> star: @image-url("icons/star.svg");
+    out property <image> star-outline: @image-url("icons/star-outline.svg");
+    out property <image> stop: @image-url("icons/stop.svg");
+    out property <image> trash: @image-url("icons/trash.svg");
+    out property <image> chevron-down: @image-url("icons/chevron-down.svg");
+    out property <image> chevron-left: @image-url("icons/chevron-left.svg");
+    out property <image> chevron-right: @image-url("icons/chevron-right.svg");
+    out property <image> arrow-up: @image-url("icons/arrow-up.svg");
+    out property <image> close: @image-url("icons/close.svg");
+    out property <image> music: @image-url("icons/music.svg");
+    out property <image> info: @image-url("icons/info.svg");
+    out property <image> contrast: @image-url("icons/contrast.svg");
+    out property <image> gear: @image-url("icons/gear.svg");
+    out property <image> folder: @image-url("icons/folder.svg");
+    out property <image> file: @image-url("icons/file.svg");
+    out property <image> eye: @image-url("icons/eye.svg");
+    out property <image> home: @image-url("icons/home.svg");
+    out property <image> drive: @image-url("icons/drive.svg");
+    out property <image> search: @image-url("icons/search.svg");
+    out property <image> download: @image-url("icons/download.svg");
+    out property <image> github: @image-url("icons/github.svg");
+    out property <image> app-icon: @image-url("../assets/icons/hicolor/scalable/apps/mukyulauncher.png");
+}

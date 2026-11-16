@@ -1,0 +1,164 @@
+name: Build and release
+'on':
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Build both platforms, or publish an already successful build
+        required: true
+        default: build
+        type: choice
+        options:
+        - build
+        - publish
+      build_run_id:
+        description: 'Publish only: successful combined build run ID'
+        required: false
+        type: string
+      tag:
+        description: 'Publish only: new release tag (for example v1.0.0)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+env:
+  CARGO_TERM_COLOR: always
+jobs:
+  linux:
+    name: Linux AppImage
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'build'
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: Swatinem/rust-cache@v2
+    - name: System libraries
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends libasound2-dev libxkbcommon-dev \
+          libfontconfig1-dev libwayland-dev libxcursor-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
+          libfuse2 file
+    - name: Unit tests
+      run: cargo test --release --locked
+    - name: Build AppImage
+      run: bash packaging/appimage/build_appimage.sh
+    - name: Report size
+      run: du -h dist/Mukyu_Launcher-x86_64.AppImage >> "$GITHUB_STEP_SUMMARY"
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Linux-AppImage
+        path: dist/Mukyu_Launcher-x86_64.AppImage
+        compression-level: 0
+        if-no-files-found: error
+
+  windows-tools:
+    name: Windows native tools
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'build'
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: Keep LF line endings
+      shell: pwsh
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v4
+    - uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: 'false'
+        install: git make flex bison mingw-w64-x86_64-python mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja mingw-w64-x86_64-zlib
+    - run: bash ./packaging/windows/build_tools_msys2.sh all
+    - uses: actions/upload-artifact@v4
+      with:
+        name: win-tools
+        path: |
+          tools/thtk/bin/thdat.exe
+          tools/pc98/bin/pmd_render.exe
+          tools/pc98/bin/mdt_render.exe
+          tools/pc98/BUILD_INFO.txt
+          tools/thtk/REVISION
+          tools/licenses
+        if-no-files-found: error
+
+  windows-installer:
+    name: Windows installer
+    needs: windows-tools
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: Swatinem/rust-cache@v2
+    - name: Build
+      run: cargo build --release --locked
+    - name: PDFium
+      shell: bash
+      run: bash scripts/fetch_pdfium.sh windows build/pdfium
+    - uses: actions/download-artifact@v4
+      with:
+        name: win-tools
+        path: win-tools
+    - name: Stage
+      shell: pwsh
+      run: ./packaging/windows/stage.ps1 -Tools win-tools
+    - name: Smoke test
+      shell: pwsh
+      run: |
+        $env:MUKYU_ROOT = "$PWD\build\stage"
+        & "$PWD\build\stage\MukyuLauncher.exe" --bgm-report | Out-Null
+        if ($LASTEXITCODE -ne 0) { throw "smoke test failed" }
+    - name: Build installer
+      shell: pwsh
+      run: |
+        choco install innosetup -y --no-progress | Out-Null
+        Copy-Item "${env:ProgramFiles(x86)}\Inno Setup 6\License.txt" "build\stage\tools\licenses\Inno-Setup-LICENSE.txt"
+        $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
+        & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" packaging\windows\installer.iss
+        if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed" }
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Windows-Installer
+        path: dist/Mukyu_Launcher_Setup.exe
+        compression-level: 0
+        if-no-files-found: error
+
+  publish:
+    name: Publish verified build
+    if: github.event_name == 'workflow_dispatch' && inputs.operation == 'publish'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write
+    steps:
+    - name: Validate inputs
+      env:
+        RUN_ID: ${{ inputs.build_run_id }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        [[ "$RUN_ID" =~ ^[1-9][0-9]*$ ]] || { echo "Enter the successful build run ID."; exit 1; }
+        [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]] || { echo "Use a tag such as v1.0.0"; exit 1; }
+    - uses: actions/download-artifact@v4
+      with:
+        name: Linux-AppImage
+        path: release
+        run-id: ${{ inputs.build_run_id }}
+        github-token: ${{ github.token }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: Windows-Installer
+        path: release
+        run-id: ${{ inputs.build_run_id }}
+        github-token: ${{ github.token }}
+    - name: Release
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+        TAG: ${{ inputs.tag }}
+      run: |
+        test -s release/Mukyu_Launcher-x86_64.AppImage
+        test -s release/Mukyu_Launcher_Setup.exe
+        gh release create "$TAG" --title "$TAG" --draft --generate-notes
+        gh release upload "$TAG" release/Mukyu_Launcher-x86_64.AppImage release/Mukyu_Launcher_Setup.exe
+        gh release edit "$TAG" --draft=false

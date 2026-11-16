@@ -1,0 +1,150 @@
+import { Theme, Ease, Icons } from "theme.slint";
+import { Btn, ProgressTrack, WrapText } from "widgets.slint";
+
+export struct DialogButton {
+    text: string,
+    role: int, // 0 accent, 1 danger, 2 neutral
+}
+
+export global DialogApi {
+    in-out property <bool> open: false;
+    in-out property <string> heading;
+    in-out property <string> message;
+    in-out property <[DialogButton]> buttons;
+    in-out property <int> cancel-index: 0;
+    in-out property <int> default-index: 0;
+    callback response(int);
+}
+
+export global DownloadApi {
+    in-out property <bool> open: false;
+    in-out property <int> state: 0;
+    in-out property <string> name;
+    in-out property <string> size-text;
+    in-out property <float> fraction: 0;
+    in-out property <bool> pulse: false;
+    in-out property <string> progress-text: "Starting…";
+    in-out property <string> error-text;
+    callback action();
+    callback cancel();
+}
+
+export component DialogButtonView inherits Btn {
+    in property <int> role;
+    min-width: 72px;
+    h: 36px;
+    pad: 16px;
+    radius: 10px;
+    weight: 600;
+    bg: role == 0 ? Theme.accent : role == 1 ? #d63a3a : Theme.alpha(Theme.fg, 0.16);
+    bg-hover: role == 0 ? Theme.accent-hover : role == 1 ? #c22f2f : Theme.alpha(Theme.fg, 0.24);
+    bg-pressed: role == 0 ? Theme.accent-hover : role == 1 ? #a82626 : Theme.alpha(Theme.fg, 0.32);
+    fg: role == 0 ? Theme.on-accent : role == 1 ? white : Theme.fg;
+    border: role == 1 ? transparent : Theme.alpha(Theme.fg, 0.20);
+}
+
+component Card inherits Rectangle {
+    in property <bool> shown;
+    border-radius: 16px;
+    background: Theme.bg;
+    border-width: 1px;
+    border-color: Theme.alpha(Theme.fg, 0.08);
+    drop-shadow-blur: 40px;
+    drop-shadow-offset-y: 16px;
+    drop-shadow-color: #00000080;
+    opacity: shown ? 1 : 0;
+    transform-scale: shown ? 1 : 0.95;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate opacity { duration: 180ms; easing: ease-out; }
+    animate transform-scale { duration: 300ms; easing: Ease.emphasized; }
+    visible: self.opacity > 0.01;
+    TouchArea { }
+    @children
+}
+
+export component MessageDialog inherits Card {
+    shown: DialogApi.open;
+    width: 400px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 24px;
+        spacing: 10px;
+        if DialogApi.heading != "": WrapText {
+            text: DialogApi.heading;
+            font-size: Theme.px(13px);
+            weight: 700;
+        }
+        if DialogApi.message != "": WrapText {
+            text: DialogApi.message;
+            font-size: Theme.base;
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: 8px;
+            padding-top: 8px;
+            for b[i] in DialogApi.buttons: DialogButtonView {
+                text: b.text;
+                role: b.role;
+                clicked => { DialogApi.response(i); }
+            }
+        }
+    }
+}
+
+export component DownloadDialog inherits Card {
+    shown: DownloadApi.open;
+    width: 460px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 24px;
+        spacing: 10px;
+        WrapText {
+            text: DownloadApi.state == 0 ? "Download required" : DownloadApi.state == 1 ? "Downloading " + DownloadApi.name : DownloadApi.state == 2 ? "Download complete" : "Download failed";
+            font-size: Theme.px(13px);
+            weight: 700;
+        }
+        if DownloadApi.state != 1: WrapText {
+            text: DownloadApi.state == 0 ? "You'll need to download \"" + DownloadApi.name + "\" before you can read it."
+                : DownloadApi.state == 2 ? "\"" + DownloadApi.name + "\" is ready to read." : "\"" + DownloadApi.name + "\" could not be downloaded.";
+            font-size: Theme.base;
+        }
+        if DownloadApi.state == 0 || DownloadApi.state == 3: Text {
+            text: DownloadApi.size-text;
+            font-size: Theme.base * 0.85;
+            color: Theme.alpha(Theme.fg, 0.6);
+        }
+        if DownloadApi.state == 1: VerticalLayout {
+            spacing: 8px;
+            padding-top: 4px;
+            ProgressTrack {
+                value: DownloadApi.fraction;
+                pulse: DownloadApi.pulse;
+            }
+            Text {
+                text: DownloadApi.progress-text;
+                font-size: Theme.base * 0.85;
+                color: Theme.alpha(Theme.fg, 0.6);
+            }
+        }
+        if DownloadApi.state == 3: WrapText {
+            text: DownloadApi.error-text;
+            ink: #ff5555;
+            font-size: Theme.base;
+        }
+        HorizontalLayout {
+            alignment: end;
+            spacing: 8px;
+            padding-top: 6px;
+            DialogButtonView {
+                text: DownloadApi.state == 2 ? "Close" : "Cancel";
+                role: 2;
+                clicked => { DownloadApi.cancel(); }
+            }
+            if DownloadApi.state != 1: DialogButtonView {
+                text: DownloadApi.state == 0 ? "Download" : DownloadApi.state == 2 ? "Read now" : "Retry";
+                role: 0;
+                clicked => { DownloadApi.action(); }
+            }
+        }
+    }
+}

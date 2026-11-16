@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+HERE="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+export MUKYU_ROOT="$HERE/usr/share/mukyulauncher"
+exec "$HERE/usr/bin/mukyulauncher" "$@"

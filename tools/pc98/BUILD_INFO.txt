@@ -1,0 +1,5 @@
+98fmplayer 4fa914e4b2b994cb3ccf92d571a20a7cdf1fe36a
+libx86emu ce81129c57fdfbf690bebc210a8db97d926cc5e7
+Build recipe: scripts/install_pc98_music.sh
+gcc (GCC) 16.2.1 20260810
+g++ (GCC) 16.2.1 20260810

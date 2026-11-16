@@ -1,0 +1,581 @@
+import { Theme, Ease, Icons } from "theme.slint";
+import { Ico, Btn, Field, ProgressTrack, ScrollBox, Dropdown, MenuItem, WrapText } from "widgets.slint";
+
+export struct GameCardData {
+    key: string,
+    title: string,
+    cover: image,
+    gray: image,
+    loaded: bool,
+    has-exe: bool,
+}
+
+export global GamesApi {
+    in-out property <[GameCardData]> cards;
+    in-out property <bool> appeared: false;
+    in-out property <string> running-key;
+    in-out property <bool> any-unset: true;
+
+    in-out property <bool> running-visible: false;
+    in-out property <string> running-title;
+    in-out property <string> running-time: "0:00";
+    callback stop-game();
+
+    in-out property <bool> settings-open: false;
+    in-out property <int> settings-index: -1;
+    in-out property <string> settings-title;
+    in-out property <string> playtime;
+    in-out property <bool> pc98: false;
+    in-out property <bool> windows: false;
+    in-out property <int> runner: 0;
+    in-out property <string> ge-status;
+    in-out property <bool> ge-busy: false;
+    in-out property <bool> ge-progress-visible: false;
+    in-out property <float> ge-progress: 0;
+    in-out property <string> ge-progress-text;
+    in-out property <bool> ge-progress-failed: false;
+    in-out property <bool> exe-set: false;
+    in-out property <bool> exe-exists: false;
+    in-out property <string> launch-options;
+    in-out property <string> dosbox-status;
+    in-out property <length> anchor-x;
+    in-out property <length> anchor-y;
+
+    callback card-clicked(int);
+    callback open-settings(int);
+    callback close-settings();
+    callback runner-changed(int);
+    callback download-ge();
+    callback change-exe();
+    callback remove-exe();
+    callback options-committed(string);
+    callback download-dosbox();
+}
+
+component SettingsCog inherits Rectangle {
+    in property <bool> card-hover;
+    in property <bool> open;
+    in property <bool> blocked;
+    callback clicked();
+    out property <bool> hovered: ta.has-hover;
+    property <bool> shown: ((card-hover || ta.has-hover) && !blocked) || open;
+    width: 34px;
+    height: 34px;
+    border-radius: open ? 10px : 17px;
+    background: open ? Theme.accent : ta.has-hover ? #000000b8 : #00000080;
+    opacity: shown ? 1 : 0;
+    transform-scale: !shown ? 0.5 : ta.pressed ? 0.86 : ta.has-hover ? 1.1 : 1.0;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate opacity { duration: 180ms; easing: ease; }
+    animate background { duration: 220ms; }
+    animate border-radius { duration: 280ms; easing: Ease.standard; }
+    animate transform-scale { duration: 420ms; easing: Ease.spring; }
+    Ico {
+        source: Icons.gear;
+        size: 16px;
+        color: root.open ? Theme.on-accent : white;
+        transform-rotation: root.open ? 180deg : ta.pressed ? 90deg : ta.has-hover ? 60deg : 0deg;
+        transform-scale: ta.pressed && !root.open ? 0.85 : 1;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        animate transform-rotation, transform-scale { duration: 560ms; easing: Ease.standard; }
+    }
+    ta := TouchArea {
+        enabled: root.shown;
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component PulseDot inherits Rectangle {
+    width: 8px;
+    height: 8px;
+    property <float> phase: mod(animation-tick() / 1600ms, 1.0);
+    ring := Rectangle {
+        property <length> spread: 7px * (1 - pow(1 - root.phase, 2));
+        x: -spread;
+        y: -spread;
+        width: root.width + 2 * spread;
+        height: root.height + 2 * spread;
+        border-radius: self.width / 2;
+        background: Theme.running-green.with-alpha(0.55 * (1 - root.phase));
+    }
+    Rectangle {
+        border-radius: 4px;
+        background: Theme.running-green;
+    }
+}
+
+export component GameCard inherits Rectangle {
+    in property <GameCardData> data;
+    in property <int> index;
+    in property <bool> running;
+    in property <bool> settings-active;
+    in property <bool> blocked;
+    callback clicked();
+    callback cog-clicked();
+
+    property <bool> hot: ((ta.has-hover || cog.hovered) && !blocked) || settings-active;
+    property <bool> pressing: false;
+    property <int> appear-step: min(mod(index, 8) + floor(index / 8), 10);
+
+    width: 210px;
+    height: GamesApi.any-unset ? 270px : 250px;
+
+    appear := Rectangle {
+        opacity: GamesApi.appeared ? 1 : 0;
+        y: GamesApi.appeared ? 0px : 28px;
+        transform-scale: GamesApi.appeared ? 1 : 0.92;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        animate opacity, y, transform-scale {
+            duration: 640ms;
+            delay: root.appear-step * 50ms;
+            easing: Ease.emphasized;
+        }
+
+        card := Rectangle {
+            y: root.pressing ? -2px : root.hot ? -6px : 0px;
+            transform-scale: root.pressing ? 0.97 : 1;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            border-radius: 18px;
+            border-width: 1px;
+            border-color: root.hot ? Theme.alpha(Theme.accent, data.has-exe ? 0.6 : 0.55) : Theme.alpha(Theme.fg, data.has-exe ? 0.12 : 0.07);
+            background: root.hot ? Theme.alpha(Theme.fg, data.has-exe ? 0.08 : 0.07) : Theme.alpha(Theme.fg, data.has-exe ? 0.05 : 0.035);
+            opacity: !data.has-exe && !root.hot ? 0.72 : 1;
+            animate y, transform-scale { duration: 420ms; easing: Ease.lift; }
+            animate background, border-color, opacity { duration: 260ms; easing: ease; }
+
+            cover-shadow := Rectangle {
+                x: 12px;
+                y: 11px;
+                width: 186px;
+                height: 184px;
+                border-radius: 12px;
+                drop-shadow-blur: 12px;
+                drop-shadow-offset-y: 4px;
+                drop-shadow-color: #0000004d;
+                background: Theme.alpha(Theme.fg, 0.06);
+            }
+            cover := Rectangle {
+                x: 12px;
+                y: 11px;
+                width: 186px;
+                height: 184px;
+                border-radius: 12px;
+                clip: true;
+                Image {
+                    width: parent.width;
+                    height: parent.height;
+                    source: data.cover;
+                    image-fit: ImageFit.cover;
+                    opacity: data.loaded ? 1 : 0;
+                    transform-scale: root.hot ? 1.06 : 1;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate transform-scale { duration: 620ms; easing: Ease.standard; }
+                    animate opacity { duration: 360ms; }
+                }
+                Image {
+                    width: parent.width;
+                    height: parent.height;
+                    source: data.gray;
+                    image-fit: ImageFit.cover;
+                    opacity: data.loaded && !data.has-exe && !root.hot ? 1 : 0;
+                    transform-scale: root.hot ? 1.06 : 1;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate transform-scale { duration: 620ms; easing: Ease.standard; }
+                    animate opacity { duration: 360ms; easing: ease; }
+                }
+            }
+
+            badge := Rectangle {
+                x: cover.x + 10px;
+                y: cover.y + 10px;
+                width: badge-row.preferred-width;
+                height: badge-row.preferred-height;
+                border-radius: 8px;
+                background: #00000099;
+                opacity: root.running ? 1 : 0;
+                transform-scale: root.running ? 1 : 0.8;
+                transform-origin: { x: 0, y: 0 };
+                animate opacity { duration: 300ms; }
+                animate transform-scale { duration: 440ms; easing: Ease.spring; }
+                badge-row := HorizontalLayout {
+                    padding-top: 4px;
+                    padding-bottom: 4px;
+                    padding-left: 8px;
+                    padding-right: 10px;
+                    spacing: 6px;
+                    alignment: start;
+                    if root.running: PulseDot { y: (parent.height - self.height) / 2; }
+                    Text {
+                        text: "Playing";
+                        color: white;
+                        font-size: Theme.base * 0.8;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            ta := TouchArea {
+                mouse-cursor: pointer;
+                pointer-event(e) => {
+                    if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
+                        root.pressing = true;
+                        press-timer.running = true;
+                    } else if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
+                        root.pressing = false;
+                    }
+                }
+                clicked => { root.clicked(); }
+            }
+            press-timer := Timer {
+                interval: 450ms;
+                running: false;
+                triggered => {
+                    root.pressing = false;
+                    self.running = false;
+                }
+            }
+
+            cog := SettingsCog {
+                x: cover.x + cover.width - self.width - 8px;
+                y: cover.y + 8px;
+                card-hover: ta.has-hover || root.hot;
+                open: root.settings-active;
+                blocked: root.blocked;
+                clicked => { root.cog-clicked(); }
+            }
+
+            info := VerticalLayout {
+                x: 12px;
+                y: cover.y + cover.height;
+                width: parent.width - 24px;
+                height: parent.height - self.y;
+                padding-top: 6px;
+                padding-bottom: 8px;
+                spacing: 4px;
+                alignment: center;
+                Text {
+                    text: data.title;
+                    color: Theme.fg;
+                    font-size: Theme.base;
+                    font-weight: 700;
+                    wrap: word-wrap;
+                    overflow: elide;
+                    horizontal-alignment: center;
+                    max-height: Theme.base * 2.6;
+                    animate color { duration: 220ms; }
+                }
+                if !data.has-exe: Rectangle {
+                    height: status.preferred-height + 4px;
+                    status-chip := Rectangle {
+                        x: (parent.width - self.width) / 2;
+                        width: status.preferred-width + 16px;
+                        border-radius: 999px;
+                        background: Theme.alpha(Theme.fg, 0.06);
+                        status := Text {
+                            text: "Not set";
+                            color: Theme.fg-dim;
+                            font-size: Theme.base * 0.82;
+                            font-weight: 600;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+component RunningBar inherits Rectangle {
+    in property <bool> shown;
+    in property <string> title;
+    in property <string> time;
+    callback stop();
+    height: 64px;
+    border-radius: 16px;
+    border-width: 1px;
+    border-color: Theme.alpha(Theme.fg, 0.06);
+    background: Theme.mix(Theme.bg, Theme.accent, 0.12);
+    drop-shadow-blur: 30px;
+    drop-shadow-offset-y: 10px;
+    drop-shadow-color: #00000059;
+    opacity: shown ? 1 : 0;
+    transform-scale: shown ? 1 : 0.96;
+    transform-origin: { x: self.width / 2, y: self.height };
+    property <length> lift: shown ? 0px : 28px;
+    animate opacity { duration: 260ms; easing: ease; }
+    animate transform-scale, lift { duration: 480ms; easing: Ease.soft-spring; }
+    HorizontalLayout {
+        y: root.lift;
+        padding-left: 16px;
+        padding-right: 8px;
+        padding-top: 6px;
+        padding-bottom: 6px;
+        spacing: 12px;
+        Rectangle {
+            width: 8px;
+            PulseDot { x: 0; y: (parent.height - self.height) / 2; }
+        }
+        VerticalLayout {
+            alignment: center;
+            horizontal-stretch: 1;
+            Text {
+                text: "NOW PLAYING";
+                font-size: Theme.base * 0.75;
+                font-weight: 700;
+                letter-spacing: 1px;
+                color: Theme.alpha(Theme.fg, 0.55);
+            }
+            Text {
+                text: root.title;
+                font-size: Theme.base * 1.1;
+                font-weight: 800;
+                color: Theme.fg;
+                overflow: elide;
+            }
+        }
+        Rectangle {
+            width: time-text.preferred-width + 20px;
+            Rectangle {
+                y: (parent.height - self.height) / 2;
+                height: time-text.preferred-height + 8px;
+                border-radius: 8px;
+                background: Theme.alpha(Theme.accent, 0.16);
+                time-text := Text {
+                    text: root.time;
+                    font-size: Theme.base * 0.9;
+                    font-weight: 700;
+                    color: Theme.accent;
+                }
+            }
+        }
+        VerticalLayout {
+            alignment: center;
+            Btn {
+                h: 36px;
+                text: "Stop";
+                has-icon: true;
+                icon: Icons.stop;
+                icon-size: 14px;
+                pad: 16px;
+                radius: 12px;
+                radius-pressed: 18px;
+                pressed-scale: 0.94;
+                weight: 700;
+                bg: Theme.alpha(Theme.danger, 0.16);
+                bg-hover: Theme.danger;
+                fg: Theme.danger-text;
+                fg-hover: white;
+                clicked => { root.stop(); }
+            }
+        }
+    }
+}
+
+component SettingsLabel inherits Text {
+    font-size: Theme.px(11px);
+    font-weight: 700;
+    color: Theme.alpha(Theme.fg, 0.6);
+}
+
+export component GameSettingsPopover inherits Rectangle {
+    in property <bool> shown;
+    property <bool> visible-anim: shown;
+    width: 330px;
+    height: body.preferred-height;
+    border-radius: 16px;
+    background: Theme.mix(Theme.bg, Theme.accent, 0.07);
+    drop-shadow-blur: 42px;
+    drop-shadow-offset-y: 18px;
+    drop-shadow-color: #0000006b;
+    opacity: shown ? 1 : 0;
+    transform-scale: shown ? 1 : 0.94;
+    transform-origin: { x: self.width / 2, y: 0 };
+    animate opacity, transform-scale { duration: 260ms; easing: Ease.emphasized; }
+    visible: self.opacity > 0.01;
+
+    TouchArea { }
+    body := VerticalLayout {
+        padding: 14px;
+        spacing: 10px;
+        WrapText {
+            text: GamesApi.settings-title;
+            font-size: Theme.base * 1.25;
+            weight: 800;
+        }
+        if GamesApi.playtime != "": HorizontalLayout {
+            alignment: start;
+            Rectangle {
+                width: pt.preferred-width + 20px;
+                height: pt.preferred-height + 6px;
+                border-radius: 6px;
+                background: Theme.alpha(Theme.accent, 0.16);
+                pt := Text {
+                    text: GamesApi.playtime;
+                    color: Theme.accent;
+                    font-weight: 700;
+                    font-size: Theme.base;
+                }
+            }
+        }
+        if GamesApi.pc98: VerticalLayout {
+            spacing: 10px;
+            WrapText {
+                text: GamesApi.dosbox-status;
+                font-size: Theme.base * 1.1;
+            }
+            Btn {
+                text: "Download DOSBox-X";
+                font-size: Theme.base * 1.1;
+                clicked => { GamesApi.download-dosbox(); }
+            }
+            Btn {
+                text: GamesApi.exe-exists ? "Change ROM (.hdi/.nhd/.fdi/.img/.d88)…" : "Add ROM (.hdi/.nhd/.fdi/.img/.d88)…";
+                font-size: Theme.base * 1.1;
+                clicked => { GamesApi.change-exe(); }
+            }
+            if GamesApi.exe-exists: Btn {
+                text: "Remove ROM";
+                font-size: Theme.base * 1.1;
+                bg: Theme.alpha(Theme.danger, 0.12);
+                bg-hover: Theme.danger;
+                fg: Theme.danger-text;
+                fg-hover: white;
+                clicked => { GamesApi.remove-exe(); }
+            }
+        }
+        if !GamesApi.pc98: VerticalLayout {
+            spacing: 10px;
+            if !GamesApi.windows: VerticalLayout {
+                spacing: 10px;
+                SettingsLabel { text: "Runner:"; }
+                Dropdown {
+                    h: 40px;
+                    radius: 10px;
+                    centered: false;
+                    font-size: Theme.base * 1.15;
+                    items: [{ text: "Wine", enabled: true }, { text: "GE-Proton", enabled: true }];
+                    current: GamesApi.runner;
+                    bg: Theme.alpha(Theme.accent, 0.14);
+                    fg: Theme.fg;
+                    hover-tint: Theme.alpha(Theme.accent, 0.10);
+                    popup-bg: Theme.mix(Theme.surface-high, Theme.accent, 0.08);
+                    popup-fg: Theme.fg;
+                    popup-selected: Theme.alpha(Theme.accent, 0.22);
+                    popup-selected-fg: Theme.fg;
+                    popup-hover: Theme.alpha(Theme.accent, 0.12);
+                    popup-radius: 14px;
+                    row-radius: 10px;
+                    min-popup-width: 160px;
+                    selected(i) => { GamesApi.runner = i; GamesApi.runner-changed(i); }
+                }
+                WrapText {
+                    text: GamesApi.ge-status;
+                    ink: GamesApi.ge-busy ? Theme.accent : Theme.fg;
+                    font-size: Theme.base * 1.1;
+                }
+                Btn {
+                    text: "Download / update GE-Proton";
+                    font-size: Theme.base * 1.1;
+                    enabled: !GamesApi.ge-busy;
+                    clicked => { GamesApi.download-ge(); }
+                }
+                if GamesApi.ge-progress-visible: VerticalLayout {
+                    spacing: 4px;
+                    ProgressTrack {
+                        value: GamesApi.ge-progress;
+                        pulse: GamesApi.ge-busy && GamesApi.ge-progress-text == "Downloading…";
+                    }
+                    Text {
+                        text: GamesApi.ge-progress-text;
+                        horizontal-alignment: center;
+                        font-size: Theme.base * 0.9;
+                        color: GamesApi.ge-progress-failed ? Theme.danger-text : Theme.fg-dim;
+                    }
+                }
+            }
+            Btn {
+                text: GamesApi.exe-set ? "Change .exe…" : "Set .exe…";
+                font-size: Theme.base * 1.1;
+                clicked => { GamesApi.change-exe(); }
+            }
+            if GamesApi.exe-exists: Btn {
+                text: "Remove .exe";
+                font-size: Theme.base * 1.1;
+                bg: Theme.alpha(Theme.danger, 0.12);
+                bg-hover: Theme.danger;
+                fg: Theme.danger-text;
+                fg-hover: white;
+                clicked => { GamesApi.remove-exe(); }
+            }
+            SettingsLabel { text: "Launch options:"; }
+            options := Field {
+                text: GamesApi.launch-options;
+                placeholder: GamesApi.windows ? "e.g. -windowed" : "e.g. mangohud %command%";
+                font-size: Theme.base * 1.1;
+                edited(t) => { GamesApi.launch-options = t; }
+                accepted(t) => { GamesApi.options-committed(t); }
+            }
+        }
+    }
+}
+
+export component GamesPage inherits Rectangle {
+    background: Theme.bg;
+    animate background { duration: 300ms; }
+    property <length> side-pad: 30px;
+    property <length> gap: 16px;
+    property <length> avail: root.width - 2 * side-pad;
+    property <int> cols: max(1, floor((avail + gap) / (210px + gap)));
+    property <length> cell-w: (avail - (cols - 1) * gap) / cols;
+    property <int> rows: ceil(GamesApi.cards.length / cols);
+    property <length> row-h: GamesApi.any-unset ? 270px : 250px;
+
+    header := Text {
+        x: 30px;
+        y: 12px;
+        text: "Game Library";
+        font-size: Theme.base * 2.2;
+        font-weight: 800;
+        color: Theme.fg;
+        animate color { duration: 300ms; }
+    }
+
+    scroller := ScrollBox {
+        y: header.y + header.preferred-height + 4px;
+        height: root.height - self.y;
+        content-height: 14px + rows * row-h + (rows - 1) * gap + 96px;
+        for card[i] in GamesApi.cards: GameCard {
+            data: card;
+            index: i;
+            x: root.side-pad + mod(i, root.cols) * (root.cell-w + root.gap) + (root.cell-w - 210px) / 2;
+            y: 14px + floor(i / root.cols) * (root.row-h + root.gap);
+            running: GamesApi.running-key == card.key && GamesApi.running-visible;
+            settings-active: GamesApi.settings-open && GamesApi.settings-index == i;
+            blocked: GamesApi.settings-open;
+            clicked => { GamesApi.card-clicked(i); }
+            cog-clicked => {
+                if GamesApi.settings-open && GamesApi.settings-index == i {
+                    GamesApi.close-settings();
+                } else {
+                    GamesApi.anchor-x = self.x + scroller.x;
+                    GamesApi.anchor-y = self.y + scroller.y - scroller.offset;
+                    GamesApi.open-settings(i);
+                }
+            }
+        }
+    }
+
+    RunningBar {
+        x: 30px;
+        width: root.width - 60px;
+        y: root.height - self.height - 14px;
+        shown: GamesApi.running-visible;
+        title: GamesApi.running-title;
+        time: GamesApi.running-time;
+        visible: self.opacity > 0.01;
+        stop => { GamesApi.stop-game(); }
+    }
+}
