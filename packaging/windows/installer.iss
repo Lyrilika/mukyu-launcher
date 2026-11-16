@@ -27,6 +27,7 @@ Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesAllowed=x64compatible
+MinVersion=10.0.14393
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Tasks]

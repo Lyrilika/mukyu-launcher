@@ -97,6 +97,13 @@ jobs:
     - uses: Swatinem/rust-cache@v2
     - name: Build
       run: cargo build --release --locked
+    - name: Check runtime dependencies
+      shell: pwsh
+      run: |
+        $text = [System.Text.Encoding]::ASCII.GetString([System.IO.File]::ReadAllBytes("target\release\mukyulauncher.exe"))
+        foreach ($dll in @("VCRUNTIME140", "MSVCP140", "api-ms-win-crt-")) {
+          if ($text.IndexOf($dll, [System.StringComparison]::OrdinalIgnoreCase) -ge 0) { throw "MukyuLauncher.exe still depends on $dll" }
+        }
     - name: PDFium
       shell: bash
       run: bash scripts/fetch_pdfium.sh windows build/pdfium
