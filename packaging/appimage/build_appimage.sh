@@ -45,6 +45,26 @@ TOOL="$WORK/appimagetool"
 curl -fsSL -o "$TOOL" "https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-$ARCH.AppImage"
 chmod +x "$TOOL"
 install -m 755 "$ROOT/packaging/appimage/runtime-x86_64" "$WORK/runtime-x86_64"
-ARCH=$ARCH "$TOOL" --appimage-extract-and-run --no-appstream --runtime-file "$WORK/runtime-x86_64" \
-    "$APPDIR" "$OUT/Mukyu_Launcher-$ARCH.AppImage"
+REPO="${GITHUB_REPOSITORY:-Lyrilika/mukyu-launcher}"
+UPDATE_INFO="gh-releases-zsync|${REPO%%/*}|${REPO##*/}|latest|Mukyu_Launcher-$ARCH.AppImage.zsync"
+rm -f "$OUT/Mukyu_Launcher-$ARCH.AppImage" "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync"
+(cd "$OUT" && ARCH=$ARCH "$TOOL" --appimage-extract-and-run --no-appstream --runtime-file "$WORK/runtime-x86_64" \
+    -u "$UPDATE_INFO" "$APPDIR" "Mukyu_Launcher-$ARCH.AppImage")
+if [ ! -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ]; then
+    if command -v zsyncmake >/dev/null; then
+        (cd "$OUT" && zsyncmake -u "Mukyu_Launcher-$ARCH.AppImage" "Mukyu_Launcher-$ARCH.AppImage")
+    elif [ -n "${MUKYU_ALLOW_NO_ZSYNC:-}" ]; then
+        echo "WARNING: zsyncmake not found, no .zsync file was created"
+    else
+        echo "zsyncmake is required to create the .zsync file (Debian/Ubuntu: apt install zsync, Arch: pacman -S zsync)"
+        exit 1
+    fi
+fi
+if [ -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ]; then
+    grep -a -q "^Filename: Mukyu_Launcher-$ARCH.AppImage$" "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" \
+        || { echo "The .zsync file does not reference Mukyu_Launcher-$ARCH.AppImage"; exit 1; }
+fi
+sed -n 's/^version = "\(.*\)"/\1/p' "$ROOT/Cargo.toml" | head -1 > "$OUT/VERSION"
 echo "Built: $OUT/Mukyu_Launcher-$ARCH.AppImage ($(du -h "$OUT/Mukyu_Launcher-$ARCH.AppImage" | cut -f1))"
+[ -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ] && echo "Built: $OUT/Mukyu_Launcher-$ARCH.AppImage.zsync"
+echo "Version: $(cat "$OUT/VERSION")"

@@ -7,8 +7,9 @@ import { PrintWorksPage, PrintApi, PrintWorkData } from "printworks.slint";
 import { SettingsDialog, SettingsApi } from "settings.slint";
 import { MessageDialog, DownloadDialog, DialogApi, DownloadApi, DialogButton } from "dialogs.slint";
 import { ReaderWindow } from "reader.slint";
+import { UpdateDialog, UpdateApi, ChangelogDialog, ChangelogApi } from "update.slint";
 
-export { Theme, GamesApi, GameCardData, MusicApi, TrackRow, MenuItem, PrintApi, PrintWorkData, SettingsApi, DialogApi, DownloadApi, DialogButton, ReaderWindow }
+export { Theme, GamesApi, GameCardData, MusicApi, TrackRow, MenuItem, PrintApi, PrintWorkData, SettingsApi, DialogApi, DownloadApi, DialogButton, ReaderWindow, UpdateApi, ChangelogApi }
 
 export global AppApi {
     in-out property <int> tab: 0;
@@ -210,6 +211,32 @@ export component AppWindow inherits Window {
         }
 
         MessageDialog {
+            x: round((root.width - self.width) / 2px) * 1px;
+            y: round((root.height - self.height) / 2px) * 1px;
+        }
+
+        Scrim {
+            shown: (UpdateApi.open || ChangelogApi.open) && !root.any-overlay;
+            strength: 0.42;
+        }
+
+        Rectangle {
+            background: black;
+            opacity: (UpdateApi.open || ChangelogApi.open) && root.any-overlay ? 0.3 : 0;
+            visible: self.opacity > 0.001;
+            animate opacity { duration: 220ms; easing: ease-out; }
+            TouchArea {
+                enabled: UpdateApi.open || ChangelogApi.open;
+                scroll-event(e) => { accept }
+            }
+        }
+
+        UpdateDialog {
+            x: round((root.width - self.width) / 2px) * 1px;
+            y: round((root.height - self.height) / 2px) * 1px;
+        }
+
+        ChangelogDialog {
             x: round((root.width - self.width) / 2px) * 1px;
             y: round((root.height - self.height) / 2px) * 1px;
         }

@@ -13,6 +13,7 @@ mod platform;
 mod printworks;
 mod printworks_data;
 mod theme;
+mod update;
 mod util;
 
 slint::include_modules!();
@@ -23,6 +24,10 @@ fn main() {
         libc::mallopt(libc::M_ARENA_MAX, 2);
     }
     let args: Vec<String> = std::env::args().collect();
+    if args.iter().any(|a| a == "--version") {
+        println!("Mukyu Launcher {}", update::current_version());
+        return;
+    }
     if args.iter().any(|a| a == "--bgm-report" || a == "--decode-test") {
         dev_report(args.iter().any(|a| a == "--decode-test"));
         return;

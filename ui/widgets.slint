@@ -148,6 +148,56 @@ export component Switch inherits Rectangle {
     }
 }
 
+export component CheckBox inherits Rectangle {
+    in property <bool> checked;
+    in property <string> text;
+    in property <length> font-size: Theme.base;
+    callback toggled(bool);
+    property <bool> hovered: ta.has-hover;
+    property <bool> down: ta.pressed;
+    height: max(box.height, label.preferred-height) + 6px;
+    preferred-width: box.width + 10px + label.preferred-width;
+    min-width: self.preferred-width;
+    box := Rectangle {
+        x: 0;
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        background: root.checked ? (root.hovered ? Theme.accent-hover : Theme.accent) : root.hovered ? Theme.alpha(Theme.accent, 0.12) : transparent;
+        border-width: root.checked ? 0px : 1.5px;
+        border-color: root.hovered ? Theme.accent : Theme.alpha(Theme.fg, 0.35);
+        transform-scale: root.down ? 0.86 : 1;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        animate background, border-color { duration: 160ms; easing: ease-out; }
+        animate transform-scale { duration: 260ms; easing: Ease.spring; }
+        Ico {
+            source: Icons.check;
+            size: 14px;
+            color: Theme.on-accent;
+            opacity: root.checked ? 1 : 0;
+            transform-scale: root.checked ? 1 : 0.3;
+            transform-rotation: root.checked ? 0deg : -45deg;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate opacity { duration: 140ms; easing: ease-out; }
+            animate transform-scale { duration: 320ms; easing: Ease.spring; }
+            animate transform-rotation { duration: 320ms; easing: Ease.soft-spring; }
+        }
+    }
+    label := Text {
+        x: box.width + 10px;
+        text: root.text;
+        font-size: root.font-size;
+        font-weight: 600;
+        color: root.hovered || root.checked ? Theme.fg : Theme.fg-dim;
+        vertical-alignment: center;
+        animate color { duration: 160ms; }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.toggled(!root.checked); }
+    }
+}
+
 export component Field inherits Rectangle {
     in-out property <string> text;
     in property <string> placeholder;

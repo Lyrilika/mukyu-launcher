@@ -1,5 +1,5 @@
 import { Theme, Ease, Icons } from "theme.slint";
-import { Ico, Btn, Field, ScrollBox } from "widgets.slint";
+import { Ico, Btn, Field, ScrollBox, Switch } from "widgets.slint";
 
 export global SettingsApi {
     in-out property <bool> open: false;
@@ -17,6 +17,13 @@ export global SettingsApi {
     in-out property <float> val: 0.85;
     in-out property <string> hex-text: "#d96bc8";
     in-out property <bool> picker-open: false;
+    in-out property <bool> auto-update: true;
+    callback set-auto-update(bool);
+    in-out property <bool> show-changelog: true;
+    callback set-show-changelog(bool);
+    in-out property <int> update-check: 0;
+    in-out property <string> update-check-text;
+    callback check-updates();
 
     callback close();
     callback set-dark(bool);
@@ -89,6 +96,94 @@ component Row inherits Rectangle {
         width: self.preferred-width;
         height: self.preferred-height;
         @children
+    }
+}
+
+component CheckUpdatesButton inherits Rectangle {
+    property <bool> busy: SettingsApi.update-check == 1;
+    property <bool> hovered: ta.has-hover && !busy;
+    height: 36px;
+    width: lay.preferred-width;
+    border-radius: 10px;
+    background: ta.pressed && !busy ? Theme.alpha(Theme.accent, 0.32) : hovered ? Theme.alpha(Theme.accent, 0.24) : Theme.alpha(Theme.accent, 0.14);
+    border-width: 1px;
+    border-color: hovered ? Theme.alpha(Theme.accent, 0.45) : Theme.alpha(Theme.accent, 0.22);
+    transform-scale: ta.pressed && !busy ? 0.96 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate background, border-color { duration: 180ms; }
+    animate transform-scale { duration: 240ms; easing: Ease.spring; }
+    lay := HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 16px;
+        spacing: 8px;
+        Ico {
+            y: (parent.height - self.height) / 2;
+            source: Icons.refresh;
+            size: 16px;
+            color: Theme.accent;
+            property <angle> spin: root.busy ? mod(animation-tick() / 800ms, 1.0) * 360deg : 0deg;
+            property <angle> nudge: root.hovered ? 60deg : 0deg;
+            animate nudge { duration: 420ms; easing: Ease.spring; }
+            transform-rotation: self.spin + self.nudge;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+        }
+        Text {
+            min-width: probe.preferred-width;
+            text: root.busy ? "Checking…" : "Check for updates";
+            font-size: Theme.px(12px);
+            font-weight: 700;
+            color: Theme.fg;
+            vertical-alignment: center;
+        }
+    }
+    probe := Text {
+        visible: false;
+        text: "Check for updates";
+        font-size: Theme.px(12px);
+        font-weight: 700;
+    }
+    ta := TouchArea {
+        enabled: !root.busy;
+        mouse-cursor: root.busy ? default : pointer;
+        clicked => { SettingsApi.check-updates(); }
+    }
+}
+
+component UpdateCheckStatus inherits Rectangle {
+    property <int> st: SettingsApi.update-check;
+    property <bool> shown: st >= 2;
+    property <bool> bad: st == 3;
+    height: 22px;
+    opacity: shown ? 1 : 0;
+    animate opacity { duration: 220ms; easing: ease-out; }
+    HorizontalLayout {
+        x: 4px;
+        y: root.shown ? 0px : -6px;
+        animate y { duration: 380ms; easing: Ease.emphasized; }
+        spacing: 6px;
+        alignment: start;
+        Rectangle {
+            width: 16px;
+            height: 16px;
+            y: (parent.height - self.height) / 2;
+            border-radius: 8px;
+            background: root.bad ? Theme.alpha(Theme.danger, 0.18) : Theme.accent;
+            Ico {
+                source: root.bad ? Icons.close : Icons.check;
+                size: 12px;
+                color: root.bad ? Theme.danger-text : Theme.on-accent;
+                transform-scale: root.shown ? 1 : 0.3;
+                transform-origin: { x: self.width / 2, y: self.height / 2 };
+                animate transform-scale { duration: 460ms; delay: 80ms; easing: Ease.spring; }
+            }
+        }
+        Text {
+            text: SettingsApi.update-check-text;
+            font-size: Theme.px(11px);
+            font-weight: 600;
+            color: root.bad ? Theme.danger-text : Theme.fg-dim;
+            vertical-alignment: center;
+        }
     }
 }
 
@@ -364,6 +459,12 @@ export component SettingsDialog inherits Rectangle {
                 height: self.preferred-height + 10px;
             }
             NavButton {
+                text: "General";
+                icon: Icons.gear;
+                active: SettingsApi.page == 2;
+                clicked => { SettingsApi.page = 2; }
+            }
+            NavButton {
                 text: "Theme";
                 icon: Icons.contrast;
                 active: SettingsApi.page == 0;
@@ -399,6 +500,52 @@ export component SettingsDialog inherits Rectangle {
     content := Rectangle {
         x: sidebar.width;
         width: parent.width - sidebar.width;
+        general-page := Rectangle {
+            opacity: SettingsApi.page == 2 ? 1 : 0;
+            visible: self.opacity > 0.01;
+            animate opacity { duration: 160ms; }
+            VerticalLayout {
+                padding: 22px;
+                padding-top: 16px;
+                spacing: 16px;
+                alignment: start;
+                Text {
+                    text: "General";
+                    font-size: Theme.px(21px);
+                    font-weight: 800;
+                    color: Theme.fg;
+                }
+                Section {
+                    title: "Updates";
+                    Row {
+                        title: "Check for updates automatically";
+                        desc: "Look for a new version each time Mukyu Launcher starts";
+                        Switch {
+                            checked: SettingsApi.auto-update;
+                            toggled(on) => { SettingsApi.set-auto-update(on); }
+                        }
+                    }
+                    Sep { }
+                    Row {
+                        title: "Show what's new after updating";
+                        desc: "Open the release notes the first time a new version starts";
+                        Switch {
+                            checked: SettingsApi.show-changelog;
+                            toggled(on) => { SettingsApi.set-show-changelog(on); }
+                        }
+                    }
+                }
+                VerticalLayout {
+                    spacing: 8px;
+                    padding-left: 2px;
+                    HorizontalLayout {
+                        alignment: start;
+                        CheckUpdatesButton { }
+                    }
+                    UpdateCheckStatus { }
+                }
+            }
+        }
         theme-page := Rectangle {
             opacity: SettingsApi.page == 0 ? 1 : 0;
             visible: self.opacity > 0.01;

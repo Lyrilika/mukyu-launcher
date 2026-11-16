@@ -116,6 +116,28 @@ with Inno Setup.
   loose WAV/Ogg files and PC-98 disk images.
 - **Reader**: PDFium through pdfium-render.
 
+## Updates
+
+On start, Mukyu Launcher quietly checks the latest GitHub release and only shows a
+popup when a newer version exists. Automatic checks can be turned off with
+"Don't show this again" in the update popup or in Settings → General, which also has a
+"Check for updates" button for checking on demand.
+
+- **AppImage**: the update replaces the running AppImage file in place, keeping the same
+  file name, so `.desktop` shortcuts keep working. The new version is used the next time
+  the launcher starts. A `.zsync` file is also published for AppImageUpdate-style tools.
+- **Windows (installed)**: the installer is downloaded and runs silently when the launcher
+  closes, upgrading the existing installation in place.
+- **Windows (not installed through the setup)**: the installer is saved to a folder you choose.
+
+After updating from inside the launcher, the first start shows what's new in that version.
+Downloading a newer AppImage or installer yourself doesn't show it. This can be turned off
+with "Don't show this again" in that popup or in Settings → General.
+
+**Releasing**: set `version` in `Cargo.toml` to the new version before building. The
+publish step refuses a tag that doesn't match it (`v` + version), because a mismatch would
+make the launcher offer the same update forever.
+
 ## License and third-party notices
 
 Mukyu Launcher's original code is licensed under the **GNU Affero General Public

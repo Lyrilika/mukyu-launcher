@@ -40,17 +40,20 @@ jobs:
         sudo apt-get update -qq
         sudo apt-get install -y --no-install-recommends libasound2-dev libxkbcommon-dev \
           libfontconfig1-dev libwayland-dev libxcursor-dev libxrandr-dev libxi-dev libgl1-mesa-dev \
-          libfuse2 file desktop-file-utils
+          libfuse2 file desktop-file-utils zsync
     - name: Unit tests
       run: cargo test --release --locked
     - name: Build AppImage
       run: bash packaging/appimage/build_appimage.sh
     - name: Report size
-      run: du -h dist/Mukyu_Launcher-x86_64.AppImage >> "$GITHUB_STEP_SUMMARY"
+      run: du -h dist/Mukyu_Launcher-x86_64.AppImage dist/Mukyu_Launcher-x86_64.AppImage.zsync >> "$GITHUB_STEP_SUMMARY"
     - uses: actions/upload-artifact@v6
       with:
         name: Linux-AppImage
-        path: dist/Mukyu_Launcher-x86_64.AppImage
+        path: |
+          dist/Mukyu_Launcher-x86_64.AppImage
+          dist/Mukyu_Launcher-x86_64.AppImage.zsync
+          dist/VERSION
         compression-level: 0
         if-no-files-found: error
 
@@ -160,11 +163,17 @@ jobs:
         RELEASE_DESCRIPTION: ${{ inputs.release_description }}
       run: |
         test -s release/Mukyu_Launcher-x86_64.AppImage
+        test -s release/Mukyu_Launcher-x86_64.AppImage.zsync
         test -s release/Mukyu_Launcher_Setup.exe
+        built="$(tr -d '[:space:]' < release/VERSION)"
+        if [[ "v$built" != "$TAG" ]]; then
+          echo "The tag $TAG does not match the built version $built (Cargo.toml). Bump the version, rebuild, then publish."
+          exit 1
+        fi
         notes=(--generate-notes)
         if [[ -n "$RELEASE_DESCRIPTION" ]]; then
           notes=(--notes "$RELEASE_DESCRIPTION")
         fi
         gh release create "$TAG" --title "$TAG" --draft "${notes[@]}"
-        gh release upload "$TAG" release/Mukyu_Launcher-x86_64.AppImage release/Mukyu_Launcher_Setup.exe
+        gh release upload "$TAG" release/Mukyu_Launcher-x86_64.AppImage release/Mukyu_Launcher-x86_64.AppImage.zsync release/Mukyu_Launcher_Setup.exe
         gh release edit "$TAG" --draft=false

@@ -1,0 +1,602 @@
+import { Theme, Ease, Icons } from "theme.slint";
+import { Ico, ProgressTrack, WrapText, ScrollBox, CheckBox, Spinner } from "widgets.slint";
+import { DialogButtonView } from "dialogs.slint";
+
+export global UpdateApi {
+    in-out property <bool> open: false;
+    in-out property <string> current;
+    in-out property <string> latest;
+    in-out property <int> state: 0;
+    in-out property <int> method: 0;
+    in-out property <float> fraction: 0;
+    in-out property <string> progress-text;
+    in-out property <string> message;
+    in-out property <bool> auto-check: true;
+    callback update();
+    callback ignore();
+    callback close();
+    callback cancel();
+    callback restart();
+    callback open-installer();
+    callback set-auto(bool);
+    callback view-changelog();
+}
+
+export global ChangelogApi {
+    in-out property <bool> open: false;
+    in-out property <string> version;
+    in-out property <string> previous;
+    in-out property <string> notes;
+    in-out property <bool> loading: true;
+    in-out property <bool> show-again: true;
+    callback close();
+    callback open-page();
+    callback set-show(bool);
+}
+
+component Card inherits Rectangle {
+    in property <bool> shown;
+    border-radius: 18px;
+    background: Theme.bg;
+    border-width: 1px;
+    border-color: Theme.alpha(Theme.fg, 0.08);
+    drop-shadow-blur: 40px;
+    drop-shadow-offset-y: 16px;
+    drop-shadow-color: #00000080;
+    opacity: shown ? 1 : 0;
+    transform-scale: shown ? 1 : 0.94;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate opacity { duration: 180ms; easing: ease-out; }
+    animate transform-scale { duration: 340ms; easing: Ease.emphasized; }
+    visible: self.opacity > 0.01;
+    TouchArea { }
+    @children
+}
+
+component Reveal inherits Rectangle {
+    in property <bool> shown;
+    in property <duration> delay;
+    in property <length> pad-top;
+    in property <length> gap;
+    property <length> offset: shown ? 0px : 10px;
+    animate offset { duration: 460ms; delay: root.shown ? root.delay : 0ms; easing: Ease.emphasized; }
+    opacity: shown ? 1 : 0;
+    animate opacity { duration: 280ms; delay: root.shown ? root.delay : 0ms; easing: ease-out; }
+    min-height: inner.min-height;
+    preferred-height: inner.preferred-height;
+    inner := VerticalLayout {
+        x: 0;
+        y: root.offset;
+        width: root.width;
+        height: root.height;
+        padding-top: root.pad-top;
+        spacing: root.gap;
+        @children
+    }
+}
+
+component CloseButton inherits Rectangle {
+    callback clicked();
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+    background: ta.pressed ? Theme.alpha(Theme.fg, 0.16) : ta.has-hover ? Theme.alpha(Theme.fg, 0.09) : transparent;
+    transform-scale: ta.pressed ? 0.88 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate background { duration: 150ms; }
+    animate transform-scale { duration: 240ms; easing: Ease.spring; }
+    Ico {
+        source: Icons.close;
+        size: 16px;
+        color: ta.has-hover ? Theme.fg : Theme.fg-dim;
+        transform-rotation: ta.has-hover ? 90deg : 0deg;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        animate transform-rotation { duration: 360ms; easing: Ease.soft-spring; }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component Header inherits HorizontalLayout {
+    callback close();
+    spacing: 10px;
+    Rectangle {
+        width: 24px;
+        Image {
+            source: Icons.app-icon;
+            width: 24px;
+            height: 24px;
+            transform-rotation: ita.has-hover ? -12deg : 0deg;
+            transform-scale: ita.has-hover ? 1.14 : 1;
+            transform-origin: { x: self.width / 2, y: self.height / 2 };
+            animate transform-rotation, transform-scale { duration: 420ms; easing: Ease.spring; }
+        }
+        ita := TouchArea { }
+    }
+    Text {
+        text: "Mukyu Launcher";
+        font-size: Theme.px(12px);
+        font-weight: 700;
+        color: Theme.fg-dim;
+        vertical-alignment: center;
+        horizontal-stretch: 1;
+    }
+    CloseButton {
+        clicked => { root.close(); }
+    }
+}
+
+component Link inherits Rectangle {
+    in property <string> text;
+    in property <image> icon: Icons.open-external;
+    callback clicked();
+    property <bool> hovered: ta.has-hover;
+    height: 26px;
+    min-width: label.preferred-width + 20px;
+    preferred-width: self.min-width;
+    horizontal-stretch: 0;
+    label := Text {
+        x: 0;
+        text: root.text;
+        font-size: Theme.base;
+        font-weight: 700;
+        color: root.hovered ? Theme.accent : Theme.fg;
+        vertical-alignment: center;
+        animate color { duration: 160ms; }
+    }
+    Ico {
+        x: label.preferred-width + 6px + (root.hovered ? 2px : 0px);
+        y: (root.height - self.height) / 2 - (root.hovered ? 2px : 0px);
+        source: root.icon;
+        size: 14px;
+        color: root.hovered ? Theme.accent : Theme.fg-dim;
+        animate x, y { duration: 300ms; easing: Ease.spring; }
+        animate color { duration: 160ms; }
+    }
+    Rectangle {
+        x: 0;
+        y: root.height - 3px;
+        height: 1.5px;
+        width: root.hovered ? label.preferred-width : 0px;
+        border-radius: 1px;
+        background: Theme.accent;
+        animate width { duration: 280ms; easing: Ease.emphasized; }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
+component Divider inherits Rectangle {
+    height: 1px;
+    background: Theme.alpha(Theme.fg, 0.08);
+}
+
+component Pill inherits Rectangle {
+    in property <string> text;
+    in property <bool> shown;
+    in property <duration> delay: 200ms;
+    height: label.preferred-height + 6px;
+    width: label.preferred-width + 18px;
+    border-radius: self.height / 2;
+    background: Theme.alpha(Theme.accent, 0.16);
+    border-width: 1px;
+    border-color: Theme.alpha(Theme.accent, 0.35);
+    transform-scale: shown ? 1 : 0.4;
+    opacity: shown ? 1 : 0;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate transform-scale { duration: 520ms; delay: root.shown ? root.delay : 0ms; easing: Ease.spring; }
+    animate opacity { duration: 200ms; delay: root.shown ? root.delay : 0ms; }
+    label := Text {
+        text: root.text;
+        font-size: Theme.px(11px);
+        font-weight: 800;
+        color: Theme.accent;
+    }
+}
+
+component VersionColumn inherits VerticalLayout {
+    in property <string> label;
+    in property <string> value;
+    in property <bool> highlight;
+    in property <bool> shown;
+    in property <TextHorizontalAlignment> align: left;
+    alignment: center;
+    spacing: 3px;
+    horizontal-stretch: 1;
+    Text {
+        text: root.label;
+        font-size: Theme.px(10px);
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        color: root.highlight ? Theme.accent : Theme.fg-dim;
+        horizontal-alignment: root.align;
+    }
+    Rectangle {
+        height: value-text.preferred-height;
+        transform-scale: root.shown || !root.highlight ? 1 : 0.6;
+        opacity: root.shown || !root.highlight ? 1 : 0;
+        transform-origin: { x: root.align == TextHorizontalAlignment.right ? self.width : 0px, y: self.height / 2 };
+        animate transform-scale { duration: 560ms; delay: root.shown ? 260ms : 0ms; easing: Ease.spring; }
+        animate opacity { duration: 220ms; delay: root.shown ? 260ms : 0ms; }
+        value-text := Text {
+            width: parent.width;
+            text: root.value;
+            font-size: Theme.px(20px);
+            font-weight: 800;
+            color: root.highlight ? Theme.accent : Theme.fg;
+            horizontal-alignment: root.align;
+        }
+    }
+}
+
+component VersionCard inherits Rectangle {
+    in property <bool> shown;
+    in property <string> from-label;
+    in property <string> from;
+    in property <string> to-label;
+    in property <string> to;
+    in property <bool> done;
+    in property <bool> busy;
+    callback view-changelog();
+    border-radius: 14px;
+    background: Theme.surface;
+    border-width: 1px;
+    border-color: ca.has-hover ? Theme.alpha(Theme.accent, 0.3) : Theme.alpha(Theme.fg, 0.07);
+    animate border-color { duration: 200ms; }
+    height: lay.preferred-height;
+    ca := TouchArea { }
+    lay := VerticalLayout {
+        HorizontalLayout {
+            padding: 16px;
+            padding-top: 14px;
+            padding-bottom: 14px;
+            spacing: 12px;
+            VersionColumn {
+                label: root.from-label;
+                value: root.from;
+                shown: root.shown;
+            }
+            Rectangle {
+                width: 38px;
+                height: 38px;
+                y: (parent.height - self.height) / 2;
+                border-radius: 19px;
+                background: root.done ? Theme.accent : Theme.alpha(Theme.accent, 0.14);
+                animate background { duration: 260ms; }
+                property <float> wave: root.shown && !root.done ? sin(animation-tick() / (root.busy ? 520ms : 1300ms) * 360deg) : 0;
+                Ico {
+                    x: (parent.width - self.width) / 2 + parent.wave * 3px;
+                    source: Icons.arrow-right;
+                    size: 18px;
+                    color: Theme.accent;
+                    opacity: root.done ? 0 : 1;
+                    transform-scale: root.done ? 0.4 : 1;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate opacity { duration: 160ms; }
+                    animate transform-scale { duration: 300ms; easing: Ease.spring; }
+                }
+                Ico {
+                    source: Icons.check;
+                    size: 20px;
+                    color: Theme.on-accent;
+                    opacity: root.done ? 1 : 0;
+                    transform-scale: root.done ? 1 : 0.3;
+                    transform-rotation: root.done ? 0deg : -60deg;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate opacity { duration: 160ms; }
+                    animate transform-scale { duration: 460ms; easing: Ease.spring; }
+                    animate transform-rotation { duration: 460ms; easing: Ease.soft-spring; }
+                }
+            }
+            VersionColumn {
+                label: root.to-label;
+                value: root.to;
+                highlight: true;
+                shown: root.shown;
+                align: right;
+            }
+        }
+        Divider { }
+        HorizontalLayout {
+            padding-left: 16px;
+            padding-right: 16px;
+            padding-top: 8px;
+            padding-bottom: 8px;
+            Link {
+                text: "View changelog";
+                clicked => { root.view-changelog(); }
+            }
+            Rectangle { horizontal-stretch: 1; }
+        }
+    }
+}
+
+export component UpdateDialog inherits Card {
+    property <int> st: UpdateApi.state;
+    shown: UpdateApi.open;
+    width: 480px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 22px;
+        padding-top: 16px;
+        spacing: 0px;
+        Header {
+            close => { UpdateApi.close(); }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 40ms;
+            pad-top: 14px;
+            gap: 4px;
+            Text {
+                text: root.st == 1 ? "Downloading update" : root.st == 2 ? "Update ready" : root.st == 3 ? "Update failed" : root.st == 4 ? "Installer saved" : "Update available";
+                font-size: Theme.px(21px);
+                font-weight: 800;
+                color: root.st == 3 ? Theme.danger-text : Theme.fg;
+                animate color { duration: 200ms; }
+            }
+            WrapText {
+                text: root.st == 0 ? "A new version of Mukyu Launcher is out. Update now to get the latest features and fixes."
+                    : root.st == 1 ? "Mukyu Launcher " + UpdateApi.latest + " is downloading. You can keep using the launcher."
+                    : root.st == 3 ? "Something went wrong while updating. Your current version was left as it is."
+                    : UpdateApi.message;
+                ink: Theme.fg-dim;
+                font-size: Theme.base;
+            }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 110ms;
+            pad-top: 16px;
+            VersionCard {
+                shown: root.shown;
+                from-label: root.st == 2 ? "PREVIOUS" : "CURRENT";
+                from: UpdateApi.current;
+                to-label: root.st == 2 ? "INSTALLED" : "NEW";
+                to: UpdateApi.latest;
+                done: root.st == 2 || root.st == 4;
+                busy: root.st == 1;
+                view-changelog => { UpdateApi.view-changelog(); }
+            }
+        }
+        if root.st == 1: VerticalLayout {
+            padding-top: 14px;
+            spacing: 7px;
+            ProgressTrack {
+                height: 8px;
+                border-radius: 4px;
+                value: UpdateApi.fraction;
+            }
+            HorizontalLayout {
+                Text {
+                    text: UpdateApi.progress-text;
+                    font-size: Theme.base * 0.88;
+                    color: Theme.fg-dim;
+                    horizontal-stretch: 1;
+                }
+                Text {
+                    text: round(UpdateApi.fraction * 100) + "%";
+                    font-size: Theme.base * 0.88;
+                    font-weight: 700;
+                    color: Theme.accent;
+                }
+            }
+        }
+        if root.st == 3: Rectangle {
+            property <length> pad: 12px;
+            height: err.preferred-height + 2 * self.pad + 14px;
+            Rectangle {
+                y: 14px;
+                height: parent.height - 14px;
+                border-radius: 12px;
+                background: Theme.alpha(Theme.danger, 0.1);
+                border-width: 1px;
+                border-color: Theme.alpha(Theme.danger, 0.3);
+                err := WrapText {
+                    x: 12px;
+                    y: 12px;
+                    width: parent.width - 24px;
+                    text: UpdateApi.message;
+                    ink: Theme.danger-text;
+                    font-size: Theme.base * 0.92;
+                }
+            }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 180ms;
+            pad-top: 18px;
+            gap: 14px;
+            Divider { }
+            HorizontalLayout {
+                spacing: 8px;
+                if root.st == 0: CheckBox {
+                    y: (parent.height - self.height) / 2;
+                    text: "Don't show this again";
+                    checked: !UpdateApi.auto-check;
+                    toggled(on) => { UpdateApi.set-auto(!on); }
+                }
+                Rectangle { horizontal-stretch: 1; }
+                if root.st == 0: DialogButtonView {
+                    text: "Ignore";
+                    role: 2;
+                    clicked => { UpdateApi.ignore(); }
+                }
+                if root.st == 0: DialogButtonView {
+                    text: UpdateApi.method == 3 ? "Get update" : UpdateApi.method == 2 ? "Download" : "Update now";
+                    role: 0;
+                    has-icon: true;
+                    icon: UpdateApi.method == 3 ? Icons.open-external : Icons.download;
+                    clicked => { UpdateApi.update(); }
+                }
+                if root.st == 1: DialogButtonView {
+                    text: "Cancel";
+                    role: 2;
+                    clicked => { UpdateApi.cancel(); }
+                }
+                if root.st == 2: DialogButtonView {
+                    text: "Later";
+                    role: 2;
+                    clicked => { UpdateApi.close(); }
+                }
+                if root.st == 2: DialogButtonView {
+                    text: "Restart now";
+                    role: 0;
+                    clicked => { UpdateApi.restart(); }
+                }
+                if root.st == 3: DialogButtonView {
+                    text: "Close";
+                    role: 2;
+                    clicked => { UpdateApi.close(); }
+                }
+                if root.st == 3: DialogButtonView {
+                    text: "Try again";
+                    role: 0;
+                    clicked => { UpdateApi.update(); }
+                }
+                if root.st == 4: DialogButtonView {
+                    text: "Close";
+                    role: 2;
+                    clicked => { UpdateApi.close(); }
+                }
+                if root.st == 4: DialogButtonView {
+                    text: "Open installer";
+                    role: 0;
+                    clicked => { UpdateApi.open-installer(); }
+                }
+            }
+        }
+    }
+}
+
+export component ChangelogDialog inherits Card {
+    shown: ChangelogApi.open;
+    width: 500px;
+    height: lay.preferred-height;
+    lay := VerticalLayout {
+        padding: 22px;
+        padding-top: 16px;
+        spacing: 0px;
+        Header {
+            close => { ChangelogApi.close(); }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 40ms;
+            pad-top: 14px;
+            gap: 4px;
+            HorizontalLayout {
+                spacing: 10px;
+                Text {
+                    text: "What's new";
+                    font-size: Theme.px(21px);
+                    font-weight: 800;
+                    color: Theme.fg;
+                    vertical-alignment: center;
+                }
+                Pill {
+                    y: (parent.height - self.height) / 2;
+                    text: "v" + ChangelogApi.version;
+                    shown: root.shown;
+                    delay: 220ms;
+                }
+                Rectangle { horizontal-stretch: 1; }
+            }
+            WrapText {
+                text: ChangelogApi.previous != ""
+                    ? "Updated from " + ChangelogApi.previous + " to " + ChangelogApi.version + ". Here's what changed."
+                    : "Updated to version " + ChangelogApi.version + ". Here's what changed.";
+                ink: Theme.fg-dim;
+                font-size: Theme.base;
+            }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 110ms;
+            pad-top: 16px;
+            notes-box := Rectangle {
+                property <length> text-h: notes.preferred-height + 28px;
+                height: ChangelogApi.loading ? 96px : min(340px, max(72px, self.text-h));
+                animate height { duration: 360ms; easing: Ease.emphasized; }
+                border-radius: 14px;
+                background: Theme.surface;
+                border-width: 1px;
+                border-color: Theme.alpha(Theme.fg, 0.07);
+                clip: true;
+                Rectangle {
+                    opacity: ChangelogApi.loading ? 1 : 0;
+                    visible: self.opacity > 0.01;
+                    animate opacity { duration: 200ms; }
+                    HorizontalLayout {
+                        alignment: center;
+                        spacing: 10px;
+                        Spinner {
+                            y: (parent.height - self.height) / 2;
+                            size: 18px;
+                            thickness: 2.5px;
+                            fg: Theme.accent;
+                            running: ChangelogApi.loading && root.shown;
+                        }
+                        Text {
+                            text: "Loading release notes…";
+                            font-size: Theme.base;
+                            color: Theme.fg-dim;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+                ScrollBox {
+                    x: 0;
+                    y: 0;
+                    width: parent.width;
+                    height: parent.height;
+                    content-height: notes-box.text-h;
+                    opacity: ChangelogApi.loading ? 0 : 1;
+                    animate opacity { duration: 260ms; delay: 80ms; }
+                    notes := WrapText {
+                        x: 16px;
+                        y: 14px;
+                        width: notes-box.width - 36px;
+                        text: ChangelogApi.notes == "" ? "No release notes were published for this version." : ChangelogApi.notes;
+                        ink: ChangelogApi.notes == "" ? Theme.fg-dim : Theme.fg;
+                        font-size: Theme.base;
+                    }
+                }
+            }
+            HorizontalLayout {
+                padding-top: 10px;
+                Link {
+                    text: "View on GitHub";
+                    clicked => { ChangelogApi.open-page(); }
+                }
+                Rectangle { horizontal-stretch: 1; }
+            }
+        }
+        Reveal {
+            shown: root.shown;
+            delay: 180ms;
+            pad-top: 14px;
+            gap: 14px;
+            Divider { }
+            HorizontalLayout {
+                spacing: 8px;
+                CheckBox {
+                    y: (parent.height - self.height) / 2;
+                    text: "Don't show this again";
+                    checked: !ChangelogApi.show-again;
+                    toggled(on) => { ChangelogApi.set-show(!on); }
+                }
+                Rectangle { horizontal-stretch: 1; }
+                DialogButtonView {
+                    text: "Got it";
+                    role: 0;
+                    clicked => { ChangelogApi.close(); }
+                }
+            }
+        }
+    }
+}

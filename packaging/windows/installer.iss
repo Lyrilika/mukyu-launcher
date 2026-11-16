@@ -10,10 +10,15 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher=Mukyu Launcher contributors
 DefaultDirName={autopf}\{#AppName}
+UsePreviousAppDir=yes
+UsePreviousTasks=yes
+UsePreviousPrivileges=yes
+CloseApplications=no
+RestartApplications=no
 DefaultGroupName={#AppName}
 DisableProgramGroupPage=yes
 PrivilegesRequired=lowest
-PrivilegesRequiredOverridesAllowed=dialog
+PrivilegesRequiredOverridesAllowed=commandline dialog
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\MukyuLauncher.exe
 OutputDir=..\..\dist
@@ -36,3 +41,46 @@ Name: "{autodesktop}\{#AppName}"; Filename: "{app}\MukyuLauncher.exe"; WorkingDi
 
 [Run]
 Filename: "{app}\MukyuLauncher.exe"; WorkingDir: "{app}"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\MukyuLauncher.exe"; WorkingDir: "{app}"; Flags: nowait runasoriginaluser; Check: ShouldRelaunch
+
+[Code]
+function HasSwitch(const Name: String): Boolean;
+var
+  I: Integer;
+begin
+  Result := False;
+  for I := 1 to ParamCount do
+    if CompareText(ParamStr(I), Name) = 0 then
+      Result := True;
+end;
+
+function ShouldRelaunch(): Boolean;
+begin
+  Result := HasSwitch('/RELAUNCH');
+end;
+
+function InitializeSetup(): Boolean;
+var
+  Waited: Integer;
+begin
+  Result := True;
+  Waited := 0;
+  while CheckForMutexes('MukyuLauncherRunning') do
+  begin
+    if WizardSilent then
+    begin
+      if Waited >= 60000 then
+      begin
+        Result := False;
+        Exit;
+      end;
+      Sleep(250);
+      Waited := Waited + 250;
+    end
+    else if MsgBox('Mukyu Launcher is running. Close it, then click OK to continue.', mbInformation, MB_OKCANCEL) = IDCANCEL then
+    begin
+      Result := False;
+      Exit;
+    end;
+  end;
+end;

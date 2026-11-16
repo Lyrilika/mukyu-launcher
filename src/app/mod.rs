@@ -3,6 +3,7 @@ pub mod games_ui;
 pub mod music_ui;
 pub mod print_ui;
 pub mod reader_ui;
+pub mod update_ui;
 
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -228,6 +229,7 @@ fn setup_settings(c: &Rc<Ctx>) {
         let s = c.app.global::<SettingsApi>();
         s.set_picker_open(false);
         s.set_open(false);
+        update_ui::reset_manual_check(&c);
     });
     s.on_set_dark(|dark| {
         let c = ctx();
@@ -280,7 +282,9 @@ fn setup_app_api(c: &Rc<Ctx>) {
     });
     a.on_escape(|| {
         let c = ctx();
-        if c.dialog_open() {
+        if update_ui::is_open(&c) {
+            update_ui::close(&c);
+        } else if c.dialog_open() {
             let cancel = c.active_dialog.borrow().as_ref().map(|d| d.cancel).unwrap_or(0);
             c.respond(cancel);
         } else if print_ui::download_open(&c) {
@@ -328,6 +332,8 @@ pub fn run() -> anyhow::Result<()> {
     if std::env::var_os("MUKYU_ALLOW_MULTIPLE").is_none() && raise_existing_instance() {
         return Ok(());
     }
+    #[cfg(windows)]
+    crate::update::hold_instance_mutex();
 
     let _ = slint::BackendSelector::new()
         .with_winit_window_attributes_hook(|attrs| {
@@ -378,21 +384,27 @@ pub fn run() -> anyhow::Result<()> {
     }
 
     c.app.window().on_close_requested(|| {
-        let c = ctx();
-        music_ui::shutdown(&c);
-        for r in c.readers.borrow_mut().drain(..) {
-            r.close_now();
-        }
-        let _ = slint::quit_event_loop();
+        quit(&ctx());
         slint::CloseRequestResponse::HideWindow
     });
 
     c.app.show()?;
     music_ui::attach_media(&c);
+    update_ui::setup(&c);
     debug_hooks();
     slint::run_event_loop_until_quit()?;
     music_ui::shutdown(&ctx());
+    crate::update::run_pending_installer(false);
     Ok(())
+}
+
+pub fn quit(c: &Rc<Ctx>) {
+    music_ui::shutdown(c);
+    for r in c.readers.borrow_mut().drain(..) {
+        r.close_now();
+    }
+    let _ = c.app.hide();
+    let _ = slint::quit_event_loop();
 }
 
 fn debug_hooks() {
@@ -408,6 +420,70 @@ fn debug_hooks() {
                     c.app.global::<AppApi>().invoke_tab_changed(t);
                 }
                 "settings" => c.app.global::<SettingsApi>().set_open(true),
+                "update-click" => {
+                    let ms: u64 = v.parse().unwrap_or(4000);
+                    after(ms, || ctx().app.global::<crate::UpdateApi>().invoke_update());
+                }
+                "update-ignore" => {
+                    let ms: u64 = v.parse().unwrap_or(4000);
+                    after(ms, || ctx().app.global::<crate::UpdateApi>().invoke_ignore());
+                }
+                "changelog-close" => {
+                    let ms: u64 = v.parse().unwrap_or(5000);
+                    after(ms, || ctx().app.global::<crate::ChangelogApi>().invoke_close());
+                }
+                "dump-update" => {
+                    for ms in v.split('/').filter_map(|t| t.parse::<u64>().ok()) {
+                        after(ms, move || {
+                            let c = ctx();
+                            let u = c.app.global::<crate::UpdateApi>();
+                            let l = c.app.global::<crate::ChangelogApi>();
+                            println!(
+                                "t={ms} update_open={} state={} latest={} changelog_open={} changelog_version={} notes_len={} loading={} auto={} show_changelog={} previous={}",
+                                u.get_open(),
+                                u.get_state(),
+                                u.get_latest(),
+                                l.get_open(),
+                                l.get_version(),
+                                l.get_notes().len(),
+                                l.get_loading(),
+                                c.app.global::<SettingsApi>().get_auto_update(),
+                                c.app.global::<SettingsApi>().get_show_changelog(),
+                                l.get_previous()
+                            );
+                        });
+                    }
+                }
+                "snapshot" => {
+                    let (ms, path) = v.split_once('@').unwrap_or(("4000", v));
+                    let ms: u64 = ms.parse().unwrap_or(4000);
+                    let path = path.to_string();
+                    after(ms, move || {
+                        if let Ok(buf) = ctx().app.window().take_snapshot() {
+                            let _ = image::RgbaImage::from_raw(buf.width(), buf.height(), buf.as_bytes().to_vec()).map(|img| img.save(&path));
+                        }
+                    });
+                }
+                "settings-page" => {
+                    c.app.global::<SettingsApi>().set_open(true);
+                    c.app.global::<SettingsApi>().set_page(v.parse().unwrap_or(2));
+                }
+                "update-disable" => {
+                    let ms: u64 = v.parse().unwrap_or(4000);
+                    after(ms, || ctx().app.global::<crate::UpdateApi>().invoke_set_auto(false));
+                }
+                "check-updates" => {
+                    let ms: u64 = v.parse().unwrap_or(1000);
+                    after(ms, || ctx().app.global::<SettingsApi>().invoke_check_updates());
+                }
+                "changelog-hide" => {
+                    let ms: u64 = v.parse().unwrap_or(3000);
+                    after(ms, || ctx().app.global::<crate::ChangelogApi>().invoke_set_show(false));
+                }
+                "update-restart" => {
+                    let ms: u64 = v.parse().unwrap_or(9000);
+                    after(ms, || ctx().app.global::<crate::UpdateApi>().invoke_restart());
+                }
                 "about" => {
                     c.app.global::<SettingsApi>().set_open(true);
                     c.app.global::<SettingsApi>().set_page(1);
