@@ -430,7 +430,7 @@ export component ScrollBox inherits Rectangle {
 
 export component Dropdown inherits Rectangle {
     in property <[MenuItem]> items;
-    in-out property <int> current: 0;
+    in property <int> current: 0;
     in property <length> h: 38px;
     in property <length> radius: h / 2;
     in property <color> bg: Theme.mu-secondary-container;
@@ -563,7 +563,6 @@ export component Dropdown inherits Rectangle {
                                 enabled: item.enabled;
                                 mouse-cursor: item.enabled ? pointer : default;
                                 clicked => {
-                                    root.current = i;
                                     root.pending = i;
                                     root.open = false;
                                     popup.close();
