@@ -327,7 +327,22 @@ fn raise_existing_instance() -> bool {
     conn.call_method(Some(name), "/org/mpris/MediaPlayer2", Some("org.mpris.MediaPlayer2"), "Raise", &()).is_ok()
 }
 
-pub fn run() -> anyhow::Result<()> {
+fn wait_for_previous_instance() {
+    let Some(pid) = std::env::var("MUKYU_WAIT_PID").ok().and_then(|p| p.parse::<u32>().ok()) else { return };
+    #[cfg(target_os = "linux")]
+    {
+        let proc_dir = std::path::PathBuf::from(format!("/proc/{pid}"));
+        let start = std::time::Instant::now();
+        while proc_dir.exists() && start.elapsed() < std::time::Duration::from_secs(10) {
+            std::thread::sleep(std::time::Duration::from_millis(50));
+        }
+    }
+    #[cfg(not(target_os = "linux"))]
+    let _ = pid;
+}
+
+pub fn run(software_renderer: bool) -> anyhow::Result<()> {
+    wait_for_previous_instance();
     #[cfg(target_os = "linux")]
     if std::env::var_os("MUKYU_ALLOW_MULTIPLE").is_none() && raise_existing_instance() {
         return Ok(());
@@ -335,7 +350,11 @@ pub fn run() -> anyhow::Result<()> {
     #[cfg(windows)]
     crate::update::hold_instance_mutex();
 
-    let _ = slint::BackendSelector::new()
+    let mut selector = slint::BackendSelector::new();
+    if software_renderer {
+        selector = selector.backend_name("winit".into()).renderer_name("software".into());
+    }
+    let _ = selector
         .with_winit_window_attributes_hook(|attrs| {
             #[cfg(target_os = "linux")]
             {

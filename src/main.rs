@@ -32,10 +32,68 @@ fn main() {
         dev_report(args.iter().any(|a| a == "--decode-test"));
         return;
     }
-    if let Err(e) = app::run() {
-        eprintln!("Mukyu Launcher failed to start: {e:#}");
-        std::process::exit(1);
+    let software = std::env::var_os(SOFTWARE_RENDERER_ENV).is_some();
+    let result = std::panic::catch_unwind(|| app::run(software));
+    let failure = match result {
+        Ok(Ok(())) => return,
+        Ok(Err(e)) => format!("{e:#}"),
+        Err(payload) => payload
+            .downcast_ref::<&str>()
+            .map(|s| s.to_string())
+            .or_else(|| payload.downcast_ref::<String>().cloned())
+            .unwrap_or_else(|| "unknown error".into()),
+    };
+    if !software && is_graphics_failure(&failure) && relaunch_with_software_renderer() {
+        return;
     }
+    eprintln!("Mukyu Launcher failed to start: {failure}");
+    show_startup_error(&failure);
+    std::process::exit(1);
+}
+
+const SOFTWARE_RENDERER_ENV: &str = "MUKYU_SOFTWARE_RENDERER";
+
+fn is_graphics_failure(text: &str) -> bool {
+    let text = text.to_ascii_lowercase();
+    ["opengl", "gl configuration", "glutin", "egl", "wgl", "glx", "gl context"].iter().any(|k| text.contains(k))
+}
+
+fn relaunch_with_software_renderer() -> bool {
+    let appimage = update::running_appimage();
+    let program = match &appimage {
+        Some(path) => path.clone(),
+        None => match std::env::current_exe() {
+            Ok(path) => path,
+            Err(_) => return false,
+        },
+    };
+    let mut cmd = std::process::Command::new(program);
+    cmd.args(std::env::args_os().skip(1))
+        .env(SOFTWARE_RENDERER_ENV, "1")
+        .env("MUKYU_WAIT_PID", std::process::id().to_string());
+    if appimage.is_some() {
+        cmd.env_clear()
+            .envs(platform::host_env().into_iter().filter(|(k, _)| !matches!(k.as_str(), "APPIMAGE" | "APPDIR" | "ARGV0" | "OWD" | "MUKYU_ROOT")))
+            .env(SOFTWARE_RENDERER_ENV, "1")
+            .env("MUKYU_WAIT_PID", std::process::id().to_string());
+    }
+    platform::detach(&mut cmd);
+    cmd.spawn().is_ok()
+}
+
+fn show_startup_error(message: &str) {
+    #[cfg(windows)]
+    {
+        use windows::core::{HSTRING, PCWSTR};
+        use windows::Win32::UI::WindowsAndMessaging::{MessageBoxW, MB_ICONERROR, MB_OK};
+        let text = HSTRING::from(format!("Mukyu Launcher could not start.\n\n{message}"));
+        let title = HSTRING::from("Mukyu Launcher");
+        unsafe {
+            MessageBoxW(None, PCWSTR(text.as_ptr()), PCWSTR(title.as_ptr()), MB_OK | MB_ICONERROR);
+        }
+    }
+    #[cfg(not(windows))]
+    let _ = message;
 }
 
 fn dev_report(decode: bool) {
