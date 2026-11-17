@@ -320,8 +320,9 @@ int main(int argc, char **argv) {
     bool looped = !M.loops.empty();
     long total = looped ? loop_end : M.pos;
     if (info) {
-        printf("LOOPED=%d\nLENGTH_MS=%ld\nLOOP_START_MS=%ld\nLOOP_END_MS=%ld\nCHANNELS=%zu\n", looped ? 1 : 0,
-               total * 1000 / RATE, looped ? loop_start * 1000 / RATE : 0, looped ? loop_end * 1000 / RATE : 0, M.seen_ch.size());
+        printf("LOOPED=%d\nLENGTH_MS=%lld\nLOOP_START_MS=%lld\nLOOP_END_MS=%lld\nCHANNELS=%zu\n", looped ? 1 : 0,
+               (long long)total * 1000 / RATE, looped ? (long long)loop_start * 1000 / RATE : 0LL,
+               looped ? (long long)loop_end * 1000 / RATE : 0LL, M.seen_ch.size());
         return 0;
     }
     if (!looped) {

@@ -11,7 +11,7 @@ use super::{GameTrack, Source};
 use crate::paths;
 use crate::platform::no_window;
 
-const CACHE_VERSION: &str = "6";
+const CACHE_VERSION: &str = "7";
 const RENDER_TAIL: f64 = 1.5;
 const RHYTHM_NAMES: [&str; 6] = ["BD", "SD", "TOP", "HH", "TOM", "RIM"];
 const PF_NONE: u16 = 0xF388;

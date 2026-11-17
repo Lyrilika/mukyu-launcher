@@ -1117,6 +1117,7 @@ fn start_selected(c: &Rc<Ctx>) {
         api(c).set_source_error(false);
         std::thread::spawn(move || {
             let result = pc98::render(&track, &scratch).map_err(|e| e.to_string());
+            let real = result.as_ref().ok().and_then(|p| rendered_seconds(p));
             post(move |c| {
                 let current = {
                     let m = c.music.borrow();
@@ -1128,6 +1129,10 @@ fn start_selected(c: &Rc<Ctx>) {
                 match result {
                     Ok(path) => {
                         evict_prepared(c, &track.id, &path);
+                        let track = match real {
+                            Some(seconds) => correct_length(c, &track, seconds),
+                            None => track,
+                        };
                         track_ready(c, &track, path);
                     }
                     Err(e) => {
@@ -1162,6 +1167,39 @@ fn evict_prepared(c: &Rc<Ctx>, id: &str, path: &PathBuf) {
         total = total.saturating_sub(std::fs::metadata(&p).map(|x| x.len()).unwrap_or(0));
         let _ = std::fs::remove_file(p);
     }
+}
+
+fn rendered_seconds(path: &std::path::Path) -> Option<f64> {
+    let src = crate::music::metadata::FileRead::open(path).ok()?;
+    let (channels, rate, bits, _, len) = crate::music::metadata::wav_info(&src).ok()?;
+    let frame = channels as u64 * (bits as u64 / 8);
+    (frame > 0 && rate > 0).then(|| len as f64 / frame as f64 / rate as f64)
+}
+
+fn correct_length(c: &Rc<Ctx>, track: &GameTrack, seconds: f64) -> GameTrack {
+    if (track.duration - seconds).abs() <= 2.0 {
+        return track.clone();
+    }
+    let mut fixed = track.clone();
+    fixed.duration = seconds;
+    if fixed.loop_end > seconds + 0.05 || fixed.loop_start >= seconds {
+        fixed.loop_start = 0.0;
+        fixed.loop_end = 0.0;
+    }
+    {
+        let mut m = c.music.borrow_mut();
+        if m.selected.as_ref().map(|t| &t.id) == Some(&fixed.id) {
+            m.selected = Some(fixed.clone());
+        }
+        if let Some(list) = m.tracks.get_mut(&fixed.game_key) {
+            if let Some(t) = list.iter_mut().find(|t| t.id == fixed.id) {
+                *t = fixed.clone();
+            }
+        }
+    }
+    update_track_ui(c);
+    render_list(c, false);
+    fixed
 }
 
 fn track_ready(c: &Rc<Ctx>, track: &GameTrack, path: PathBuf) {
