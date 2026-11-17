@@ -407,6 +407,8 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
         slint::CloseRequestResponse::HideWindow
     });
 
+    #[cfg(windows)]
+    crate::platform::vsync_off_while(c.app.window(), reader_ui::any_open);
     c.app.show()?;
     music_ui::attach_media(&c);
     update_ui::setup(&c);

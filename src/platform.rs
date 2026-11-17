@@ -455,3 +455,27 @@ mod tests {
         assert_eq!(shell_split("mangohud %command% -x"), vec!["mangohud", "%command%", "-x"]);
     }
 }
+
+#[cfg(windows)]
+pub fn vsync_off_while(window: &slint::Window, condition: fn() -> bool) {
+    use windows::core::s;
+    use windows::Win32::Graphics::OpenGL::wglGetProcAddress;
+    let current = std::cell::Cell::new(1);
+    let _ = window.set_rendering_notifier(move |state, _| {
+        if !matches!(state, slint::RenderingState::BeforeRendering) {
+            return;
+        }
+        let wanted = if condition() { 0 } else { 1 };
+        if wanted == current.get() {
+            return;
+        }
+        unsafe {
+            if let Some(proc) = wglGetProcAddress(s!("wglSwapIntervalEXT")) {
+                let set_interval: unsafe extern "system" fn(i32) -> i32 = std::mem::transmute(proc);
+                if set_interval(wanted) != 0 {
+                    current.set(wanted);
+                }
+            }
+        }
+    });
+}

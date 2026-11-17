@@ -31,6 +31,7 @@ struct Inner {
     fullscreen: bool,
     scroll_acc: f32,
     scroll_time: Option<Instant>,
+    last_poke: Instant,
     hide_timer: slint::Timer,
     toast_timer: slint::Timer,
     spinner_timer: slint::Timer,
@@ -38,6 +39,15 @@ struct Inner {
 }
 
 pub struct Reader(Rc<RefCell<Inner>>);
+
+thread_local! {
+    static OPEN_READERS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
+#[cfg(windows)]
+pub fn any_open() -> bool {
+    OPEN_READERS.with(|n| n.get() > 0)
+}
 
 impl Reader {
     pub fn close_now(&self) {
@@ -74,12 +84,14 @@ pub fn open(c: &Rc<Ctx>, name: &str) {
         fullscreen: true,
         scroll_acc: 0.0,
         scroll_time: None,
+        last_poke: Instant::now(),
         hide_timer: slint::Timer::default(),
         toast_timer: slint::Timer::default(),
         spinner_timer: slint::Timer::default(),
         tick: slint::Timer::default(),
     }));
     c.readers.borrow_mut().push(Reader(inner.clone()));
+    OPEN_READERS.with(|n| n.set(n.get() + 1));
 
     let w = Rc::downgrade(&inner);
     let with = move |f: fn(&Rc<RefCell<Inner>>)| {
@@ -335,17 +347,29 @@ fn set_ui(i: &Rc<RefCell<Inner>>, visible: bool) {
 }
 
 fn poke_ui(i: &Rc<RefCell<Inner>>) {
-    set_ui(i, true);
+    let (window, armed) = {
+        let mut s = i.borrow_mut();
+        s.last_poke = Instant::now();
+        (s.window.clone_strong(), s.hide_timer.running())
+    };
+    if !window.get_ui_visible() {
+        window.set_ui_visible(true);
+    }
+    if armed {
+        return;
+    }
     let w = Rc::downgrade(i);
-    i.borrow().hide_timer.start(slint::TimerMode::SingleShot, UI_HIDE, move || {
-        if let Some(i) = w.upgrade() {
-            let hide = {
-                let s = i.borrow();
-                !s.closed && s.window.get_error_text().is_empty()
-            };
-            if hide {
-                set_ui(&i, false);
-            }
+    i.borrow().hide_timer.start(slint::TimerMode::Repeated, Duration::from_millis(250), move || {
+        let Some(i) = w.upgrade() else { return };
+        let (window, closed, idle) = {
+            let s = i.borrow();
+            (s.window.clone_strong(), s.closed, s.last_poke.elapsed() >= UI_HIDE)
+        };
+        if closed || idle {
+            i.borrow().hide_timer.stop();
+        }
+        if !closed && idle && window.get_error_text().is_empty() {
+            window.set_ui_visible(false);
         }
     });
 }
@@ -428,6 +452,7 @@ fn close(i: &Rc<RefCell<Inner>>) {
     super::after(0, move || {
         let c = ctx();
         c.readers.borrow_mut().retain(|r| r.0.borrow().id != id);
+        OPEN_READERS.with(|n| n.set(n.get().saturating_sub(1)));
     });
     super::after(1500, crate::platform::trim_memory);
 }
