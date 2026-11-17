@@ -418,6 +418,7 @@ component LoadingBlob inherits Rectangle {
 }
 
 component TrackPanel inherits Rectangle {
+    in property <{width: length, height: length}> window-size;
     border-radius: 28px;
     background: Theme.alpha(Theme.mu-surface-container, 0.92);
     animate background { duration: 500ms; }
@@ -428,6 +429,8 @@ component TrackPanel inherits Rectangle {
         Dropdown {
             h: 44px;
             centered: false;
+            max-popup-height: min(420px, root.height - self.y - self.height - 6px);
+            window-size: root.window-size;
             items: MusicApi.games;
             current: MusicApi.game-index;
             selected(i) => { MusicApi.game-index = i; MusicApi.game-selected(i); }
@@ -580,8 +583,11 @@ export component MusicPage inherits Rectangle {
     property <length> outer-pad: 24px;
     property <length> panel-w: 390px;
     property <length> panel-gap: 30px;
-    property <length> player-w: max(340px, min(680px, root.width - 2 * outer-pad - (game ? panel-w + panel-gap : 0px)));
-    property <length> group-w: player-w + (game ? panel-gap + panel-w : 0px);
+    property <float> game-progress: game ? 1 : 0;
+    animate game-progress { duration: 420ms; easing: Ease.standard; }
+    property <length> panel-space: (panel-gap + panel-w) * game-progress;
+    property <length> player-w: max(340px, min(680px, root.width - 2 * outer-pad - panel-space));
+    property <length> group-w: player-w + panel-space;
     property <length> body-y: 16px + 38px + 16px;
     property <length> body-h: root.height - body-y - 24px;
 
@@ -593,6 +599,7 @@ export component MusicPage inherits Rectangle {
         height: 38px;
         Dropdown {
             width: 230px;
+            window-size: { width: root.width, height: root.height };
             items: [{ text: "Game BGM", enabled: true }, { text: "Gensokyo Radio", enabled: true }];
             current: MusicApi.mode;
             selected(i) => { MusicApi.mode = i; MusicApi.mode-changed(i); }
@@ -604,7 +611,6 @@ export component MusicPage inherits Rectangle {
         y: root.body-y;
         width: root.player-w;
         height: root.body-h;
-        animate x { duration: 420ms; easing: Ease.standard; }
         property <length> fixed-h: info.height + 16px + 54px + 16px + 76px + 16px + 16px + 16px;
         property <length> art-area: max(220px, self.height - fixed-h);
         property <length> art-size: max(180px, min(self.width, art-area));
@@ -772,13 +778,13 @@ export component MusicPage inherits Rectangle {
     }
 
     panel := TrackPanel {
-        x: player.x + player.width + root.panel-gap + (root.game ? 0px : 60px);
+        window-size: { width: root.width, height: root.height };
+        x: player.x + player.width + root.panel-gap + (1 - root.game-progress) * 60px;
         y: root.body-y;
         width: root.panel-w;
         height: root.body-h;
         opacity: root.game ? 1 : 0;
         visible: self.opacity > 0.01;
         animate opacity { duration: 320ms; delay: root.game ? 90ms : 0ms; easing: cubic-bezier(0.2, 0, 0, 1); }
-        animate x { duration: 420ms; easing: Ease.standard; }
     }
 }

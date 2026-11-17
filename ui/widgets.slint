@@ -1,4 +1,5 @@
 import { Theme, Ease, Icons } from "theme.slint";
+import { ScrollView } from "std-widgets.slint";
 
 export component Ico inherits Image {
     in property <color> color: Theme.fg;
@@ -446,9 +447,13 @@ export component Dropdown inherits Rectangle {
     in property <length> row-radius: 20px;
     in property <length> min-popup-width: 200px;
     in property <length> max-popup-height: 420px;
+    in property <{width: length, height: length}> window-size;
     callback selected(int);
     property <bool> open: false;
     property <int> pending: -1;
+    changed window-size => {
+        if popup.is-open { popup.close(); }
+    }
     changed pending => {
         if root.pending >= 0 {
             root.selected(root.pending);
@@ -500,12 +505,13 @@ export component Dropdown inherits Rectangle {
         x: 0;
         y: root.height + 6px;
         width: max(root.min-popup-width, root.width);
+        height: min(list.preferred-height, root.max-popup-height);
         close-policy: close-on-click-outside;
         forward-focus: pfs;
         property <bool> reveal: false;
         init => {
             reveal = true;
-            list-scroll.scroll-to(root.current * 44px - 120px);
+            list-scroll.content-y = -max(0px, min(list-scroll.content-height - list-scroll.visible-height, root.current * 44px - 120px));
         }
         pfs := FocusScope {
             focus-changed-event => { root.open = self.has-focus; }
@@ -525,47 +531,46 @@ export component Dropdown inherits Rectangle {
                 transform-scale: popup.reveal ? 1 : 0.97;
                 transform-origin: { x: self.width / 2, y: 0 };
                 animate opacity, transform-scale { duration: 240ms; easing: Ease.emphasized; }
-                height: min(list.preferred-height, root.max-popup-height);
                 clip: true;
-                list-scroll := ScrollBox {
-                    x: 0;
-                    y: 0;
+                list-scroll := ScrollView {
                     width: parent.width;
                     height: parent.height;
+                    content-width: self.visible-width;
                     content-height: list.preferred-height;
-                    bar-color: root.popup-fg;
-                list := VerticalLayout {
-                    width: list-scroll.width;
-                    padding: 6px;
-                    spacing: 4px;
-                    for item[i] in root.items: Rectangle {
-                        height: max(40px, label.preferred-height + 12px);
-                        border-radius: root.row-radius;
-                        background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
-                        animate background { duration: 150ms; }
-                        label := Text {
-                            x: 12px;
-                            width: parent.width - 24px;
-                            text: item.text;
-                            color: !item.enabled ? Theme.alpha(root.popup-fg, 0.6) : i == root.current ? root.popup-selected-fg : root.popup-fg;
-                            font-size: item.enabled ? root.font-size : root.font-size * 0.92;
-                            font-weight: item.enabled ? 700 : 500;
-                            horizontal-alignment: root.centered ? center : left;
-                            vertical-alignment: center;
-                            wrap: word-wrap;
-                        }
-                        rta := TouchArea {
-                            enabled: item.enabled;
-                            mouse-cursor: item.enabled ? pointer : default;
-                            clicked => {
-                                root.current = i;
-                                root.pending = i;
-                                root.open = false;
-                                popup.close();
+                    horizontal-scrollbar-policy: always-off;
+                    list := VerticalLayout {
+                        width: list-scroll.visible-width;
+                        height: self.preferred-height;
+                        padding: 6px;
+                        spacing: 4px;
+                        for item[i] in root.items: Rectangle {
+                            height: max(40px, label.preferred-height + 12px);
+                            border-radius: root.row-radius;
+                            background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
+                            animate background { duration: 150ms; }
+                            label := Text {
+                                x: 12px;
+                                width: parent.width - 24px;
+                                text: item.text;
+                                color: !item.enabled ? Theme.alpha(root.popup-fg, 0.6) : i == root.current ? root.popup-selected-fg : root.popup-fg;
+                                font-size: item.enabled ? root.font-size : root.font-size * 0.92;
+                                font-weight: item.enabled ? 700 : 500;
+                                horizontal-alignment: root.centered ? center : left;
+                                vertical-alignment: center;
+                                wrap: word-wrap;
+                            }
+                            rta := TouchArea {
+                                enabled: item.enabled;
+                                mouse-cursor: item.enabled ? pointer : default;
+                                clicked => {
+                                    root.current = i;
+                                    root.pending = i;
+                                    root.open = false;
+                                    popup.close();
+                                }
                             }
                         }
                     }
-                }
                 }
             }
         }
