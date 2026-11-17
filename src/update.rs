@@ -572,7 +572,9 @@ pub fn run_pending_installer(relaunch: bool) {
     }
     #[cfg(windows)]
     {
-        let all_users = windows_install_dir()
+        let install_dir = windows_install_dir();
+        let all_users = install_dir
+            .as_ref()
             .and_then(|d| {
                 let pf = std::env::var_os("ProgramFiles").map(PathBuf::from)?;
                 Some(d.starts_with(pf))
@@ -580,6 +582,9 @@ pub fn run_pending_installer(relaunch: bool) {
             .unwrap_or(false);
         let mut params = String::from("/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-");
         params.push_str(if all_users { " /ALLUSERS" } else { " /CURRENTUSER" });
+        if let Some(dir) = install_dir.as_ref().map(|d| d.display().to_string()).filter(|d| !d.contains('"')) {
+            params.push_str(&format!(" /DIR=\"{}\"", dir.trim_end_matches('\\')));
+        }
         if relaunch {
             params.push_str(" /RELAUNCH");
         }
