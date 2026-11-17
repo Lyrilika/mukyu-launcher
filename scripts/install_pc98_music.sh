@@ -8,6 +8,8 @@ FM_REV=4fa914e4b2b994cb3ccf92d571a20a7cdf1fe36a
 X86_REV=ce81129c57fdfbf690bebc210a8db97d926cc5e7
 FORCE=0
 EXT=
+CC="${CC:-gcc}"
+CXX="${CXX:-g++}"
 LINK=(-static-libstdc++ -static-libgcc)
 case "$(uname -s)" in MINGW*|MSYS*) EXT=.exe; LINK=(-static) ;; esac
 for arg in "$@"; do
@@ -21,7 +23,7 @@ if [[ "$FORCE" -eq 0 && -x "$BIN/pmd_render$EXT" && -x "$BIN/mdt_render$EXT" && 
     echo "PC-98 helpers are already installed (use --force to rebuild)."
     exit 0
 fi
-for cmd in git g++ gcc tar; do
+for cmd in git "$CXX" "$CC" tar; do
     command -v "$cmd" >/dev/null 2>&1 || { echo "Missing build prerequisite: $cmd" >&2; exit 1; }
 done
 TMP_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/mukyulauncher-pc98.XXXXXXXX")"
@@ -43,24 +45,26 @@ if [[ -n "$EXT" ]]; then
 fi
 mkdir -p "$TMP_ROOT/obj" "$BIN" "$ROOT/tools/licenses"
 FM_OBJECTS=()
-for file in opna opnafm opnassg opnassg-sinc-c opnassg-sinc-sse2 opnadrum opnaadpcm; do
-    gcc -std=c11 -O3 -flto -I"$FM" -c "$FM/libopna/$file.c" -o "$TMP_ROOT/obj/$file.o"
+FM_FILES=(opna opnafm opnassg opnassg-sinc-c opnadrum opnaadpcm)
+case "$("$CC" -dumpmachine)" in x86_64*|amd64*) FM_FILES+=(opnassg-sinc-sse2) ;; esac
+for file in "${FM_FILES[@]}"; do
+    "$CC" -std=c11 -O3 -flto -I"$FM" -c "$FM/libopna/$file.c" -o "$TMP_ROOT/obj/$file.o"
     FM_OBJECTS+=("$TMP_ROOT/obj/$file.o")
 done
 PMD_OBJECTS=()
 for file in fmdriver_pmd fmdriver_common ppz8; do
-    gcc -std=c11 -O3 -flto -I"$FM" -c "$FM/fmdriver/$file.c" -o "$TMP_ROOT/obj/$file.o"
+    "$CC" -std=c11 -O3 -flto -I"$FM" -c "$FM/fmdriver/$file.c" -o "$TMP_ROOT/obj/$file.o"
     PMD_OBJECTS+=("$TMP_ROOT/obj/$file.o")
 done
-gcc -std=c11 -O3 -flto -I"$FM" -c "$SRC/pmd_driver.c" -o "$TMP_ROOT/obj/pmd_driver.o"
-g++ -std=c++14 -O3 -flto -I"$FM" "${LINK[@]}" "$SRC/pmd_render.cpp" "$TMP_ROOT/obj/pmd_driver.o" \
+"$CC" -std=c11 -O3 -flto -I"$FM" -c "$SRC/pmd_driver.c" -o "$TMP_ROOT/obj/pmd_driver.o"
+"$CXX" -std=c++14 -O3 -flto -I"$FM" "${LINK[@]}" "$SRC/pmd_render.cpp" "$TMP_ROOT/obj/pmd_driver.o" \
     "${PMD_OBJECTS[@]}" "${FM_OBJECTS[@]}" -lm -o "$TMP_ROOT/pmd_render$EXT"
 X86_OBJECTS=()
 for file in api decode mem ops ops2 prim_ops; do
-    gcc -O3 -flto -I"$X86/include" -c "$X86/$file.c" -o "$TMP_ROOT/obj/x86_$file.o"
+    "$CC" -O3 -flto -I"$X86/include" -c "$X86/$file.c" -o "$TMP_ROOT/obj/x86_$file.o"
     X86_OBJECTS+=("$TMP_ROOT/obj/x86_$file.o")
 done
-g++ -std=c++14 -O3 -flto -I"$FM" -I"$X86/include" "${LINK[@]}" "$SRC/mdt_render.cpp" \
+"$CXX" -std=c++14 -O3 -flto -I"$FM" -I"$X86/include" "${LINK[@]}" "$SRC/mdt_render.cpp" \
     "${FM_OBJECTS[@]}" "${X86_OBJECTS[@]}" -lm -o "$TMP_ROOT/mdt_render$EXT"
 install -m 755 "$TMP_ROOT/pmd_render$EXT" "$BIN/pmd_render$EXT"
 install -m 755 "$TMP_ROOT/mdt_render$EXT" "$BIN/mdt_render$EXT"
@@ -70,7 +74,7 @@ install -m 644 "$X86/LICENSE" "$ROOT/tools/licenses/libx86emu-LICENSE"
     printf '98fmplayer %s\nlibx86emu %s\n' "$FM_REV" "$X86_REV"
     printf 'Build recipe: scripts/install_pc98_music.sh\n'
     if [[ -n "$EXT" ]]; then printf 'libx86emu mem.c: disable Linux-specific memory code on Windows.\n'; fi
-    gcc --version | head -1
-    g++ --version | head -1
+    "$CC" --version | head -1
+    "$CXX" --version | head -1
 } > "$ROOT/tools/pc98/BUILD_INFO.txt"
 echo "Built BSD-licensed PC-98 helpers."

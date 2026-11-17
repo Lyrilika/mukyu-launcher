@@ -10,8 +10,10 @@ use sha2::{Digest, Sha256};
 use crate::paths;
 
 pub const REPO: &str = "Lyrilika/mukyu-launcher";
-pub const APPIMAGE_ASSET: &str = "Mukyu_Launcher-x86_64.AppImage";
-pub const INSTALLER_ASSET: &str = "Mukyu_Launcher_Setup.exe";
+pub const APPIMAGE_ASSET: &str =
+    if cfg!(target_arch = "aarch64") { "Mukyu_Launcher-aarch64.AppImage" } else { "Mukyu_Launcher-x86_64.AppImage" };
+pub const INSTALLER_ASSET: &str =
+    if cfg!(target_arch = "aarch64") { "Mukyu_Launcher_Setup_arm64.exe" } else { "Mukyu_Launcher_Setup.exe" };
 const USER_AGENT: &str = "Mukyu-Launcher-Updater";
 const MAX_JSON_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_ASSET_BYTES: u64 = 1024 * 1024 * 1024;
@@ -530,7 +532,7 @@ pub fn apply(release: &Release, method: Method, save_dir: Option<&Path>, cancel:
             let file_name = if method == Method::SaveInstaller {
                 INSTALLER_ASSET.to_string()
             } else {
-                format!("Mukyu_Launcher_Setup-{}.exe", release.version)
+                format!("{}-{}.exe", INSTALLER_ASSET.trim_end_matches(".exe"), release.version)
             };
             let dest = dir.join(file_name);
             let temp = dest.with_extension("exe.part");
@@ -670,26 +672,26 @@ mod tests {
                 {"name": "Mukyu_Launcher_Setup.exe", "browser_download_url": "https://github.com/Lyrilika/mukyu-launcher/releases/download/v1.2.0/b", "size": 20}
             ]
         });
-        let r = parse_release(&json, APPIMAGE_ASSET).unwrap();
+        let r = parse_release(&json, "Mukyu_Launcher-x86_64.AppImage").unwrap();
         assert_eq!(r.version, "1.2.0");
         assert_eq!(r.asset_url.as_deref(), Some("https://github.com/Lyrilika/mukyu-launcher/releases/download/v1.2.0/a"));
         assert_eq!(r.asset_size, 10);
         assert_eq!(r.asset_sha256.as_deref(), Some("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"));
-        let w = parse_release(&json, INSTALLER_ASSET).unwrap();
+        let w = parse_release(&json, "Mukyu_Launcher_Setup.exe").unwrap();
         assert_eq!(w.asset_url.as_deref(), Some("https://github.com/Lyrilika/mukyu-launcher/releases/download/v1.2.0/b"));
         assert_eq!(w.asset_sha256, None);
         let mut bad = json.clone();
         bad["tag_name"] = "v1.2.0-a/../../x".into();
-        assert!(parse_release(&bad, APPIMAGE_ASSET).is_none());
+        assert!(parse_release(&bad, "Mukyu_Launcher-x86_64.AppImage").is_none());
         let mut evil = json.clone();
         evil["assets"][0]["browser_download_url"] = "http://evil.example/a".into();
         evil["html_url"] = "file:///etc/passwd".into();
-        let e = parse_release(&evil, APPIMAGE_ASSET).unwrap();
+        let e = parse_release(&evil, "Mukyu_Launcher-x86_64.AppImage").unwrap();
         assert_eq!(e.asset_url, None);
         assert_eq!(e.page_url, format!("https://github.com/{REPO}/releases/latest"));
         let mut pre = json.clone();
         pre["prerelease"] = true.into();
-        assert!(parse_release(&pre, APPIMAGE_ASSET).is_none());
+        assert!(parse_release(&pre, "Mukyu_Launcher-x86_64.AppImage").is_none());
     }
 
     #[test]

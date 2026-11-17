@@ -1,8 +1,13 @@
 #ifndef AppVersion
   #define AppVersion "1.0.0"
 #endif
+#ifndef Arch
+  #define Arch "x64"
+#endif
+#ifndef Stage
+  #define Stage "..\..\build\stage"
+#endif
 #define AppName "Mukyu Launcher"
-#define Stage "..\..\build\stage"
 
 [Setup]
 AppId={{1E7864F2-D894-462E-A249-08AE2EEE2B08}
@@ -22,13 +27,20 @@ PrivilegesRequiredOverridesAllowed=commandline dialog
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\MukyuLauncher.exe
 OutputDir=..\..\dist
-OutputBaseFilename=Mukyu_Launcher_Setup
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
+#if Arch == "arm64"
+OutputBaseFilename=Mukyu_Launcher_Setup_arm64
+ArchitecturesAllowed=arm64
+ArchitecturesInstallIn64BitMode=arm64
+MinVersion=10.0.16299
+#else
+OutputBaseFilename=Mukyu_Launcher_Setup
 ArchitecturesAllowed=x64compatible
-MinVersion=10.0.14393
 ArchitecturesInstallIn64BitMode=x64compatible
+MinVersion=10.0.14393
+#endif
 
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Shortcuts:"

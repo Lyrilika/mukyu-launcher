@@ -71,7 +71,7 @@ pub struct GameEntry {
 }
 
 fn default_runner() -> String {
-    "wine".into()
+    if cfg!(all(target_os = "linux", target_arch = "aarch64")) { "ge-proton".into() } else { "wine".into() }
 }
 
 impl Default for GameEntry {
@@ -100,9 +100,9 @@ pub fn load_config() -> GameConfig {
             let entry = match value {
                 Value::String(s) => GameEntry { exe: Some(s), ..Default::default() },
                 Value::Object(map) => {
-                    let mut runner = map.get("runner").and_then(Value::as_str).unwrap_or("wine").to_string();
+                    let mut runner = map.get("runner").and_then(Value::as_str).map(String::from).unwrap_or_else(default_runner);
                     if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") {
-                        runner = "wine".into();
+                        runner = default_runner();
                     }
                     GameEntry {
                         exe: map.get("exe").and_then(Value::as_str).map(String::from),

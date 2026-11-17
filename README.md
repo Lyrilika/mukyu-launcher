@@ -91,11 +91,14 @@ make it executable and run it.
 ./scripts/install_thtk.sh          # thdat, used to read game BGM metadata
 ./scripts/install_pc98_music.sh    # PC-98 music renderers
 ./scripts/install_umu.sh           # umu-run, used for GE-Proton
-./scripts/fetch_pdfium.sh linux lib   # PDFium for the built-in reader
+./scripts/fetch_pdfium.sh linux lib   # PDFium for the built-in reader (x86_64)
+# on ARM64, use this instead: ./scripts/fetch_pdfium.sh linux lib arm64
 cargo run --release
 ```
 
-To build the AppImage yourself: `bash packaging/appimage/build_appimage.sh`.
+To build the AppImage yourself: `bash packaging/appimage/build_appimage.sh`. On ARM64, rebuild
+the bundled tools first with `./scripts/install_thtk.sh --update` and
+`./scripts/install_pc98_music.sh --force`.
 
 ### Windows 10/11
 
@@ -103,9 +106,10 @@ Download `Mukyu_Launcher_Setup.exe` from the [latest release](../../releases/lat
 
 To build it yourself on Windows: build the native helpers with
 `packaging/windows/build_windows_tools.ps1`, run `cargo build --release`,
-`bash scripts/fetch_pdfium.sh windows build/pdfium`,
+`bash scripts/fetch_pdfium.sh windows build/pdfium` (on Windows on ARM:
+`bash scripts/fetch_pdfium.sh windows build/pdfium arm64`),
 `packaging/windows/stage.ps1 -Tools .` and compile `packaging/windows/installer.iss`
-with Inno Setup.
+with Inno Setup (pass `/DArch=arm64` for the ARM installer).
 
 ## License and third-party notices
 

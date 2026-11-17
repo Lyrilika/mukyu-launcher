@@ -9,9 +9,17 @@ if (-not (Test-Path $bash)) {
 }
 
 $script = Join-Path $PSScriptRoot "build_tools_msys2.sh"
-$env:MSYSTEM = "UCRT64"
 $env:CHERE_INVOKING = "1"
-$cmd = 'pacman -S --needed --noconfirm git make flex bison mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja && ' +
+if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
+    $env:MSYSTEM = "CLANGARM64"
+    $env:CC = "clang"
+    $env:CXX = "clang++"
+    $packages = "mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-ninja"
+} else {
+    $env:MSYSTEM = "UCRT64"
+    $packages = "mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja"
+}
+$cmd = 'pacman -S --needed --noconfirm git make flex bison ' + $packages + ' && ' +
        'bash "$(cygpath -u ''' + $script + ''')" ' + $What
 & $bash -lc $cmd
 if ($LASTEXITCODE -ne 0) { Write-Host "Build failed (see the output above)."; exit $LASTEXITCODE }
