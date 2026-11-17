@@ -147,11 +147,17 @@ pub fn open(c: &Rc<Ctx>, name: &str) {
     window.window().set_fullscreen(true);
     let _ = window.show();
     let weak = window.as_weak();
-    super::after(50, move || {
-        if let Some(w) = weak.upgrade() {
-            w.window().set_fullscreen(true);
-        }
-    });
+    for delay in [50, 300, 700] {
+        let weak = weak.clone();
+        super::after(delay, move || {
+            if let Some(w) = weak.upgrade() {
+                if !w.window().is_fullscreen() || delay == 300 {
+                    w.window().set_fullscreen(false);
+                    w.window().set_fullscreen(true);
+                }
+            }
+        });
+    }
     poke_ui(&inner);
 }
 

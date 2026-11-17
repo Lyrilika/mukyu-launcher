@@ -358,136 +358,6 @@ export struct MenuItem {
     enabled: bool,
 }
 
-export component Dropdown inherits Rectangle {
-    in property <[MenuItem]> items;
-    in-out property <int> current: 0;
-    in property <length> h: 38px;
-    in property <length> radius: h / 2;
-    in property <color> bg: Theme.mu-secondary-container;
-    in property <color> fg: Theme.mu-on-primary-container;
-    in property <color> hover-tint: Theme.alpha(Theme.mu-primary, 0.10);
-    in property <color> popup-bg: Theme.mu-surface-high;
-    in property <color> popup-fg: Theme.mu-text;
-    in property <color> popup-selected: Theme.mu-secondary-container;
-    in property <color> popup-selected-fg: Theme.mu-on-primary-container;
-    in property <color> popup-hover: Theme.alpha(Theme.mu-primary, 0.10);
-    in property <bool> centered: true;
-    in property <length> font-size: Theme.base;
-    in property <length> popup-radius: 22px;
-    in property <length> row-radius: 20px;
-    in property <length> min-popup-width: 200px;
-    callback selected(int);
-    property <bool> open: false;
-    property <int> pending: -1;
-    changed pending => {
-        if root.pending >= 0 {
-            root.selected(root.pending);
-            root.pending = -1;
-        }
-    }
-    height: h;
-    border-radius: radius;
-    background: bg;
-    animate background { duration: 300ms; }
-    Rectangle {
-        border-radius: root.radius;
-        background: ta.pressed || root.open ? Theme.alpha(Theme.mu-primary, 0.16) : ta.has-hover ? root.hover-tint : transparent;
-        animate background { duration: 200ms; }
-    }
-    HorizontalLayout {
-        padding-left: 14px;
-        padding-right: 14px;
-        spacing: 8px;
-        if centered: Rectangle { width: 16px; }
-        Text {
-            text: root.current >= 0 && root.current < root.items.length ? root.items[root.current].text : "";
-            color: root.fg;
-            font-weight: 700;
-            font-size: root.font-size;
-            vertical-alignment: center;
-            horizontal-alignment: root.centered ? center : left;
-            overflow: elide;
-            animate color { duration: 300ms; }
-        }
-        Ico {
-            y: (parent.height - self.height) / 2;
-            source: Icons.chevron-down;
-            size: 16px;
-            color: root.fg;
-            opacity: 0.8;
-            transform-rotation: root.open ? 180deg : 0deg;
-            animate transform-rotation { duration: 220ms; easing: cubic-bezier(0.2, 0, 0, 1); }
-        }
-    }
-    ta := TouchArea {
-        mouse-cursor: pointer;
-        clicked => {
-            root.open = true;
-            popup.show();
-        }
-    }
-    popup := PopupWindow {
-        x: 0;
-        y: root.height + 6px;
-        width: max(root.min-popup-width, root.width);
-        close-policy: close-on-click-outside;
-        forward-focus: pfs;
-        property <bool> reveal: false;
-        init => { reveal = true; }
-        pfs := FocusScope {
-            focus-changed-event => { root.open = self.has-focus; }
-            key-pressed(e) => {
-                if e.text == Key.Escape { popup.close(); return accept; }
-                reject
-            }
-            Rectangle {
-                border-radius: root.popup-radius;
-                background: root.popup-bg;
-                border-width: 1px;
-                border-color: Theme.alpha(root.popup-fg, 0.10);
-                drop-shadow-blur: 24px;
-                drop-shadow-offset-y: 10px;
-                drop-shadow-color: #00000057;
-                opacity: popup.reveal ? 1 : 0;
-                transform-scale: popup.reveal ? 1 : 0.97;
-                transform-origin: { x: self.width / 2, y: 0 };
-                animate opacity, transform-scale { duration: 240ms; easing: Ease.emphasized; }
-                VerticalLayout {
-                    padding: 6px;
-                    spacing: 4px;
-                    for item[i] in root.items: Rectangle {
-                        height: max(40px, label.preferred-height + 12px);
-                        border-radius: root.row-radius;
-                        background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
-                        animate background { duration: 150ms; }
-                        label := Text {
-                            x: 12px;
-                            width: parent.width - 24px;
-                            text: item.text;
-                            color: !item.enabled ? Theme.alpha(root.popup-fg, 0.6) : i == root.current ? root.popup-selected-fg : root.popup-fg;
-                            font-size: item.enabled ? root.font-size : root.font-size * 0.92;
-                            font-weight: item.enabled ? 700 : 500;
-                            horizontal-alignment: root.centered ? center : left;
-                            vertical-alignment: center;
-                            wrap: word-wrap;
-                        }
-                        rta := TouchArea {
-                            enabled: item.enabled;
-                            mouse-cursor: item.enabled ? pointer : default;
-                            clicked => {
-                                root.current = i;
-                                root.pending = i;
-                                root.open = false;
-                                popup.close();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 export component ScrollBox inherits Rectangle {
     in property <length> content-height;
     in-out property <length> offset: 0px;
@@ -551,6 +421,151 @@ export component ScrollBox inherits Rectangle {
                 if root.dragging {
                     root.offset = max(0px, min(root.max-offset,
                         root.drag-start-offset + (self.mouse-y - self.pressed-y) * root.max-offset / max(1px, root.height - bar.height)));
+                }
+            }
+        }
+    }
+}
+
+export component Dropdown inherits Rectangle {
+    in property <[MenuItem]> items;
+    in-out property <int> current: 0;
+    in property <length> h: 38px;
+    in property <length> radius: h / 2;
+    in property <color> bg: Theme.mu-secondary-container;
+    in property <color> fg: Theme.mu-on-primary-container;
+    in property <color> hover-tint: Theme.alpha(Theme.mu-primary, 0.10);
+    in property <color> popup-bg: Theme.mu-surface-high;
+    in property <color> popup-fg: Theme.mu-text;
+    in property <color> popup-selected: Theme.mu-secondary-container;
+    in property <color> popup-selected-fg: Theme.mu-on-primary-container;
+    in property <color> popup-hover: Theme.alpha(Theme.mu-primary, 0.10);
+    in property <bool> centered: true;
+    in property <length> font-size: Theme.base;
+    in property <length> popup-radius: 22px;
+    in property <length> row-radius: 20px;
+    in property <length> min-popup-width: 200px;
+    in property <length> max-popup-height: 420px;
+    callback selected(int);
+    property <bool> open: false;
+    property <int> pending: -1;
+    changed pending => {
+        if root.pending >= 0 {
+            root.selected(root.pending);
+            root.pending = -1;
+        }
+    }
+    height: h;
+    border-radius: radius;
+    background: bg;
+    animate background { duration: 300ms; }
+    Rectangle {
+        border-radius: root.radius;
+        background: ta.pressed || root.open ? Theme.alpha(Theme.mu-primary, 0.16) : ta.has-hover ? root.hover-tint : transparent;
+        animate background { duration: 200ms; }
+    }
+    HorizontalLayout {
+        padding-left: 14px;
+        padding-right: 14px;
+        spacing: 8px;
+        if centered: Rectangle { width: 16px; }
+        Text {
+            text: root.current >= 0 && root.current < root.items.length ? root.items[root.current].text : "";
+            color: root.fg;
+            font-weight: 700;
+            font-size: root.font-size;
+            vertical-alignment: center;
+            horizontal-alignment: root.centered ? center : left;
+            overflow: elide;
+            animate color { duration: 300ms; }
+        }
+        Ico {
+            y: (parent.height - self.height) / 2;
+            source: Icons.chevron-down;
+            size: 16px;
+            color: root.fg;
+            opacity: 0.8;
+            transform-rotation: root.open ? 180deg : 0deg;
+            animate transform-rotation { duration: 220ms; easing: cubic-bezier(0.2, 0, 0, 1); }
+        }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => {
+            root.open = true;
+            popup.show();
+        }
+    }
+    popup := PopupWindow {
+        x: 0;
+        y: root.height + 6px;
+        width: max(root.min-popup-width, root.width);
+        close-policy: close-on-click-outside;
+        forward-focus: pfs;
+        property <bool> reveal: false;
+        init => {
+            reveal = true;
+            list-scroll.scroll-to(root.current * 44px - 120px);
+        }
+        pfs := FocusScope {
+            focus-changed-event => { root.open = self.has-focus; }
+            key-pressed(e) => {
+                if e.text == Key.Escape { popup.close(); return accept; }
+                reject
+            }
+            Rectangle {
+                border-radius: root.popup-radius;
+                background: root.popup-bg;
+                border-width: 1px;
+                border-color: Theme.alpha(root.popup-fg, 0.10);
+                drop-shadow-blur: 24px;
+                drop-shadow-offset-y: 10px;
+                drop-shadow-color: #00000057;
+                opacity: popup.reveal ? 1 : 0;
+                transform-scale: popup.reveal ? 1 : 0.97;
+                transform-origin: { x: self.width / 2, y: 0 };
+                animate opacity, transform-scale { duration: 240ms; easing: Ease.emphasized; }
+                height: min(list.preferred-height, root.max-popup-height);
+                clip: true;
+                list-scroll := ScrollBox {
+                    x: 0;
+                    y: 0;
+                    width: parent.width;
+                    height: parent.height;
+                    content-height: list.preferred-height;
+                    bar-color: root.popup-fg;
+                list := VerticalLayout {
+                    width: list-scroll.width;
+                    padding: 6px;
+                    spacing: 4px;
+                    for item[i] in root.items: Rectangle {
+                        height: max(40px, label.preferred-height + 12px);
+                        border-radius: root.row-radius;
+                        background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
+                        animate background { duration: 150ms; }
+                        label := Text {
+                            x: 12px;
+                            width: parent.width - 24px;
+                            text: item.text;
+                            color: !item.enabled ? Theme.alpha(root.popup-fg, 0.6) : i == root.current ? root.popup-selected-fg : root.popup-fg;
+                            font-size: item.enabled ? root.font-size : root.font-size * 0.92;
+                            font-weight: item.enabled ? 700 : 500;
+                            horizontal-alignment: root.centered ? center : left;
+                            vertical-alignment: center;
+                            wrap: word-wrap;
+                        }
+                        rta := TouchArea {
+                            enabled: item.enabled;
+                            mouse-cursor: item.enabled ? pointer : default;
+                            clicked => {
+                                root.current = i;
+                                root.pending = i;
+                                root.open = false;
+                                popup.close();
+                            }
+                        }
+                    }
+                }
                 }
             }
         }
