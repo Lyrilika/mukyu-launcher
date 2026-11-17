@@ -20,5 +20,5 @@ Mention anything you could not test. -->
 - [ ] For new dependencies or bundled assets, I noted the source and license.
 - [ ] Related issue: <!-- Write Fixes #123 if this closes an issue. Otherwise link it or write None. -->
 - [ ] Depends on: <!-- List any prerequisite pull requests, or write None. -->
-- [ ] AI-assisted <!-- Yes or No. If yes. briefly describe the assistance. -->
+- [ ] AI-assisted
 ```
