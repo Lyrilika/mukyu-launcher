@@ -70,8 +70,10 @@ pub struct GameEntry {
     pub runner: String,
 }
 
+pub const PROTON_ONLY: bool = cfg!(all(target_os = "linux", target_arch = "aarch64"));
+
 fn default_runner() -> String {
-    if cfg!(all(target_os = "linux", target_arch = "aarch64")) { "ge-proton".into() } else { "wine".into() }
+    if PROTON_ONLY { "ge-proton".into() } else { "wine".into() }
 }
 
 impl Default for GameEntry {
@@ -101,7 +103,7 @@ pub fn load_config() -> GameConfig {
                 Value::String(s) => GameEntry { exe: Some(s), ..Default::default() },
                 Value::Object(map) => {
                     let mut runner = map.get("runner").and_then(Value::as_str).map(String::from).unwrap_or_else(default_runner);
-                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") {
+                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") || (PROTON_ONLY && runner == "wine") {
                         runner = default_runner();
                     }
                     GameEntry {

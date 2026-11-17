@@ -115,6 +115,7 @@ pub fn setup(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_cards(model);
     api.set_windows(cfg!(windows));
+    api.set_proton_only(games::PROTON_ONLY);
     refresh_any_unset(c);
 
     let next = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -246,7 +247,7 @@ fn persist(c: &Rc<Ctx>) {
     let mut g = c.games.borrow_mut();
     let entry = g.config.entry(key.to_string()).or_default();
     entry.launch_options = api.get_launch_options().to_string();
-    entry.runner = if api.get_runner() == 1 { "ge-proton".into() } else { "wine".into() };
+    entry.runner = if api.get_runner() == 1 || games::PROTON_ONLY { "ge-proton".into() } else { "wine".into() };
     games::save_config(&g.config);
 }
 
@@ -369,6 +370,8 @@ fn launch(c: &Rc<Ctx>, i: usize) {
         "dosbox-x".to_string()
     } else if cfg!(windows) {
         "wine".to_string()
+    } else if games::PROTON_ONLY {
+        "ge-proton".to_string()
     } else {
         entry.runner.clone()
     };
