@@ -31,6 +31,7 @@ enum Mode {
 
 pub struct MusicState {
     engine: Option<Result<Engine, String>>,
+    pending_engine: Option<std::sync::mpsc::Receiver<Result<Engine, String>>>,
     playback: Option<Playback>,
     mode: Mode,
     playing: bool,
@@ -79,6 +80,7 @@ impl MusicState {
         let scratch = private_temp_dir();
         MusicState {
             engine: None,
+            pending_engine: None,
             playback: None,
             mode: Mode::Game,
             playing: false,
@@ -268,7 +270,7 @@ pub fn on_shown(c: &Rc<Ctx>) {
     if first {
         super::after(30, || api(&ctx()).set_intro(true));
     }
-    ensure_engine(c);
+    start_engine(c);
     refresh_assigned(c, false);
     if c.music.borrow().mode == Mode::Radio {
         let stale = c.music.borrow().last_metadata.map_or(true, |t| t.elapsed() >= METADATA_INTERVAL);
@@ -283,14 +285,56 @@ fn page_visible(c: &Ctx) -> bool {
     c.app.global::<AppApi>().get_tab() == 1
 }
 
-fn ensure_engine(c: &Rc<Ctx>) -> bool {
-    let missing = c.music.borrow().engine.is_none();
-    if missing {
-        let engine = Engine::new().map_err(|e| e.to_string());
-        if let Err(e) = &engine {
-            set_error(c, &format!("Audio output is unavailable: {e}"));
+fn start_engine(c: &Rc<Ctx>) {
+    let mut m = c.music.borrow_mut();
+    if m.engine.is_some() || m.pending_engine.is_some() {
+        return;
+    }
+    let (tx, rx) = std::sync::mpsc::channel();
+    let spawned = std::thread::Builder::new()
+        .name("audio-start".into())
+        .spawn(move || {
+            let _ = tx.send(Engine::new().map_err(|e| e.to_string()));
+        })
+        .is_ok();
+    if spawned {
+        m.pending_engine = Some(rx);
+    }
+}
+
+fn store_engine(c: &Rc<Ctx>, engine: Result<Engine, String>) {
+    if let Err(e) = &engine {
+        set_error(c, &format!("Audio output is unavailable: {e}"));
+    }
+    c.music.borrow_mut().engine = Some(engine);
+}
+
+fn poll_engine(c: &Rc<Ctx>) {
+    let ready = {
+        let m = c.music.borrow();
+        match &m.pending_engine {
+            Some(rx) => match rx.try_recv() {
+                Ok(engine) => Some(engine),
+                Err(std::sync::mpsc::TryRecvError::Empty) => return,
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => Some(Err("The audio output could not be started".to_string())),
+            },
+            None => return,
         }
-        c.music.borrow_mut().engine = Some(engine);
+    };
+    c.music.borrow_mut().pending_engine = None;
+    if let Some(engine) = ready {
+        store_engine(c, engine);
+    }
+}
+
+fn ensure_engine(c: &Rc<Ctx>) -> bool {
+    if c.music.borrow().engine.is_none() {
+        let pending = c.music.borrow_mut().pending_engine.take();
+        let engine = match pending {
+            Some(rx) => rx.recv().unwrap_or_else(|_| Err("The audio output could not be started".to_string())),
+            None => Engine::new().map_err(|e| e.to_string()),
+        };
+        store_engine(c, engine);
     }
     matches!(c.music.borrow().engine, Some(Ok(_)))
 }
@@ -1291,6 +1335,7 @@ fn set_repeat(c: &Rc<Ctx>, mode: u8) {
 
 
 fn tick(c: &Rc<Ctx>) {
+    poll_engine(c);
     let (mode, playing) = {
         let m = c.music.borrow();
         (m.mode, m.playing)

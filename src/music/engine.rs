@@ -553,21 +553,36 @@ impl Drop for Playback {
 }
 
 pub struct Engine {
-    _stream: rodio::OutputStream,
+    _keep_alive: std::sync::mpsc::Sender<()>,
     handle: rodio::OutputStreamHandle,
     rate: u32,
 }
 
 impl Engine {
     pub fn new() -> Result<Engine> {
-        use rodio::cpal::traits::{DeviceTrait, HostTrait};
-        let (stream, handle) = rodio::OutputStream::try_default().map_err(|e| anyhow!("No audio output device ({e})"))?;
-        let rate = rodio::cpal::default_host()
-            .default_output_device()
-            .and_then(|d| d.default_output_config().ok())
-            .map(|c| c.sample_rate().0)
-            .unwrap_or(48000);
-        Ok(Engine { _stream: stream, handle, rate })
+        let (ready_tx, ready_rx) = std::sync::mpsc::sync_channel(1);
+        let (keep_tx, keep_rx) = std::sync::mpsc::channel::<()>();
+        std::thread::Builder::new().name("audio-output".into()).spawn(move || {
+            use rodio::cpal::traits::{DeviceTrait, HostTrait};
+            match rodio::OutputStream::try_default() {
+                Ok((stream, handle)) => {
+                    let rate = rodio::cpal::default_host()
+                        .default_output_device()
+                        .and_then(|d| d.default_output_config().ok())
+                        .map(|c| c.sample_rate().0)
+                        .unwrap_or(48000);
+                    if ready_tx.send(Ok((handle, rate))).is_ok() {
+                        let _ = keep_rx.recv();
+                    }
+                    drop(stream);
+                }
+                Err(e) => {
+                    let _ = ready_tx.send(Err(anyhow!("No audio output device ({e})")));
+                }
+            }
+        })?;
+        let (handle, rate) = ready_rx.recv().map_err(|_| anyhow!("The audio output stopped unexpectedly"))??;
+        Ok(Engine { _keep_alive: keep_tx, handle, rate })
     }
 
     pub fn play(&self, input: Input, start_at: f64, loop_region: Option<(f64, f64)>, volume: f32, paused: bool) -> Result<Playback> {
