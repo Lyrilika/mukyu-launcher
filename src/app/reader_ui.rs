@@ -59,6 +59,20 @@ fn find(c: &Ctx, id: u64) -> Option<Rc<RefCell<Inner>>> {
     c.readers.borrow().iter().find(|r| r.0.borrow().id == id).map(|r| r.0.clone())
 }
 
+fn set_fullscreen(window: &slint::Window, fullscreen: bool) {
+    #[cfg(target_os = "linux")]
+    {
+        use slint::winit_030::{winit::window::Fullscreen, WinitWindowAccessor};
+
+        if window.with_winit_window(|native| {
+            native.set_fullscreen(fullscreen.then_some(Fullscreen::Borderless(None)));
+        }).is_some() {
+            return;
+        }
+    }
+    window.set_fullscreen(fullscreen);
+}
+
 pub fn open(c: &Rc<Ctx>, name: &str) {
     static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let id = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
@@ -109,7 +123,7 @@ pub fn open(c: &Rc<Ctx>, name: &str) {
     window.on_toggle_fullscreen(with(|i| {
         let fs = !i.borrow().fullscreen;
         i.borrow_mut().fullscreen = fs;
-        i.borrow().window.window().set_fullscreen(fs);
+        set_fullscreen(i.borrow().window.window(), fs);
     }));
     let w2 = Rc::downgrade(&inner);
     window.on_go(move |index| {
@@ -144,20 +158,16 @@ pub fn open(c: &Rc<Ctx>, name: &str) {
         }
     });
 
-    window.window().set_fullscreen(true);
     let _ = window.show();
-    let weak = window.as_weak();
-    for delay in [50, 300, 700] {
-        let weak = weak.clone();
-        super::after(delay, move || {
-            if let Some(w) = weak.upgrade() {
-                if !w.window().is_fullscreen() || delay == 300 {
-                    w.window().set_fullscreen(false);
-                    w.window().set_fullscreen(true);
-                }
+    let weak = Rc::downgrade(&inner);
+    super::after(50, move || {
+        if let Some(reader) = weak.upgrade() {
+            let reader = reader.borrow();
+            if !reader.closed && reader.fullscreen && !reader.window.window().is_fullscreen() {
+                set_fullscreen(reader.window.window(), true);
             }
-        });
-    }
+        }
+    });
     poke_ui(&inner);
 }
 
