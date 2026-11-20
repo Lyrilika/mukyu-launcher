@@ -47,7 +47,7 @@ fn picker_directory_file() -> PathBuf {
     crate::paths::config_dir().join("game_picker_directory.json")
 }
 
-const COVER_PX: u32 = 340;
+const COVER_PX: u32 = 350;
 
 pub type Pixels = SharedPixelBuffer<Rgba8Pixel>;
 

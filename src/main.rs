@@ -33,6 +33,10 @@ fn main() {
         return;
     }
     let software = std::env::var_os(SOFTWARE_RENDERER_ENV).is_some();
+    #[cfg(target_os = "linux")]
+    let picked = !software && platform::pick_egl_vendor();
+    #[cfg(not(target_os = "linux"))]
+    let picked = false;
     let result = std::panic::catch_unwind(|| app::run(software));
     let failure = match result {
         Ok(Ok(())) => return,
@@ -43,7 +47,7 @@ fn main() {
             .or_else(|| payload.downcast_ref::<String>().cloned())
             .unwrap_or_else(|| "unknown error".into()),
     };
-    if !software && is_graphics_failure(&failure) && relaunch_with_software_renderer() {
+    if !software && is_graphics_failure(&failure) && ((picked && relaunch(false)) || relaunch(true)) {
         return;
     }
     eprintln!("Mukyu Launcher failed to start: {failure}");
@@ -58,7 +62,7 @@ fn is_graphics_failure(text: &str) -> bool {
     ["opengl", "gl configuration", "glutin", "egl", "wgl", "glx", "gl context"].iter().any(|k| text.contains(k))
 }
 
-fn relaunch_with_software_renderer() -> bool {
+fn relaunch(software: bool) -> bool {
     let appimage = update::running_appimage();
     let program = match &appimage {
         Some(path) => path.clone(),
@@ -68,14 +72,17 @@ fn relaunch_with_software_renderer() -> bool {
         },
     };
     let mut cmd = std::process::Command::new(program);
-    cmd.args(std::env::args_os().skip(1))
-        .env(SOFTWARE_RENDERER_ENV, "1")
-        .env("MUKYU_WAIT_PID", std::process::id().to_string());
     if appimage.is_some() {
         cmd.env_clear()
-            .envs(platform::host_env().into_iter().filter(|(k, _)| !matches!(k.as_str(), "APPIMAGE" | "APPDIR" | "ARGV0" | "OWD" | "MUKYU_ROOT")))
-            .env(SOFTWARE_RENDERER_ENV, "1")
-            .env("MUKYU_WAIT_PID", std::process::id().to_string());
+            .envs(platform::host_env().into_iter().filter(|(k, _)| !matches!(k.as_str(), "APPIMAGE" | "APPDIR" | "ARGV0" | "OWD" | "MUKYU_ROOT")));
+    } else if std::env::var_os(platform::EGL_PICK_MARK).is_some() {
+        cmd.env_remove("__EGL_VENDOR_LIBRARY_FILENAMES").env_remove(platform::EGL_PICK_MARK);
+    }
+    cmd.args(std::env::args_os().skip(1)).env("MUKYU_WAIT_PID", std::process::id().to_string());
+    if software {
+        cmd.env(SOFTWARE_RENDERER_ENV, "1");
+    } else {
+        cmd.env("MUKYU_GPU_PICK", "0");
     }
     platform::detach(&mut cmd);
     cmd.spawn().is_ok()

@@ -2,7 +2,17 @@
 use std::collections::{HashMap, HashSet};
 use std::process::{Child, Command};
 
+pub const EGL_PICK_MARK: &str = "MUKYU_EGL_PICKED";
+
 pub fn host_env() -> HashMap<String, String> {
+    let mut env = host_env_unfiltered();
+    if env.remove(EGL_PICK_MARK).is_some() {
+        env.remove("__EGL_VENDOR_LIBRARY_FILENAMES");
+    }
+    env
+}
+
+fn host_env_unfiltered() -> HashMap<String, String> {
     let mut env: HashMap<String, String> = std::env::vars().collect();
     if std::env::var_os("TL_APPIMAGE").is_none() {
         return env;
@@ -478,4 +488,81 @@ pub fn vsync_off_while(window: &slint::Window, condition: fn() -> bool) {
             }
         }
     });
+}
+
+#[cfg(target_os = "linux")]
+fn display_uses_nvidia() -> Option<bool> {
+    let mut kinds = std::collections::HashSet::new();
+    for entry in std::fs::read_dir("/sys/class/drm").ok()?.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        let Some((card, _)) = name.split_once('-') else { continue };
+        if !card.starts_with("card") {
+            continue;
+        }
+        let connected = std::fs::read_to_string(entry.path().join("status")).map_or(false, |s| s.trim() == "connected");
+        if !connected {
+            continue;
+        }
+        let driver = std::fs::read_link(format!("/sys/class/drm/{card}/device/driver")).ok()?;
+        let nvidia = match driver.file_name()?.to_str()? {
+            "nvidia" => true,
+            "amdgpu" | "radeon" | "i915" | "xe" | "nouveau" => false,
+            _ => return None,
+        };
+        kinds.insert(nvidia);
+    }
+    if kinds.len() == 1 {
+        kinds.into_iter().next()
+    } else {
+        None
+    }
+}
+
+#[cfg(target_os = "linux")]
+fn egl_vendor_files(nvidia: bool) -> Vec<String> {
+    let mut dirs = vec![std::path::PathBuf::from("/etc/glvnd/egl_vendor.d")];
+    let data_dirs = std::env::var("XDG_DATA_DIRS").unwrap_or_default();
+    for d in data_dirs.split(':').filter(|d| !d.is_empty()).chain(["/usr/local/share", "/usr/share"]) {
+        dirs.push(std::path::Path::new(d).join("glvnd/egl_vendor.d"));
+    }
+    let mut seen = std::collections::HashSet::new();
+    let mut picked = Vec::new();
+    for dir in dirs {
+        let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+        let mut files: Vec<std::path::PathBuf> = entries.flatten().map(|e| e.path()).filter(|p| p.extension().is_some_and(|e| e == "json")).collect();
+        files.sort();
+        for file in files {
+            let Some(name) = file.file_name().map(|n| n.to_owned()) else { continue };
+            if !seen.insert(name) {
+                continue;
+            }
+            let Ok(text) = std::fs::read_to_string(&file) else { continue };
+            let Ok(json) = serde_json::from_str::<serde_json::Value>(&text) else { continue };
+            let lib = json.pointer("/ICD/library_path").and_then(|v| v.as_str()).unwrap_or("").to_ascii_lowercase();
+            let is_nvidia = lib.contains("nvidia");
+            let is_mesa = lib.contains("mesa");
+            if (nvidia && is_nvidia) || (!nvidia && is_mesa) {
+                picked.push(file.display().to_string());
+            }
+        }
+    }
+    picked
+}
+
+#[cfg(target_os = "linux")]
+pub fn pick_egl_vendor() -> bool {
+    let user_set = ["__EGL_VENDOR_LIBRARY_FILENAMES", "__EGL_VENDOR_LIBRARY_DIRS", "MUKYU_GPU_PICK"]
+        .iter()
+        .any(|k| std::env::var_os(k).is_some());
+    if user_set {
+        return false;
+    }
+    let Some(nvidia) = display_uses_nvidia() else { return false };
+    let files = egl_vendor_files(nvidia);
+    if files.is_empty() {
+        return false;
+    }
+    std::env::set_var("__EGL_VENDOR_LIBRARY_FILENAMES", files.join(":"));
+    std::env::set_var(EGL_PICK_MARK, "1");
+    true
 }

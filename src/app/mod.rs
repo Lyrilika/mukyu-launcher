@@ -399,6 +399,7 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
     {
         let t = slint::Timer::default();
         t.start(slint::TimerMode::Repeated, std::time::Duration::from_secs(45), crate::platform::trim_memory);
+        after(6000, crate::platform::trim_memory);
         c.timers.borrow_mut().push(t);
     }
 
