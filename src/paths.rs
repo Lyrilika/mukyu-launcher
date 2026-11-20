@@ -58,7 +58,7 @@ pub fn cover_path(file: &str) -> PathBuf {
     assets_dir().join("covers").join(file)
 }
 
-fn home() -> PathBuf {
+pub fn home() -> PathBuf {
     dirs::home_dir().unwrap_or_else(|| PathBuf::from("."))
 }
 

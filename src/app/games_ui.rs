@@ -30,6 +30,7 @@ pub struct GamesState {
     running: Option<Running>,
     cards: Option<ModelRc<GameCardData>>,
     timers: Vec<slint::Timer>,
+    runner_ids: Vec<String>,
 }
 
 impl GamesState {
@@ -115,7 +116,6 @@ pub fn setup(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_cards(model);
     api.set_windows(cfg!(windows));
-    api.set_proton_only(games::PROTON_ONLY);
     refresh_any_unset(c);
 
     let next = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -154,7 +154,8 @@ pub fn setup(c: &Rc<Ctx>) {
     api.on_runner_changed(|i| {
         let c = ctx();
         persist(&c);
-        if i == 1 && !games::ge_proton_installed() {
+        let picked = c.games.borrow().runner_ids.get(i as usize).cloned().unwrap_or_default();
+        if picked == "ge-proton" && !games::ge_proton_installed() {
             c.app.global::<GamesApi>().set_ge_status("GE-Proton is not installed yet.".into());
         }
     });
@@ -223,7 +224,13 @@ fn open_settings(c: &Rc<Ctx>, i: usize) {
     api.set_playtime(games::playtime_text(info.key).into());
     let pc98 = entry.runner == "dosbox-x" || games::is_pc98(info.key);
     api.set_pc98(pc98);
-    api.set_runner(if entry.runner == "ge-proton" { 1 } else { 0 });
+    let options = games::runner_options();
+    let current = games::effective_runner(&entry.runner);
+    let index = options.iter().position(|(id, _)| *id == current).unwrap_or(0);
+    let items: Vec<crate::MenuItem> = options.iter().map(|(_, label)| crate::MenuItem { text: label.into(), enabled: true }).collect();
+    api.set_runner_items(ModelRc::new(VecModel::from(items)));
+    api.set_runner(index as i32);
+    c.games.borrow_mut().runner_ids = options.into_iter().map(|(id, _)| id).collect();
     if !api.get_ge_busy() {
         api.set_ge_status(ge_status_text().into());
         api.set_ge_progress_visible(false);
@@ -245,9 +252,10 @@ fn persist(c: &Rc<Ctx>) {
     }
     let key = GAMES[i as usize].key;
     let mut g = c.games.borrow_mut();
+    let runner = g.runner_ids.get(api.get_runner().max(0) as usize).cloned().unwrap_or_else(|| "ge-proton".into());
     let entry = g.config.entry(key.to_string()).or_default();
     entry.launch_options = api.get_launch_options().to_string();
-    entry.runner = if api.get_runner() == 1 || games::PROTON_ONLY { "ge-proton".into() } else { "wine".into() };
+    entry.runner = runner;
     games::save_config(&g.config);
 }
 
@@ -370,10 +378,8 @@ fn launch(c: &Rc<Ctx>, i: usize) {
         "dosbox-x".to_string()
     } else if cfg!(windows) {
         "wine".to_string()
-    } else if games::PROTON_ONLY {
-        "ge-proton".to_string()
     } else {
-        entry.runner.clone()
+        games::effective_runner(&entry.runner)
     };
 
     if running_alive(c) {
@@ -434,7 +440,7 @@ fn launch(c: &Rc<Ctx>, i: usize) {
     }
     let session = format!("{:016x}", rand::random::<u64>());
     let game_dir = Path::new(&exe).parent().map(Path::to_path_buf).unwrap_or_default();
-    let proton = runner == "ge-proton";
+    let proton = games::is_proton_runner(&runner);
     let mut cmd = Command::new(&plan.command[0]);
     cmd.args(&plan.command[1..]);
     cmd.env_clear().envs(platform::host_env()).envs(plan.env.iter().cloned());

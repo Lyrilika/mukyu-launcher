@@ -73,7 +73,72 @@ pub struct GameEntry {
 pub const PROTON_ONLY: bool = cfg!(all(target_os = "linux", target_arch = "aarch64"));
 
 fn default_runner() -> String {
-    if PROTON_ONLY { "ge-proton".into() } else { "wine".into() }
+    "ge-proton".into()
+}
+
+pub fn wine_installed() -> bool {
+    let path = platform::host_env_var("PATH").unwrap_or_default();
+    std::env::split_paths(&path).any(|dir| paths::is_executable(&dir.join("wine")))
+}
+
+fn is_proton_dir(dir: &Path) -> bool {
+    dir.join("proton").is_file() && dir.join("toolmanifest.vdf").is_file()
+}
+
+pub fn installed_protons() -> Vec<(String, PathBuf)> {
+    let home = paths::home();
+    let steam_roots = [
+        paths::data_home().join("Steam"),
+        home.join(".steam/root"),
+        home.join(".steam/steam"),
+        home.join(".var/app/com.valvesoftware.Steam/data/Steam"),
+    ];
+    let mut seen = std::collections::HashSet::new();
+    let mut found = Vec::new();
+    for root in &steam_roots {
+        for (dir, only_proton) in [(root.join("compatibilitytools.d"), false), (root.join("steamapps/common"), true)] {
+            let Ok(entries) = std::fs::read_dir(&dir) else { continue };
+            for entry in entries.flatten() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                if only_proton && !name.starts_with("Proton") {
+                    continue;
+                }
+                let path = entry.path();
+                if !is_proton_dir(&path) {
+                    continue;
+                }
+                let real = path.canonicalize().unwrap_or(path);
+                if seen.insert(real.clone()) {
+                    found.push((name, real));
+                }
+            }
+        }
+    }
+    found.sort_by(|a, b| (version_key(&b.0), &b.0).cmp(&(version_key(&a.0), &a.0)));
+    found
+}
+
+pub fn runner_options() -> Vec<(String, String)> {
+    let mut options = vec![("ge-proton".to_string(), "GE-Proton (latest)".to_string())];
+    if !PROTON_ONLY && wine_installed() {
+        options.push(("wine".into(), "Wine".into()));
+    }
+    for (name, path) in installed_protons() {
+        options.push((format!("proton:{}", path.display()), name));
+    }
+    options
+}
+
+pub fn effective_runner(runner: &str) -> String {
+    match runner {
+        "wine" if PROTON_ONLY || !wine_installed() => default_runner(),
+        r if r.strip_prefix("proton:").is_some_and(|p| !is_proton_dir(Path::new(p))) => default_runner(),
+        r => r.to_string(),
+    }
+}
+
+pub fn is_proton_runner(runner: &str) -> bool {
+    runner == "ge-proton" || runner.starts_with("proton:")
 }
 
 impl Default for GameEntry {
@@ -103,7 +168,7 @@ pub fn load_config() -> GameConfig {
                 Value::String(s) => GameEntry { exe: Some(s), ..Default::default() },
                 Value::Object(map) => {
                     let mut runner = map.get("runner").and_then(Value::as_str).map(String::from).unwrap_or_else(default_runner);
-                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") || (PROTON_ONLY && runner == "wine") {
+                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") && !runner.starts_with("proton:") {
                         runner = default_runner();
                     }
                     GameEntry {
@@ -556,10 +621,14 @@ pub fn build_launch_command(exe: &str, options: &str, runner: &str, key: &str) -
         .ok()
         .and_then(|p| p.parent().map(Path::to_path_buf))
         .unwrap_or_default();
-    if runner == "ge-proton" {
+    if is_proton_runner(runner) {
         let prefix = paths::data_dir().join("prefixes").join(key);
         let _ = std::fs::create_dir_all(&prefix);
-        let proton = ge_proton_path().ok_or(LaunchError::ProtonMissing)?;
+        let proton = match runner.strip_prefix("proton:") {
+            Some(dir) if is_proton_dir(Path::new(dir)) => PathBuf::from(dir),
+            Some(_) => return Err(LaunchError::ProtonMissing),
+            None => ge_proton_path().ok_or(LaunchError::ProtonMissing)?,
+        };
         let env = vec![
             ("WINEPREFIX".into(), prefix.display().to_string()),
             ("GAMEID".into(), "0".into()),

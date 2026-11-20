@@ -27,7 +27,7 @@ export global GamesApi {
     in-out property <string> playtime;
     in-out property <bool> pc98: false;
     in-out property <bool> windows: false;
-    in-out property <bool> proton-only: false;
+    in-out property <[MenuItem]> runner-items;
     in-out property <int> runner: 0;
     in-out property <string> ge-status;
     in-out property <bool> ge-busy: false;
@@ -452,25 +452,12 @@ export component GameSettingsPopover inherits Rectangle {
             if !GamesApi.windows: VerticalLayout {
                 spacing: 10px;
                 SettingsLabel { text: "Runner:"; }
-                if GamesApi.proton-only: Rectangle {
-                    height: 40px;
-                    border-radius: 10px;
-                    background: Theme.alpha(Theme.accent, 0.14);
-                    Text {
-                        x: 14px;
-                        width: parent.width - 28px;
-                        text: "GE-Proton";
-                        font-size: Theme.base * 1.15;
-                        color: Theme.fg;
-                        vertical-alignment: center;
-                    }
-                }
-                if !GamesApi.proton-only: Dropdown {
+                Dropdown {
                     h: 40px;
                     radius: 10px;
                     centered: false;
                     font-size: Theme.base * 1.15;
-                    items: [{ text: "Wine", enabled: true }, { text: "GE-Proton", enabled: true }];
+                    items: GamesApi.runner-items;
                     current: GamesApi.runner;
                     bg: Theme.alpha(Theme.accent, 0.14);
                     fg: Theme.fg;
