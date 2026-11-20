@@ -1,6 +1,7 @@
 
 use std::path::{Path, PathBuf};
 
+#[cfg_attr(windows, allow(dead_code))]
 pub enum Picked {
     File(PathBuf),
     Cancelled,

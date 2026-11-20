@@ -110,6 +110,7 @@ pub fn shell_join(args: &[String]) -> String {
 
 pub const SESSION_ENV_VAR: &str = "MUKYU_LAUNCHER_SESSION";
 
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
 const WINE_SYSTEM_EXES: &[&str] = &[
     "services.exe", "winedevice.exe", "plugplay.exe", "svchost.exe", "explorer.exe",
     "rpcss.exe", "conhost.exe", "start.exe", "winemenubuilder.exe", "wineboot.exe",
@@ -310,6 +311,7 @@ mod job {
 
 pub struct GameProcess {
     pub child: Child,
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     pub session: String,
     #[allow(dead_code)]
     tree: HashSet<u32>,

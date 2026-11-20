@@ -38,6 +38,7 @@ pub struct Ctx {
     pub music: RefCell<music_ui::MusicState>,
     pub print: RefCell<print_ui::PrintState>,
     pub readers: RefCell<Vec<reader_ui::Reader>>,
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     timers: RefCell<Vec<slint::Timer>>,
 }
 

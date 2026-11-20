@@ -135,6 +135,7 @@ impl MusicState {
 fn private_temp_dir() -> PathBuf {
     for _ in 0..16 {
         let dir = std::env::temp_dir().join(format!("mukyulauncher-bgm-{:016x}", rand::random::<u64>()));
+        #[cfg_attr(not(unix), allow(unused_mut))]
         let mut builder = std::fs::DirBuilder::new();
         #[cfg(unix)]
         std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);

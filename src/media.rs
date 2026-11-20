@@ -21,6 +21,7 @@ pub struct MediaState {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
 pub enum MediaCommand {
     Raise,
     Quit,
