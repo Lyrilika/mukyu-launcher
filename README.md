@@ -64,6 +64,7 @@ Mukyu Launcher brings your Touhou collection and related media into one app: lau
 - Mukyu Launcher is a community-made project. It is **not affiliated with, endorsed by, or sponsored by ZUN or Team Shanghai Alice**
 - Mukyu Launcher does **not** distribute games or music files. You need your own copies of the games.
 - Gensokyo Radio is an external service. Its availability and content are controlled by its operators.
+- [AI disclosure](DISCLOSURE.md)
 
 ## Installation
 
