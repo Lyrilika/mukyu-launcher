@@ -1,5 +1,6 @@
 
 use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use std::process::{Child, Command};
 
 pub const EGL_PICK_MARK: &str = "MUKYU_EGL_PICKED";
@@ -323,7 +324,7 @@ pub struct GameProcess {
 }
 
 struct ExeWatch {
-    name: String,
+    dir: PathBuf,
     #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
     app_id: u32,
     started: std::time::Instant,
@@ -332,10 +333,29 @@ struct ExeWatch {
 
 const STEAM_START_GRACE: std::time::Duration = std::time::Duration::from_secs(90);
 
-pub fn pids_running_exe(name: &str) -> Vec<u32> {
+#[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+fn path_in_dir(candidate: &str, dir: &Path) -> bool {
+    let unix = match candidate.as_bytes() {
+        [d, b':', b'\\', ..] if d.eq_ignore_ascii_case(&b'z') => candidate[2..].replace('\\', "/"),
+        [b'/', ..] => candidate.to_string(),
+        _ => return false,
+    };
+    if !unix.to_ascii_lowercase().ends_with(".exe") {
+        return false;
+    }
+    let path = Path::new(&unix);
+    if std::fs::canonicalize(path).is_ok_and(|real| real.starts_with(dir)) {
+        return true;
+    }
+    let prefix = format!("{}/", dir.to_string_lossy().trim_end_matches('/')).to_ascii_lowercase();
+    unix.to_ascii_lowercase().starts_with(&prefix)
+}
+
+pub fn pids_running_from(dir: &Path) -> Vec<u32> {
     let mut found = Vec::new();
     #[cfg(target_os = "linux")]
     {
+        let dir = std::fs::canonicalize(dir).unwrap_or_else(|_| dir.to_path_buf());
         let me = std::process::id();
         if let Ok(entries) = std::fs::read_dir("/proc") {
             for entry in entries.flatten() {
@@ -344,11 +364,7 @@ pub fn pids_running_exe(name: &str) -> Vec<u32> {
                     continue;
                 }
                 let Ok(raw) = std::fs::read(entry.path().join("cmdline")) else { continue };
-                let hit = raw.split(|&b| b == 0).any(|arg| {
-                    let arg = String::from_utf8_lossy(arg);
-                    arg.rsplit(['/', '\\']).next().is_some_and(|base| base.eq_ignore_ascii_case(name))
-                });
-                if hit {
+                if raw.split(|&b| b == 0).any(|arg| path_in_dir(&String::from_utf8_lossy(arg), &dir)) {
                     found.push(pid);
                 }
             }
@@ -356,14 +372,25 @@ pub fn pids_running_exe(name: &str) -> Vec<u32> {
     }
     #[cfg(windows)]
     unsafe {
+        use windows::core::PWSTR;
         use windows::Win32::System::Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS};
+        use windows::Win32::System::Threading::{OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION};
+        let prefix = format!("{}\\", dir.to_string_lossy().replace('/', "\\").trim_end_matches('\\')).to_lowercase();
         if let Ok(snap) = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) {
             let mut entry = PROCESSENTRY32W { dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
             let mut ok = Process32FirstW(snap, &mut entry).is_ok();
             while ok {
-                let len = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
-                if String::from_utf16_lossy(&entry.szExeFile[..len]).eq_ignore_ascii_case(name) {
-                    found.push(entry.th32ProcessID);
+                let pid = entry.th32ProcessID;
+                if let Ok(h) = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) {
+                    let mut buf = [0u16; 1024];
+                    let mut len = buf.len() as u32;
+                    if QueryFullProcessImageNameW(h, PROCESS_NAME_WIN32, PWSTR(buf.as_mut_ptr()), &mut len).is_ok() {
+                        let path = String::from_utf16_lossy(&buf[..len as usize]).to_lowercase();
+                        if path.starts_with(&prefix) && path.ends_with(".exe") {
+                            found.push(pid);
+                        }
+                    }
+                    let _ = windows::Win32::Foundation::CloseHandle(h);
                 }
                 ok = Process32NextW(snap, &mut entry).is_ok();
             }
@@ -371,7 +398,7 @@ pub fn pids_running_exe(name: &str) -> Vec<u32> {
         }
     }
     #[cfg(not(any(target_os = "linux", windows)))]
-    let _ = name;
+    let _ = dir;
     found
 }
 
@@ -393,10 +420,9 @@ fn steam_launch_pids(app_id: u32) -> Vec<u32> {
     found
 }
 
-fn end_pids(pids: &[u32], name: &str, force: bool) {
+fn end_pids(pids: &[u32], force: bool) {
     #[cfg(unix)]
     {
-        let _ = name;
         let sig = if force { libc::SIGKILL } else { libc::SIGTERM };
         for &pid in pids {
             unsafe {
@@ -407,8 +433,13 @@ fn end_pids(pids: &[u32], name: &str, force: bool) {
     #[cfg(windows)]
     {
         if !force {
+            if pids.is_empty() {
+                return;
+            }
             let mut cmd = Command::new("taskkill");
-            cmd.args(["/IM", name]);
+            for pid in pids {
+                cmd.arg("/PID").arg(pid.to_string());
+            }
             no_window(&mut cmd);
             let _ = cmd.status();
             return;
@@ -442,8 +473,8 @@ impl GameProcess {
         }
     }
 
-    pub fn watching(mut self, exe_name: String, app_id: u32) -> Self {
-        self.watch = Some(ExeWatch { name: exe_name, app_id, started: std::time::Instant::now(), seen: false });
+    pub fn watching(mut self, game_dir: PathBuf, app_id: u32) -> Self {
+        self.watch = Some(ExeWatch { dir: game_dir, app_id, started: std::time::Instant::now(), seen: false });
         self
     }
 
@@ -463,7 +494,7 @@ impl GameProcess {
     pub fn alive(&mut self) -> bool {
         if let Some(w) = self.watch.as_mut() {
             let _ = self.child.try_wait();
-            if !pids_running_exe(&w.name).is_empty() {
+            if !pids_running_from(&w.dir).is_empty() {
                 w.seen = true;
                 return true;
             }
@@ -518,7 +549,7 @@ impl GameProcess {
                     libc::kill(pid as i32, libc::SIGTERM);
                 }
             }
-            end_pids(&pids_running_exe(&w.name), &w.name, force);
+            end_pids(&pids_running_from(&w.dir), force);
             return;
         }
         #[cfg(windows)]

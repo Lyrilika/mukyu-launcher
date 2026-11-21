@@ -531,7 +531,7 @@ fn launch(c: &Rc<Ctx>, i: usize) {
     let running = Running {
         proc: match steam_app {
             Some(app_id) => GameProcess::new(child, session)
-                .watching(Path::new(&exe).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default(), app_id),
+                .watching(Path::new(&exe).parent().map(Path::to_path_buf).unwrap_or_default(), app_id),
             None => GameProcess::new(child, session),
         },
         key: info.key.into(),
