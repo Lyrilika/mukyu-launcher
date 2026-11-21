@@ -319,6 +319,110 @@ pub struct GameProcess {
     pub exit_status: Option<i32>,
     #[cfg(windows)]
     job: Option<job::Job>,
+    watch: Option<ExeWatch>,
+}
+
+struct ExeWatch {
+    name: String,
+    #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
+    app_id: u32,
+    started: std::time::Instant,
+    seen: bool,
+}
+
+const STEAM_START_GRACE: std::time::Duration = std::time::Duration::from_secs(90);
+
+pub fn pids_running_exe(name: &str) -> Vec<u32> {
+    let mut found = Vec::new();
+    #[cfg(target_os = "linux")]
+    {
+        let me = std::process::id();
+        if let Ok(entries) = std::fs::read_dir("/proc") {
+            for entry in entries.flatten() {
+                let Some(pid) = entry.file_name().to_str().and_then(|s| s.parse::<u32>().ok()) else { continue };
+                if pid == me || !procfs::exists(pid) {
+                    continue;
+                }
+                let Ok(raw) = std::fs::read(entry.path().join("cmdline")) else { continue };
+                let hit = raw.split(|&b| b == 0).any(|arg| {
+                    let arg = String::from_utf8_lossy(arg);
+                    arg.rsplit(['/', '\\']).next().is_some_and(|base| base.eq_ignore_ascii_case(name))
+                });
+                if hit {
+                    found.push(pid);
+                }
+            }
+        }
+    }
+    #[cfg(windows)]
+    unsafe {
+        use windows::Win32::System::Diagnostics::ToolHelp::{CreateToolhelp32Snapshot, Process32FirstW, Process32NextW, PROCESSENTRY32W, TH32CS_SNAPPROCESS};
+        if let Ok(snap) = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) {
+            let mut entry = PROCESSENTRY32W { dwSize: std::mem::size_of::<PROCESSENTRY32W>() as u32, ..Default::default() };
+            let mut ok = Process32FirstW(snap, &mut entry).is_ok();
+            while ok {
+                let len = entry.szExeFile.iter().position(|&c| c == 0).unwrap_or(entry.szExeFile.len());
+                if String::from_utf16_lossy(&entry.szExeFile[..len]).eq_ignore_ascii_case(name) {
+                    found.push(entry.th32ProcessID);
+                }
+                ok = Process32NextW(snap, &mut entry).is_ok();
+            }
+            let _ = windows::Win32::Foundation::CloseHandle(snap);
+        }
+    }
+    #[cfg(not(any(target_os = "linux", windows)))]
+    let _ = name;
+    found
+}
+
+#[cfg(target_os = "linux")]
+fn steam_launch_pids(app_id: u32) -> Vec<u32> {
+    let tag = format!("AppId={app_id}");
+    let mut found = Vec::new();
+    if let Ok(entries) = std::fs::read_dir("/proc") {
+        for entry in entries.flatten() {
+            let Some(pid) = entry.file_name().to_str().and_then(|s| s.parse::<u32>().ok()) else { continue };
+            let Ok(raw) = std::fs::read(entry.path().join("cmdline")) else { continue };
+            let text = String::from_utf8_lossy(&raw);
+            let tagged = text.match_indices(&tag).any(|(i, m)| !text[i + m.len()..].starts_with(|c: char| c.is_ascii_digit()));
+            if tagged {
+                found.push(pid);
+            }
+        }
+    }
+    found
+}
+
+fn end_pids(pids: &[u32], name: &str, force: bool) {
+    #[cfg(unix)]
+    {
+        let _ = name;
+        let sig = if force { libc::SIGKILL } else { libc::SIGTERM };
+        for &pid in pids {
+            unsafe {
+                libc::kill(pid as i32, sig);
+            }
+        }
+    }
+    #[cfg(windows)]
+    {
+        if !force {
+            let mut cmd = Command::new("taskkill");
+            cmd.args(["/IM", name]);
+            no_window(&mut cmd);
+            let _ = cmd.status();
+            return;
+        }
+        use windows::Win32::System::Threading::{OpenProcess, TerminateProcess, PROCESS_TERMINATE};
+        for &pid in pids {
+            unsafe {
+                if let Ok(h) = OpenProcess(PROCESS_TERMINATE, false, pid) {
+                    let _ = TerminateProcess(h, 1);
+                    let _ = windows::Win32::Foundation::CloseHandle(h);
+                }
+            }
+        }
+    }
 }
 
 impl GameProcess {
@@ -334,7 +438,13 @@ impl GameProcess {
             exit_status: None,
             #[cfg(windows)]
             job,
+            watch: None,
         }
+    }
+
+    pub fn watching(mut self, exe_name: String, app_id: u32) -> Self {
+        self.watch = Some(ExeWatch { name: exe_name, app_id, started: std::time::Instant::now(), seen: false });
+        self
     }
 
     fn poll_child(&mut self) -> bool {
@@ -351,6 +461,14 @@ impl GameProcess {
     }
 
     pub fn alive(&mut self) -> bool {
+        if let Some(w) = self.watch.as_mut() {
+            let _ = self.child.try_wait();
+            if !pids_running_exe(&w.name).is_empty() {
+                w.seen = true;
+                return true;
+            }
+            return !w.seen && !self.stopping && w.started.elapsed() < STEAM_START_GRACE;
+        }
         let child_alive = self.poll_child();
         #[cfg(windows)]
         {
@@ -382,6 +500,9 @@ impl GameProcess {
     }
 
     pub fn snapshot_tree(&mut self) {
+        if self.watch.is_some() {
+            return;
+        }
         #[cfg(target_os = "linux")]
         {
             self.tree = procfs::tree(self.child.id(), &self.tree);
@@ -390,6 +511,16 @@ impl GameProcess {
 
     pub fn signal(&mut self, force: bool) {
         self.stopping = true;
+        if let Some(w) = &self.watch {
+            #[cfg(target_os = "linux")]
+            for pid in steam_launch_pids(w.app_id) {
+                unsafe {
+                    libc::kill(pid as i32, libc::SIGTERM);
+                }
+            }
+            end_pids(&pids_running_exe(&w.name), &w.name, force);
+            return;
+        }
         #[cfg(windows)]
         {
             if !force {

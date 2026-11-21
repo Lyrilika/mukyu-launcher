@@ -424,15 +424,20 @@ fn launch(c: &Rc<Ctx>, i: usize) {
             None,
         )
     };
-    if runner == "ge-proton" && !games::ge_proton_installed() {
+    let steam_app = if games::is_pc98(info.key) { None } else { games::steam_app_id(Path::new(&exe)) };
+    if steam_app.is_none() && runner == "ge-proton" && !games::ge_proton_installed() {
         return proton_missing(c);
     }
-    let plan = match games::build_launch_command(&exe, &entry.launch_options, &runner, info.key) {
+    let plan = if let Some(app_id) = steam_app {
+        games::LaunchPlan { command: games::steam_launch_command(app_id), env: vec![] }
+    } else {
+        match games::build_launch_command(&exe, &entry.launch_options, &runner, info.key) {
         Ok(p) => p,
         Err(LaunchError::DosboxMissing) => return dosbox_missing(c),
         Err(LaunchError::ProtonMissing) => return proton_missing(c),
         Err(LaunchError::BadPath) => {
             return c.message("Unsupported file name", "Rename the disk image so its path contains no double quotes (\"), then select it again.")
+        }
         }
     };
     if plan.command.is_empty() {
@@ -440,7 +445,7 @@ fn launch(c: &Rc<Ctx>, i: usize) {
     }
     let session = format!("{:016x}", rand::random::<u64>());
     let game_dir = Path::new(&exe).parent().map(Path::to_path_buf).unwrap_or_default();
-    let proton = games::is_proton_runner(&runner);
+    let proton = steam_app.is_none() && games::is_proton_runner(&runner);
     let mut cmd = Command::new(&plan.command[0]);
     cmd.args(&plan.command[1..]);
     cmd.env_clear().envs(platform::host_env()).envs(plan.env.iter().cloned());
@@ -462,6 +467,9 @@ fn launch(c: &Rc<Ctx>, i: usize) {
                 cmd.stdout(log);
             }
         }
+    }
+    if steam_app.is_some() {
+        platform::no_window(&mut cmd);
     }
     platform::detach(&mut cmd);
     let mut child = match cmd.spawn() {
@@ -521,7 +529,11 @@ fn launch(c: &Rc<Ctx>, i: usize) {
         });
     }
     let running = Running {
-        proc: GameProcess::new(child, session),
+        proc: match steam_app {
+            Some(app_id) => GameProcess::new(child, session)
+                .watching(Path::new(&exe).file_name().map(|n| n.to_string_lossy().to_string()).unwrap_or_default(), app_id),
+            None => GameProcess::new(child, session),
+        },
         key: info.key.into(),
         title: info.title.into(),
         start: Instant::now(),
