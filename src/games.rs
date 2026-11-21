@@ -677,3 +677,38 @@ mod tests {
         assert_eq!(read_sha512sum(&text, "GE-Proton9-1.tar.gz"), Some("a".repeat(128)));
     }
 }
+
+pub fn steam_app_id(exe: &Path) -> Option<u32> {
+    let mut dir = exe.parent()?;
+    loop {
+        let parent = dir.parent()?;
+        let is_common = parent.file_name().is_some_and(|n| n.eq_ignore_ascii_case("common"));
+        let steamapps = parent.parent()?;
+        if is_common && steamapps.file_name().is_some_and(|n| n.eq_ignore_ascii_case("steamapps")) {
+            let install = dir.file_name()?.to_string_lossy().to_string();
+            for entry in std::fs::read_dir(steamapps).ok()?.flatten() {
+                let name = entry.file_name().to_string_lossy().to_string();
+                let Some(id) = name.strip_prefix("appmanifest_").and_then(|n| n.strip_suffix(".acf")) else { continue };
+                let Ok(text) = std::fs::read_to_string(entry.path()) else { continue };
+                let matches = text.lines().any(|line| {
+                    let mut parts = line.split('"').map(str::trim).filter(|s| !s.is_empty());
+                    parts.next().is_some_and(|k| k.eq_ignore_ascii_case("installdir")) && parts.next().is_some_and(|v| v.eq_ignore_ascii_case(&install))
+                });
+                if matches {
+                    return id.parse().ok();
+                }
+            }
+            return None;
+        }
+        dir = parent;
+    }
+}
+
+pub fn steam_launch_command(app_id: u32) -> Vec<String> {
+    let url = format!("steam://rungameid/{app_id}");
+    if cfg!(windows) {
+        vec!["cmd".into(), "/C".into(), "start".into(), String::new(), url]
+    } else {
+        vec!["xdg-open".into(), url]
+    }
+}
