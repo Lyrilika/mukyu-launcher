@@ -321,6 +321,25 @@ struct Shared {
     error: Mutex<Option<String>>,
     wraps: AtomicU64,
     stop: AtomicBool,
+    gain: std::sync::atomic::AtomicU32,
+}
+
+pub fn volume_gain(position: f32) -> f32 {
+    if position <= 0.0 {
+        0.0
+    } else {
+        (position.min(1.0) / 0.85).powf(2.1)
+    }
+}
+
+fn soft_limit(x: f32) -> f32 {
+    const KNEE: f32 = 0.9;
+    let a = x.abs();
+    if a <= KNEE {
+        x
+    } else {
+        x.signum() * (KNEE + (1.0 - KNEE) * ((a - KNEE) / (1.0 - KNEE)).tanh())
+    }
 }
 
 fn decode_thread(input: Input, out_rate: u32, shared: Arc<Shared>, tx: SyncSender<Chunk>) {
@@ -470,7 +489,8 @@ impl Iterator for EngineSource {
                 return Some(0.0);
             }
         }
-        let s = self.cur[self.idx];
+        let gain = f32::from_bits(self.shared.gain.load(Ordering::Relaxed));
+        let s = soft_limit(self.cur[self.idx] * gain);
         self.idx += 1;
         if self.idx % 64 == 0 || self.idx == self.cur.len() {
             let t = self.start + (self.idx / 2) as f64 / self.rate as f64;
@@ -511,8 +531,8 @@ impl Playback {
     pub fn is_paused(&self) -> bool {
         self.sink.is_paused()
     }
-    pub fn set_volume(&self, v: f32) {
-        self.sink.set_volume(v);
+    pub fn set_volume(&self, position: f32) {
+        self.shared.gain.store(volume_gain(position).to_bits(), Ordering::Relaxed);
     }
     pub fn position(&self) -> f64 {
         self.shared.position_us.load(Ordering::Relaxed) as f64 / 1e6
@@ -587,7 +607,7 @@ impl Engine {
 
     pub fn play(&self, input: Input, start_at: f64, loop_region: Option<(f64, f64)>, volume: f32, paused: bool) -> Result<Playback> {
         let sink = rodio::Sink::try_new(&self.handle).map_err(|e| anyhow!("{e}"))?;
-        sink.set_volume(volume);
+        sink.set_volume(1.0);
         if paused {
             sink.pause();
         }
@@ -600,6 +620,7 @@ impl Engine {
             error: Mutex::new(None),
             wraps: AtomicU64::new(0),
             stop: AtomicBool::new(false),
+            gain: std::sync::atomic::AtomicU32::new(volume_gain(volume).to_bits()),
         });
         let (tx, rx) = sync_channel::<Chunk>(12);
         let rate = self.rate;

@@ -84,7 +84,7 @@ impl MusicState {
             playback: None,
             mode: Mode::Game,
             playing: false,
-            volume: 1.0,
+            volume: titles::load_volume(),
             now: NowPlaying::default(),
             metadata_gen: 0,
             metadata_in_flight: false,
@@ -229,6 +229,9 @@ pub fn setup(c: &Rc<Ctx>) {
         media_changed(&c);
     });
     a.on_play_pause(|| play_pause(&ctx()));
+    a.set_volume(c.music.borrow().volume as f32);
+    a.on_volume_changed(|v| set_volume(&ctx(), v as f64, false));
+    a.on_volume_committed(|v| set_volume(&ctx(), v as f64, true));
     a.on_previous(|| previous(&ctx()));
     a.on_next(|| {
         let c = ctx();
@@ -1631,15 +1634,25 @@ fn media_command(c: &Rc<Ctx>, cmd: MediaCommand) {
                 api(c).set_shuffle(on);
             }
         }
-        MediaCommand::Volume(v) => {
-            let v = v.clamp(0.0, 1.0);
-            c.music.borrow_mut().volume = v;
-            if let Some(pb) = c.music.borrow().playback.as_ref() {
-                pb.set_volume(v as f32);
-            }
-        }
+        MediaCommand::Volume(v) => set_volume(c, v, true),
     }
     media_changed(c);
+}
+
+fn set_volume(c: &Rc<Ctx>, v: f64, save: bool) {
+    let v = if v.is_finite() { v.clamp(0.0, 1.0) } else { return };
+    c.music.borrow_mut().volume = v;
+    if let Some(pb) = c.music.borrow().playback.as_ref() {
+        pb.set_volume(v as f32);
+    }
+    let a = api(c);
+    if (a.get_volume() as f64 - v).abs() > 0.0005 {
+        a.set_volume(v as f32);
+    }
+    if save {
+        let _ = titles::save_volume(v);
+        media_changed(c);
+    }
 }
 
 pub fn shutdown(c: &Rc<Ctx>) {

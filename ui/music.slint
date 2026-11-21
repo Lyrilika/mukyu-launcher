@@ -30,6 +30,7 @@ export global MusicApi {
     in-out property <bool> source-error: false;
     in-out property <bool> shuffle: false;
     in-out property <bool> repeat: false;
+    in-out property <float> volume: 1.0;
     in-out property <bool> controls-enabled: false;
     in-out property <bool> play-enabled: false;
     in-out property <[MenuItem]> games: [{ text: "Only music of provided games will be available", enabled: false }];
@@ -56,6 +57,8 @@ export global MusicApi {
     callback shuffle-clicked();
     callback repeat-clicked();
     callback seek(float);
+    callback volume-changed(float);
+    callback volume-committed(float);
 }
 
 component Replay {
@@ -101,12 +104,13 @@ component ControlButton inherits Rectangle {
     in property <bool> enabled: true;
     in property <length> nudge-x: 0px;
     in property <angle> spin: 0deg;
+    in property <length> size: 46px;
     callback clicked();
     property <bool> hot: ta.has-hover && enabled;
     property <int> pulses: 0;
-    width: 46px;
-    height: 46px;
-    border-radius: ta.pressed && enabled ? 12px : hot ? 16px : 23px;
+    width: size;
+    height: size;
+    border-radius: ta.pressed && enabled ? size * 0.26 : hot ? size * 0.35 : size / 2;
     background: active ? (ta.pressed ? Theme.mix(Theme.mu-primary-container, Theme.mu-primary, 0.28) : hot ? Theme.mix(Theme.mu-primary-container, Theme.mu-primary, 0.14) : Theme.mu-primary-container)
               : ta.pressed && enabled ? Theme.alpha(Theme.mu-primary, 0.26) : hot ? Theme.alpha(Theme.mu-primary, 0.14) : transparent;
     opacity: enabled ? 1 : 0.30;
@@ -239,6 +243,7 @@ component ProgressSlider inherits Rectangle {
     in property <float> value;
     in property <bool> enabled;
     in property <bool> smooth;
+    in property <bool> compact: false;
     callback committed(float);
     callback preview(float);
     property <bool> dragging: false;
@@ -250,7 +255,7 @@ component ProgressSlider inherits Rectangle {
     property <bool> hot: ta.has-hover && root.enabled;
     property <bool> down: ta.pressed && root.enabled;
     property <float> hover-frac: max(0, min(1, (ta.mouse-x - 6px) / root.track-w));
-    property <length> bar-h: down ? 12px : hot ? 14px : 10px;
+    property <length> bar-h: compact ? (down ? 5px : hot ? 6px : 4px) : (down ? 12px : hot ? 14px : 10px);
     animate bar-h { duration: 220ms; easing: Ease.soft-spring; }
     trough := Rectangle {
         x: 6px;
@@ -283,8 +288,8 @@ component ProgressSlider inherits Rectangle {
         animate background { duration: 160ms; }
     }
     handle := Rectangle {
-        width: down ? 10px : hot ? 8px : 6px;
-        height: down ? 24px : hot ? 34px : 30px;
+        width: compact ? (down ? 12px : hot ? 14px : 10px) : (down ? 10px : hot ? 8px : 6px);
+        height: compact ? self.width : (down ? 24px : hot ? 34px : 30px);
         x: 6px + root.track-w * root.shown - self.width / 2;
         y: (parent.height - self.height) / 2;
         border-radius: self.width / 2;
@@ -296,7 +301,7 @@ component ProgressSlider inherits Rectangle {
     property <int> ripples: 0;
     ripple := Replay { gen: root.ripples; length: 520ms; curve: cubic-bezier(0.2, 0.7, 0.2, 1); }
     Rectangle {
-        property <length> size: 14px + 34px * ripple.t;
+        property <length> size: root.compact ? 10px + 22px * ripple.t : 14px + 34px * ripple.t;
         x: root.ripple-x - self.width / 2;
         y: (parent.height - self.height) / 2;
         width: size;
@@ -611,7 +616,7 @@ export component MusicPage inherits Rectangle {
         y: root.body-y;
         width: root.player-w;
         height: root.body-h;
-        property <length> fixed-h: info.height + 16px + 54px + 16px + 76px + 16px + 16px + 16px;
+        property <length> fixed-h: info.height + 16px + 54px + 16px + 76px + 4px + 34px + 12px + 16px + 16px;
         property <length> art-area: max(220px, self.height - fixed-h);
         property <length> art-size: max(180px, min(self.width, art-area));
 
@@ -762,9 +767,66 @@ export component MusicPage inherits Rectangle {
             }
         }
 
-        Enter {
+        volume-row := Enter {
             order: 5;
-            y: controls.y + controls.height + 16px;
+            y: controls.y + controls.height + 4px;
+            height: 34px;
+            property <float> remembered: 1.0;
+            property <length> slider-w: min(260px, self.width - 2 * (34px + 8px));
+            mute := ControlButton {
+                x: (parent.width - parent.slider-w) / 2 - 8px - self.width;
+                y: (parent.height - self.height) / 2;
+                size: 34px;
+                icon: MusicApi.volume <= 0.001 ? Icons.volume-off : MusicApi.volume < 0.5 ? Icons.volume-low : Icons.volume-high;
+                icon-size: 18px;
+                clicked => {
+                    if MusicApi.volume > 0.001 {
+                        volume-row.remembered = MusicApi.volume;
+                        MusicApi.volume-changed(0);
+                        MusicApi.volume-committed(0);
+                    } else {
+                        MusicApi.volume-changed(max(0.05, volume-row.remembered));
+                        MusicApi.volume-committed(max(0.05, volume-row.remembered));
+                    }
+                }
+            }
+            TouchArea {
+                x: (parent.width - parent.slider-w) / 2;
+                width: parent.slider-w;
+                height: parent.height;
+                scroll-event(e) => {
+                    if e.delta-y == 0 { return reject; }
+                    MusicApi.volume-changed(max(0, min(1, MusicApi.volume + (e.delta-y > 0 ? 0.05 : -0.05))));
+                    MusicApi.volume-committed(MusicApi.volume);
+                    accept
+                }
+                ProgressSlider {
+                    x: 0;
+                    width: parent.width;
+                    y: (parent.height - self.height) / 2;
+                    value: MusicApi.volume;
+                    enabled: true;
+                    smooth: true;
+                    compact: true;
+                    preview(v) => { MusicApi.volume-changed(v); }
+                    committed(v) => { MusicApi.volume-committed(v); }
+                }
+            }
+            Text {
+                x: (parent.width + parent.slider-w) / 2 + 8px;
+                width: 36px;
+                height: parent.height;
+                text: Math.round(MusicApi.volume * 100) + "%";
+                font-weight: 700;
+                font-size: Theme.px(11px);
+                color: Theme.mu-text-dim;
+                vertical-alignment: center;
+            }
+        }
+
+        Enter {
+            order: 6;
+            y: volume-row.y + volume-row.height + 12px;
             height: 16px;
             Text {
                 text: MusicApi.source-text;

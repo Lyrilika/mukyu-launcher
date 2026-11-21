@@ -52,6 +52,17 @@ pub fn load_title_language() -> String {
     }
 }
 
+pub fn load_volume() -> f64 {
+    let prefs: serde_json::Map<String, serde_json::Value> = crate::util::read_json(&prefs_file()).unwrap_or_default();
+    prefs.get("volume").and_then(|v| v.as_f64()).filter(|v| v.is_finite()).map_or(0.8, |v| v.clamp(0.0, 1.0))
+}
+
+pub fn save_volume(volume: f64) -> std::io::Result<()> {
+    let mut prefs: serde_json::Map<String, serde_json::Value> = crate::util::read_json(&prefs_file()).unwrap_or_default();
+    prefs.insert("volume".into(), volume.into());
+    crate::util::write_json_atomic(&prefs_file(), &prefs)
+}
+
 pub fn save_title_language(language: &str) -> std::io::Result<()> {
     let mut prefs: serde_json::Map<String, serde_json::Value> = crate::util::read_json(&prefs_file()).unwrap_or_default();
     prefs.insert("title_language".into(), language.into());
