@@ -329,9 +329,45 @@ struct ExeWatch {
     app_id: u32,
     started: std::time::Instant,
     seen: bool,
+    cancelling: bool,
 }
 
 const STEAM_START_GRACE: std::time::Duration = std::time::Duration::from_secs(90);
+
+static STEAM_LAUNCH_GEN: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(0);
+
+fn end_steam_game(dir: &Path, app_id: u32, force: bool) -> bool {
+    #[cfg(target_os = "linux")]
+    let launchers = steam_launch_pids(app_id);
+    #[cfg(not(target_os = "linux"))]
+    let launchers: Vec<u32> = {
+        let _ = app_id;
+        Vec::new()
+    };
+    #[cfg(target_os = "linux")]
+    for &pid in &launchers {
+        unsafe {
+            libc::kill(pid as i32, libc::SIGTERM);
+        }
+    }
+    let game = pids_running_from(dir);
+    end_pids(&game, force);
+    !launchers.is_empty() || !game.is_empty()
+}
+
+fn cancel_pending_steam_launch(dir: PathBuf, app_id: u32, deadline: std::time::Instant) {
+    let gen = STEAM_LAUNCH_GEN.load(std::sync::atomic::Ordering::Relaxed);
+    let _ = std::thread::Builder::new().name("steam-cancel".into()).spawn(move || {
+        let mut found_before = false;
+        while std::time::Instant::now() < deadline {
+            std::thread::sleep(std::time::Duration::from_millis(500));
+            if STEAM_LAUNCH_GEN.load(std::sync::atomic::Ordering::Relaxed) != gen {
+                return;
+            }
+            found_before = end_steam_game(&dir, app_id, found_before);
+        }
+    });
+}
 
 #[cfg_attr(not(target_os = "linux"), allow(dead_code))]
 fn path_in_dir(candidate: &str, dir: &Path) -> bool {
@@ -474,7 +510,8 @@ impl GameProcess {
     }
 
     pub fn watching(mut self, game_dir: PathBuf, app_id: u32) -> Self {
-        self.watch = Some(ExeWatch { dir: game_dir, app_id, started: std::time::Instant::now(), seen: false });
+        STEAM_LAUNCH_GEN.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.watch = Some(ExeWatch { dir: game_dir, app_id, started: std::time::Instant::now(), seen: false, cancelling: false });
         self
     }
 
@@ -542,14 +579,12 @@ impl GameProcess {
 
     pub fn signal(&mut self, force: bool) {
         self.stopping = true;
-        if let Some(w) = &self.watch {
-            #[cfg(target_os = "linux")]
-            for pid in steam_launch_pids(w.app_id) {
-                unsafe {
-                    libc::kill(pid as i32, libc::SIGTERM);
-                }
+        if let Some(w) = self.watch.as_mut() {
+            end_steam_game(&w.dir, w.app_id, force);
+            if !w.seen && !w.cancelling {
+                w.cancelling = true;
+                cancel_pending_steam_launch(w.dir.clone(), w.app_id, w.started + STEAM_START_GRACE);
             }
-            end_pids(&pids_running_from(&w.dir), force);
             return;
         }
         #[cfg(windows)]
