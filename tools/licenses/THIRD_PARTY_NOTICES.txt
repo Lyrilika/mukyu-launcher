@@ -9,9 +9,6 @@ files, sound recordings, cover art, printwork thumbnails, trademarks or other
 third-party artwork. Original copyright and license notices remain applicable.
 The bundled helper executables are not covered by a blanket AGPL declaration.
 
-Since version 2.0 the launcher is a single native Rust program. It no longer
-ships Python, GTK, GStreamer or FFmpeg.
-
 Rust components (compiled into the executable)
 ==============================================
 The complete list of crates and versions is in Cargo.lock; each crate's
@@ -69,11 +66,7 @@ thtk / thtk contributors
   WAV rhythm loading and output resampling. The helper build scripts download
   the pinned upstream revision without modifying its source files.
 
-Earlier PC-98 implementations used pmdmini, PMDWin (C60), PMD (M. Kajihara / KAJA),
-PPZ8 (Ukky) and FMGEN (cisc). Those inherited PMDWin/FMGEN implementations have
-been removed from the current helper builds because their separate custom
-terms cannot be assumed covered by pmdmini's GPL license. Game-driver programs
-such as TH01's MDRV98.COM are read from the user's own game files, not bundled.
+Game-driver programs such as TH01's MDRV98.COM are read from the user's own game files, not bundled.
 
 libx86emu / SciTech Software, David Mosberger-Tang, Egbert Eich, SUSE and
 Steffen Winterfeldt, and contributors
