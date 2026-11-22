@@ -68,49 +68,46 @@ Mukyu Launcher brings your Touhou collection and related media into one app: lau
 
 ## Installation
 
-### Linux
+Download the build for your system from the [latest release](../../releases/latest).
 
-#### AppImage (recommended)
+### Build from source
 
-Download `Mukyu_Launcher-x86_64.AppImage` from the [latest release](../../releases/latest),
-make it executable and run it.
-
-**Requirements**
-
-- glibc 2.35 or newer (Ubuntu 22.04+, Debian 12+, Fedora 36+, Arch and other bleeding edge distros), ```getconf GNU_LIBC_VERSION``` to check glibc version
-- Optional: Wine, DOSBox-X (both can also be set up from the game settings).
-
-#### Build from source
-
-**Build requirements**
-
-- Rust 1.92 or newer (`rustup` or your distribution's package).
-- Development headers for ALSA, fontconfig, xkbcommon and Wayland
-  (Debian/Ubuntu: `libasound2-dev libfontconfig1-dev libxkbcommon-dev libwayland-dev`).
+**Linux:** needs Rust 1.92+ and the ALSA, fontconfig, xkbcommon and Wayland headers
+(Debian/Ubuntu: `libasound2-dev libfontconfig1-dev libxkbcommon-dev libwayland-dev`,
+Alpine: `alsa-lib-dev fontconfig-dev libxkbcommon-dev wayland-dev`).
 
 ```bash
-./scripts/install_thtk.sh          # thdat, used to read game BGM metadata
-./scripts/install_pc98_music.sh    # PC-98 music renderers
-./scripts/install_umu.sh           # umu-run, used for GE-Proton
-./scripts/fetch_pdfium.sh linux lib   # PDFium for the built-in reader (x86_64)
-# on ARM64, use this instead: ./scripts/fetch_pdfium.sh linux lib arm64
-cargo run --release
+./scripts/install_thtk.sh
+./scripts/install_pc98_music.sh
+./scripts/install_umu.sh   # only needed for Proton (64-bit glibc)
 ```
 
-To build the AppImage yourself: `bash packaging/appimage/build_appimage.sh`. On ARM64, rebuild
-the bundled tools first with `./scripts/install_thtk.sh --update` and
-`./scripts/install_pc98_music.sh --force`.
+Get PDFium for your system:
 
-### Windows 10/11
+| System | Command |
+|---|---|
+| x86_64 | `./scripts/fetch_pdfium.sh linux lib` |
+| aarch64 | `./scripts/fetch_pdfium.sh linux lib arm64` |
+| i686 | `./scripts/fetch_pdfium.sh linux lib x86` |
+| armhf | `./scripts/fetch_pdfium.sh linux lib arm` |
+| x86_64 musl | `./scripts/fetch_pdfium.sh linux-musl lib` |
+| aarch64 musl | `./scripts/fetch_pdfium.sh linux-musl lib arm64` |
+| i686 musl | `./scripts/fetch_pdfium.sh linux-musl lib x86` |
 
-Download `Mukyu_Launcher_Setup.exe` from the [latest release](../../releases/latest).
+Then run it with `cargo run --release`, or build an AppImage with
+`bash packaging/appimage/build_appimage.sh`.
 
-To build it yourself on Windows: build the native helpers with
-`packaging/windows/build_windows_tools.ps1`, run `cargo build --release`,
-`bash scripts/fetch_pdfium.sh windows build/pdfium` (on Windows on ARM:
-`bash scripts/fetch_pdfium.sh windows build/pdfium arm64`),
-`packaging/windows/stage.ps1 -Tools .` and compile `packaging/windows/installer.iss`
-with Inno Setup (pass `/DArch=arm64` for the ARM installer).
+**Windows:**
+
+```powershell
+packaging/windows/build_windows_tools.ps1
+cargo build --release
+packaging/windows/stage.ps1 -Tools .
+```
+
+Before staging, get PDFium: `bash scripts/fetch_pdfium.sh windows build/pdfium`
+(add `arm64` for ARM or `x86` for 32-bit). Then compile `packaging/windows/installer.iss`
+with Inno Setup.
 
 ## License and third-party notices
 
