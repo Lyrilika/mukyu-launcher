@@ -110,13 +110,15 @@ component ControlButton inherits Rectangle {
     property <int> pulses: 0;
     width: size;
     height: size;
-    border-radius: ta.pressed && enabled ? size * 0.26 : hot ? size * 0.35 : size / 2;
+    border-radius: size / 2;
     background: active ? (ta.pressed ? Theme.mix(Theme.mu-primary-container, Theme.mu-primary, 0.28) : hot ? Theme.mix(Theme.mu-primary-container, Theme.mu-primary, 0.14) : Theme.mu-primary-container)
               : ta.pressed && enabled ? Theme.alpha(Theme.mu-primary, 0.26) : hot ? Theme.alpha(Theme.mu-primary, 0.14) : transparent;
     opacity: enabled ? 1 : 0.30;
     animate background { duration: 180ms; }
-    animate border-radius { duration: 260ms; easing: Ease.soft-spring; }
     animate opacity { duration: 200ms; }
+    transform-scale: ta.pressed && enabled ? 0.94 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate transform-scale { duration: ta.pressed ? 100ms : 320ms; easing: ta.pressed ? ease-out : spring(0.4); }
     pulse := Replay { gen: root.pulses; length: 360ms; curve: ease-out; }
     Rectangle {
         property <length> spread: 10px * pulse.t;
@@ -345,28 +347,88 @@ component TrackRowItem inherits Rectangle {
     border-radius: 18px;
     background: item.active ? Theme.alpha(Theme.mu-primary, 0.16) : ta.pressed ? Theme.alpha(Theme.mu-primary, 0.17) : ta.has-hover ? Theme.alpha(Theme.mu-primary, 0.10) : transparent;
     animate background { duration: 180ms; }
+    transform-scale: ta.pressed ? 0.975 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate transform-scale { duration: ta.pressed ? 120ms : 460ms; easing: ta.pressed ? ease-out : spring(0.4); }
+    property <length> tap-x;
+    property <length> tap-y;
+    property <int> taps: 0;
+    tap := Replay { gen: root.taps; length: 680ms; curve: cubic-bezier(0.23, 1, 0.32, 1); }
     ta := TouchArea {
         mouse-cursor: pointer;
+        pointer-event(e) => {
+            if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
+                root.tap-x = self.mouse-x;
+                root.tap-y = self.mouse-y;
+                root.taps += 1;
+            }
+        }
         clicked => { root.activate(); }
+    }
+    Rectangle {
+        border-radius: root.border-radius;
+        clip: true;
+        Rectangle {
+            property <length> size: 2.2 * root.width * tap.t;
+            x: root.tap-x - self.width / 2;
+            y: root.tap-y - self.height / 2;
+            width: size;
+            height: size;
+            border-radius: self.width / 2;
+            background: Theme.mu-primary;
+            opacity: root.taps > 0 ? 0.22 * (1 - tap.t) : 0;
+        }
     }
     HorizontalLayout {
         padding-left: 10px;
         padding-right: 6px;
         spacing: 12px;
-        Text {
+        Rectangle {
             width: 26px;
-            text: item.number;
-            horizontal-alignment: right;
-            vertical-alignment: center;
-            color: Theme.mu-text-dim;
-            font-size: Theme.px(12px);
+            Text {
+                width: parent.width;
+                height: parent.height;
+                text: item.number;
+                horizontal-alignment: right;
+                vertical-alignment: center;
+                color: Theme.mu-text-dim;
+                font-size: Theme.px(12px);
+                opacity: item.active ? 0 : 1;
+                transform-scale: item.active ? 0.6 : 1;
+                transform-origin: { x: self.width - 8px, y: self.height / 2 };
+                animate opacity { duration: item.active ? 100ms : 180ms; delay: item.active ? 0ms : 80ms; }
+                animate transform-scale { duration: item.active ? 140ms : 380ms; delay: item.active ? 0ms : 80ms; easing: item.active ? ease-in : spring(0.3); }
+            }
+            eq := Rectangle {
+                property <float> level: MusicApi.playing ? 1 : 0;
+                animate level { duration: MusicApi.playing ? 420ms : 320ms; easing: MusicApi.playing ? spring(0.35) : cubic-bezier(0.3, 0, 0.8, 0.15); }
+                property <float> beat: item.active && MusicApi.playing ? animation-tick() / 1ms : 0;
+                x: parent.width - 18px;
+                width: 18px;
+                height: 18px;
+                y: (parent.height - self.height) / 2;
+                opacity: item.active ? 1 : 0;
+                transform-scale: item.active ? 1 : 0.3;
+                transform-origin: { x: self.width / 2, y: self.height };
+                animate opacity { duration: item.active ? 160ms : 100ms; delay: item.active ? 60ms : 0ms; }
+                animate transform-scale { duration: item.active ? 520ms : 140ms; delay: item.active ? 60ms : 0ms; easing: item.active ? spring(0.45) : cubic-bezier(0.3, 0, 0.8, 0.15); }
+                for b[k] in [{ f: 1.7, g: 2.9, p: 0deg }, { f: 2.3, g: 1.3, p: 120deg }, { f: 1.4, g: 3.4, p: 240deg }]: Rectangle {
+                    property <float> wave: 0.5 + 0.3 * Math.sin(eq.beat * 0.36deg * b.f + b.p) + 0.2 * Math.sin(eq.beat * 0.36deg * b.g + b.p * 2);
+                    x: k * 6px + 1px;
+                    width: 4px;
+                    height: 4px + 14px * eq.level * wave;
+                    y: parent.height - self.height;
+                    border-radius: 2px;
+                    background: Theme.mu-primary;
+                }
+            }
         }
         VerticalLayout {
             alignment: center;
             spacing: 1px;
             Marquee {
                 text: item.title;
-                fg: Theme.mu-text;
+                fg: item.active ? Theme.mu-primary : Theme.mu-text;
                 weight: 700;
                 font-size: Theme.base;
                 active: ta.has-hover || item.active;
@@ -384,15 +446,61 @@ component TrackRowItem inherits Rectangle {
             border-radius: 18px;
             background: sta.has-hover ? Theme.alpha(Theme.mu-primary, 0.12) : transparent;
             animate background { duration: 150ms; }
-            pop := Replay { gen: root.pops; length: 520ms; curve: linear; }
-            Ico {
-                source: item.favorite ? Icons.star : Icons.star-outline;
-                size: 18px;
-                color: item.favorite || sta.has-hover ? Theme.mu-primary : Theme.mu-text-dim;
-                property <float> p: pop.t;
-                transform-scale: root.pops == 0 ? 1 : p < 0.28 ? 1 + 0.7 * p / 0.28 : p < 0.52 ? 1.7 - 0.88 * (p - 0.28) / 0.24 : p < 0.76 ? 0.82 + 0.36 * (p - 0.52) / 0.24 : 1.18 - 0.18 * (p - 0.76) / 0.24;
-                transform-rotation: root.pops == 0 ? 0deg : p < 0.28 ? -14deg * p / 0.28 : p < 0.52 ? -14deg + 22deg * (p - 0.28) / 0.24 : p < 0.76 ? 8deg - 11deg * (p - 0.52) / 0.24 : -3deg + 3deg * (p - 0.76) / 0.24;
+            burst := Replay { gen: root.pops; length: 620ms; curve: cubic-bezier(0.23, 1, 0.32, 1); }
+            Rectangle {
+                property <length> size: 12px + 24px * burst.t;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                width: size;
+                height: size;
+                border-radius: self.width / 2;
+                border-width: 1px + 3px * (1 - burst.t);
+                border-color: Theme.mu-primary;
+                opacity: root.pops > 0 ? 0.8 * (1 - burst.t) : 0;
+            }
+            for k in 8: Rectangle {
+                property <angle> a: k * 45deg + 22.5deg;
+                property <length> reach: (Math.mod(k, 2) == 0 ? 17px : 13px) * burst.t + 5px;
+                property <length> dot: (Math.mod(k, 2) == 0 ? 4px : 3px) * (1 - 0.7 * burst.t);
+                x: parent.width / 2 + reach * Math.cos(a) - self.width / 2;
+                y: parent.height / 2 + reach * Math.sin(a) - self.height / 2;
+                width: dot;
+                height: dot;
+                border-radius: self.width / 2;
+                background: Math.mod(k, 2) == 0 ? Theme.mu-primary : Theme.mix(Theme.mu-primary, white, 0.35);
+                opacity: root.pops > 0 && burst.t < 0.999 ? 1 - burst.t * burst.t : 0;
+            }
+            icon := Rectangle {
+                width: 18px;
+                height: 18px;
+                x: (parent.width - self.width) / 2;
+                y: (parent.height - self.height) / 2;
+                transform-scale: sta.pressed ? 0.78 : sta.has-hover ? 1.12 : 1;
                 transform-origin: { x: self.width / 2, y: self.height / 2 };
+                animate transform-scale { duration: sta.pressed ? 110ms : 420ms; easing: sta.pressed ? ease-out : spring(0.45); }
+                Ico {
+                    source: Icons.star-outline;
+                    size: 18px;
+                    color: sta.has-hover ? Theme.mu-primary : Theme.mu-text-dim;
+                    opacity: item.favorite ? 0 : 1;
+                    transform-scale: item.favorite ? 0.5 : 1;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate opacity { duration: item.favorite ? 90ms : 160ms; delay: item.favorite ? 0ms : 60ms; }
+                    animate transform-scale { duration: item.favorite ? 120ms : 360ms; delay: item.favorite ? 0ms : 60ms; easing: item.favorite ? ease-in : spring(0.3); }
+                    animate color { duration: 150ms; }
+                }
+                Ico {
+                    source: Icons.star;
+                    size: 18px;
+                    color: Theme.mu-primary;
+                    opacity: item.favorite ? 1 : 0;
+                    transform-scale: item.favorite ? 1 : 0.4;
+                    transform-rotation: item.favorite ? 0deg : -72deg;
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+                    animate opacity { duration: item.favorite ? 120ms : 140ms; }
+                    animate transform-scale { duration: item.favorite ? 560ms : 160ms; easing: item.favorite ? spring(0.55) : cubic-bezier(0.3, 0, 0.8, 0.15); }
+                    animate transform-rotation { duration: item.favorite ? 620ms : 160ms; easing: item.favorite ? spring(0.35) : cubic-bezier(0.3, 0, 0.8, 0.15); }
+                }
             }
             sta := TouchArea {
                 mouse-cursor: pointer;
@@ -505,7 +613,7 @@ component TrackPanel inherits Rectangle {
                         color: fta.has-hover || MusicApi.favorites-view ? Theme.mu-primary : Theme.mu-text-dim;
                     }
                     Text {
-                        text: MusicApi.favorites-view ? "Favorites  ·  back to game" : "Favorites";
+                        text: "Favorites";
                         font-weight: 700;
                         font-size: Theme.base;
                         vertical-alignment: center;

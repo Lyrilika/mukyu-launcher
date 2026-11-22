@@ -1,5 +1,27 @@
 import { Theme, Ease, Icons } from "theme.slint";
-import { Ico, Btn, ScrollBox, WrapText } from "widgets.slint";
+import { Ico, ScrollBox, WrapText } from "widgets.slint";
+
+component Replay {
+    in property <int> gen;
+    in property <duration> length: 620ms;
+    out property <float> t: 1;
+    property <bool> instant: false;
+    animate t { duration: instant ? 0ms : length; easing: cubic-bezier(0.23, 1, 0.32, 1); }
+    changed gen => {
+        instant = true;
+        t = 0;
+        kick.running = true;
+    }
+    kick := Timer {
+        interval: 16ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            instant = false;
+            t = 1;
+        }
+    }
+}
 
 export struct PrintWorkData {
     name: string,
@@ -37,12 +59,116 @@ component Chip inherits Rectangle {
     }
 }
 
+component ReadButton inherits Rectangle {
+    callback clicked();
+    out property <bool> hovered: ta.has-hover;
+    property <bool> down: ta.pressed;
+    property <int> taps: 0;
+    property <length> tap-x;
+    property <length> tap-y;
+    height: 36px;
+    width: label.preferred-width + 36px + (hovered ? 22px : 0px);
+    animate width { duration: 320ms; easing: spring(0.2); }
+    border-radius: self.height / 2;
+    background: hovered ? Theme.accent : transparent;
+    animate background { duration: 160ms; }
+    border-width: 1px;
+    border-color: hovered ? Theme.accent : Theme.alpha(Theme.fg, 0.25);
+    animate border-color { duration: 160ms; }
+    transform-scale: down ? 0.96 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate transform-scale { duration: down ? 100ms : 320ms; easing: down ? ease-out : spring(0.4); }
+    clip: true;
+    tap := Replay { gen: root.taps; }
+    Rectangle {
+        background: Theme.on-accent;
+        opacity: root.down ? 0.10 : 0;
+        animate opacity { duration: 100ms; }
+    }
+    Rectangle {
+        property <length> size: 2.4 * root.width * tap.t;
+        x: root.tap-x - self.width / 2;
+        y: root.tap-y - self.height / 2;
+        width: size;
+        height: size;
+        border-radius: self.width / 2;
+        background: Theme.on-accent;
+        opacity: root.taps > 0 ? 0.28 * (1 - tap.t) : 0;
+    }
+    label := Text {
+        x: 18px;
+        text: "Read";
+        font-weight: 600;
+        font-size: Theme.base;
+        vertical-alignment: center;
+        color: root.hovered ? Theme.on-accent : Theme.fg;
+        animate color { duration: 160ms; }
+    }
+    Ico {
+        source: Icons.arrow-right;
+        size: 16px;
+        color: Theme.on-accent;
+        x: label.x + label.preferred-width + (root.hovered ? 6px : -4px);
+        y: (parent.height - self.height) / 2;
+        opacity: root.hovered ? 1 : 0;
+        animate x { duration: 360ms; easing: spring(0.35); }
+        animate opacity { duration: root.hovered ? 160ms : 90ms; delay: root.hovered ? 40ms : 0ms; }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        pointer-event(e) => {
+            if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
+                root.tap-x = self.mouse-x;
+                root.tap-y = self.mouse-y;
+                root.taps += 1;
+            }
+        }
+        clicked => { root.clicked(); }
+    }
+}
+
+component DeleteButton inherits Rectangle {
+    callback clicked();
+    out property <bool> hovered: ta.has-hover;
+    property <bool> down: ta.pressed;
+    width: 36px;
+    height: 36px;
+    border-radius: self.height / 2;
+    background: down ? Theme.alpha(Theme.danger, 0.20) : hovered ? Theme.alpha(Theme.danger, 0.12) : transparent;
+    animate background { duration: 160ms; }
+    border-width: 1px;
+    border-color: hovered ? Theme.alpha(Theme.danger, 0.5) : Theme.alpha(Theme.fg, 0.18);
+    animate border-color { duration: 160ms; }
+    transform-scale: down ? 0.92 : 1;
+    transform-origin: { x: self.width / 2, y: self.height / 2 };
+    animate transform-scale { duration: down ? 100ms : 340ms; easing: down ? ease-out : spring(0.45); }
+    Ico {
+        source: Icons.trash;
+        size: 16px;
+        color: root.hovered ? Theme.danger : Theme.fg;
+        opacity: root.hovered ? 1 : 0.6;
+        transform-rotation: root.down ? 0deg : root.hovered ? -14deg : 0deg;
+        transform-scale: root.hovered ? 1.1 : 1;
+        transform-origin: { x: self.width * 0.2, y: self.height * 0.9 };
+        animate transform-rotation { duration: 420ms; easing: spring(0.55); }
+        animate transform-scale { duration: 320ms; easing: spring(0.4); }
+        animate color, opacity { duration: 160ms; }
+    }
+    ta := TouchArea {
+        mouse-cursor: pointer;
+        clicked => { root.clicked(); }
+    }
+}
+
 component PrintCard inherits Rectangle {
     in property <PrintWorkData> data;
     in property <int> index;
     callback read();
     callback delete();
-    property <bool> hot: ta.has-hover;
+    property <bool> del-hot: false;
+    property <bool> hot: ta.has-hover || read-btn.hovered || del-hot;
+    property <length> lift: hot ? -4px : 0px;
+    animate lift { duration: 320ms; easing: spring(0.2); }
     property <bool> shown: PrintApi.appeared;
     min-height: 332px;
     preferred-height: max(332px, info.preferred-height + 32px);
@@ -53,12 +179,16 @@ component PrintCard inherits Rectangle {
 
     ta := TouchArea { }
     card := Rectangle {
-        y: root.rise;
+        y: root.rise + root.lift;
         border-radius: 16px;
         border-width: 1px;
         border-color: root.hot ? Theme.alpha(Theme.accent, 0.55) : Theme.alpha(Theme.fg, 0.07);
         background: root.hot ? Theme.alpha(Theme.fg, 0.07) : Theme.alpha(Theme.fg, 0.035);
-        animate background, border-color { duration: 200ms; }
+        drop-shadow-blur: root.hot ? 26px : 0px;
+        drop-shadow-offset-y: root.hot ? 10px : 0px;
+        drop-shadow-color: Theme.alpha(#000000, root.hot ? 0.28 : 0);
+        animate background, border-color { duration: 160ms; }
+        animate drop-shadow-blur, drop-shadow-offset-y, drop-shadow-color { duration: 260ms; easing: ease-out; }
 
         cover := Rectangle {
             x: 16px;
@@ -66,13 +196,14 @@ component PrintCard inherits Rectangle {
             width: 220px;
             height: 300px;
             border-radius: 10px;
-            drop-shadow-blur: 20px;
-            drop-shadow-offset-y: 8px;
-            drop-shadow-color: #00000073;
+            drop-shadow-blur: root.hot ? 30px : 20px;
+            drop-shadow-offset-y: root.hot ? 14px : 8px;
+            drop-shadow-color: root.hot ? #00000085 : #00000073;
             background: Theme.alpha(Theme.fg, 0.05);
-            transform-scale: root.hot ? 1.025 : 1;
+            transform-scale: root.hot ? 1.035 : 1;
             transform-origin: { x: self.width / 2, y: self.height / 2 };
-            animate transform-scale { duration: 380ms; easing: Ease.standard; }
+            animate transform-scale { duration: 380ms; easing: spring(0.25); }
+            animate drop-shadow-blur, drop-shadow-offset-y, drop-shadow-color { duration: 300ms; easing: ease-out; }
             Rectangle {
                 border-radius: 10px;
                 clip: true;
@@ -138,44 +269,13 @@ component PrintCard inherits Rectangle {
             Rectangle { vertical-stretch: 1; }
             HorizontalLayout {
                 spacing: 8px;
-                alignment: start;
-                Btn {
-                    text: "Read";
-                    h: 32px;
-                    pad: 22px;
-                    radius: 16px;
-                    weight: 500;
-                    bg: transparent;
-                    bg-hover: Theme.accent;
-                    bg-pressed: Theme.alpha(Theme.accent, 0.75);
-                    fg: Theme.fg;
-                    fg-hover: Theme.on-accent;
-                    border: Theme.alpha(Theme.fg, 0.25);
-                    border-hover: Theme.accent;
-                    pressed-scale: 0.95;
+                read-btn := ReadButton {
                     clicked => { root.read(); }
                 }
-                if data.downloaded: trash := Rectangle {
-                    y: (parent.height - self.height) / 2;
-                    width: 34px;
-                    height: 26px;
-                    border-radius: 13px;
-                    border-width: 1px;
-                    border-color: tta.has-hover ? #ff55558c : Theme.alpha(Theme.fg, 0.18);
-                    background: tta.has-hover ? #ff55551f : transparent;
-                    opacity: tta.has-hover ? 1 : 0.6;
-                    transform-scale: tta.pressed ? 0.9 : 1;
-                    animate border-color, background, opacity { duration: 180ms; }
-                    animate transform-scale { duration: 160ms; }
-                    Ico {
-                        source: Icons.trash;
-                        size: 14px;
-                        color: tta.has-hover ? Theme.danger : Theme.fg;
-                    }
-                    tta := TouchArea {
-                        mouse-cursor: pointer;
-                        clicked => { root.delete(); }
-                    }
+                Rectangle { horizontal-stretch: 1; }
+                if data.downloaded: DeleteButton {
+                    changed hovered => { root.del-hot = self.hovered; }
+                    clicked => { root.delete(); }
                 }
             }
         }

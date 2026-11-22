@@ -428,6 +428,11 @@ export component ScrollBox inherits Rectangle {
     }
 }
 
+export global WindowInfo {
+    in-out property <length> width;
+    in-out property <length> height;
+}
+
 export component Dropdown inherits Rectangle {
     in property <[MenuItem]> items;
     in property <int> current: 0;
@@ -450,9 +455,41 @@ export component Dropdown inherits Rectangle {
     in property <{width: length, height: length}> window-size;
     callback selected(int);
     property <bool> open: false;
+    property <bool> reveal: false;
     property <int> pending: -1;
+    property <length> win-w: WindowInfo.width;
+    property <length> win-h: WindowInfo.height;
     changed window-size => {
-        if popup.is-open { popup.close(); }
+        if popup.is-open { closer.running = false; root.open = false; root.reveal = false; popup.close(); }
+    }
+    changed win-w => {
+        if popup.is-open { closer.running = false; root.open = false; root.reveal = false; popup.close(); }
+    }
+    changed win-h => {
+        if popup.is-open { closer.running = false; root.open = false; root.reveal = false; popup.close(); }
+    }
+    function close-animated() {
+        if !popup.is-open || closer.running { return; }
+        opener.running = false;
+        root.open = false;
+        root.reveal = false;
+        closer.running = true;
+    }
+    opener := Timer {
+        interval: 16ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            root.reveal = true;
+        }
+    }
+    closer := Timer {
+        interval: 190ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            popup.close();
+        }
     }
     changed pending => {
         if root.pending >= 0 {
@@ -497,29 +534,39 @@ export component Dropdown inherits Rectangle {
     ta := TouchArea {
         mouse-cursor: pointer;
         clicked => {
+            closer.running = false;
+            root.reveal = false;
             root.open = true;
             popup.show();
+            opener.running = true;
         }
     }
     popup := PopupWindow {
-        x: 0;
-        y: root.height + 6px;
-        width: max(root.min-popup-width, root.width);
-        height: min(list.preferred-height, root.max-popup-height);
-        close-policy: close-on-click-outside;
+        x: -root.absolute-position.x;
+        y: -root.absolute-position.y;
+        width: WindowInfo.width;
+        height: WindowInfo.height;
+        close-policy: no-auto-close;
         forward-focus: pfs;
-        property <bool> reveal: false;
+        TouchArea {
+            clicked => { root.close-animated(); }
+            scroll-event(e) => { accept }
+        }
         init => {
-            reveal = true;
             list-scroll.content-y = -max(0px, min(list-scroll.content-height - list-scroll.visible-height, root.current * 44px - 120px));
         }
         pfs := FocusScope {
-            focus-changed-event => { root.open = self.has-focus; }
+            x: root.absolute-position.x;
+            y: root.absolute-position.y + root.height + 6px;
+            width: max(root.min-popup-width, root.width);
+            height: min(list.preferred-height, root.max-popup-height);
             key-pressed(e) => {
-                if e.text == Key.Escape { popup.close(); return accept; }
+                if e.text == Key.Escape { root.close-animated(); return accept; }
                 reject
             }
             Rectangle {
+                y: 0;
+                height: root.reveal ? parent.height : 0px;
                 border-radius: root.popup-radius;
                 background: root.popup-bg;
                 border-width: 1px;
@@ -527,14 +574,13 @@ export component Dropdown inherits Rectangle {
                 drop-shadow-blur: 24px;
                 drop-shadow-offset-y: 10px;
                 drop-shadow-color: #00000057;
-                opacity: popup.reveal ? 1 : 0;
-                transform-scale: popup.reveal ? 1 : 0.97;
-                transform-origin: { x: self.width / 2, y: 0 };
-                animate opacity, transform-scale { duration: 240ms; easing: Ease.emphasized; }
+                opacity: root.reveal ? 1 : 0;
+                animate height { duration: root.reveal ? 320ms : 180ms; easing: root.reveal ? cubic-bezier(0.2, 0.9, 0.25, 1.04) : cubic-bezier(0.4, 0, 1, 1); }
+                animate opacity { duration: root.reveal ? 90ms : 80ms; delay: root.reveal ? 0ms : 110ms; }
                 clip: true;
                 list-scroll := ScrollView {
                     width: parent.width;
-                    height: parent.height;
+                    height: pfs.height;
                     content-width: self.visible-width;
                     content-height: list.preferred-height;
                     horizontal-scrollbar-policy: always-off;
@@ -545,6 +591,11 @@ export component Dropdown inherits Rectangle {
                         spacing: 4px;
                         for item[i] in root.items: Rectangle {
                             height: max(40px, label.preferred-height + 12px);
+                            opacity: root.reveal ? 1 : 0;
+                            transform-scale: root.reveal ? 1 : 0.92;
+                            transform-origin: { x: self.width / 2, y: 0 };
+                            animate opacity { duration: root.reveal ? 200ms : 90ms; delay: root.reveal ? 70ms + min(i, 10) * 26ms : 0ms; easing: ease-out; }
+                            animate transform-scale { duration: root.reveal ? 360ms : 90ms; delay: root.reveal ? 70ms + min(i, 10) * 26ms : 0ms; easing: root.reveal ? cubic-bezier(0.34, 1.56, 0.64, 1) : ease-in; }
                             border-radius: root.row-radius;
                             background: i == root.current ? root.popup-selected : rta.has-hover && item.enabled ? root.popup-hover : transparent;
                             animate background { duration: 150ms; }
@@ -564,8 +615,7 @@ export component Dropdown inherits Rectangle {
                                 mouse-cursor: item.enabled ? pointer : default;
                                 clicked => {
                                     root.pending = i;
-                                    root.open = false;
-                                    popup.close();
+                                    root.close-animated();
                                 }
                             }
                         }

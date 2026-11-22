@@ -391,10 +391,13 @@ export component GameSettingsPopover inherits Rectangle {
     drop-shadow-blur: 42px;
     drop-shadow-offset-y: 18px;
     drop-shadow-color: #0000006b;
+    in property <length> origin-x: self.width / 2;
+    in property <length> origin-y: 0px;
     opacity: shown ? 1 : 0;
-    transform-scale: shown ? 1 : 0.94;
-    transform-origin: { x: self.width / 2, y: 0 };
-    animate opacity, transform-scale { duration: 260ms; easing: Ease.emphasized; }
+    transform-scale: shown ? 1 : 0.88;
+    transform-origin: { x: root.origin-x, y: max(0px, min(self.height, root.origin-y)) };
+    animate opacity { duration: shown ? 150ms : 110ms; easing: shown ? ease-out : cubic-bezier(0.3, 0, 0.8, 0.15); }
+    animate transform-scale { duration: shown ? 400ms : 140ms; easing: shown ? spring(0.25) : cubic-bezier(0.3, 0, 0.8, 0.15); }
     visible: self.opacity > 0.01;
 
     TouchArea { }
