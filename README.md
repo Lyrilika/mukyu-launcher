@@ -68,6 +68,8 @@ Mukyu Launcher brings your Touhou collection and related media into one app: lau
 
 ## Installation
 
+### Download (Recommended)
+
 Download the build for your system from the [latest release](../../releases/latest).
 
 ### Build from source
