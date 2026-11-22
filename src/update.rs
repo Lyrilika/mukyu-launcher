@@ -10,10 +10,32 @@ use sha2::{Digest, Sha256};
 use crate::paths;
 
 pub const REPO: &str = "Lyrilika/mukyu-launcher";
-pub const APPIMAGE_ASSET: &str =
-    if cfg!(target_arch = "aarch64") { "Mukyu_Launcher-aarch64.AppImage" } else { "Mukyu_Launcher-x86_64.AppImage" };
-pub const INSTALLER_ASSET: &str =
-    if cfg!(target_arch = "aarch64") { "Mukyu_Launcher_Setup_arm64.exe" } else { "Mukyu_Launcher_Setup.exe" };
+const APPIMAGE_ARCH: &str = if cfg!(target_arch = "aarch64") {
+    "aarch64"
+} else if cfg!(target_arch = "x86") {
+    "i686"
+} else if cfg!(target_arch = "arm") {
+    "armhf"
+} else {
+    "x86_64"
+};
+pub const APPIMAGE_ASSET: &str = match (APPIMAGE_ARCH.as_bytes(), cfg!(target_env = "musl")) {
+    (b"aarch64", true) => "Mukyu_Launcher-aarch64-musl.AppImage",
+    (b"aarch64", false) => "Mukyu_Launcher-aarch64.AppImage",
+    (b"i686", true) => "Mukyu_Launcher-i686-musl.AppImage",
+    (b"i686", false) => "Mukyu_Launcher-i686.AppImage",
+    (b"armhf", true) => "Mukyu_Launcher-armhf-musl.AppImage",
+    (b"armhf", false) => "Mukyu_Launcher-armhf.AppImage",
+    (_, true) => "Mukyu_Launcher-x86_64-musl.AppImage",
+    (_, false) => "Mukyu_Launcher-x86_64.AppImage",
+};
+pub const INSTALLER_ASSET: &str = if cfg!(target_arch = "aarch64") {
+    "Mukyu_Launcher_Setup_arm64.exe"
+} else if cfg!(target_arch = "x86") {
+    "Mukyu_Launcher_Setup_x86.exe"
+} else {
+    "Mukyu_Launcher_Setup.exe"
+};
 const USER_AGENT: &str = "Mukyu-Launcher-Updater";
 const MAX_JSON_BYTES: u64 = 4 * 1024 * 1024;
 const MAX_ASSET_BYTES: u64 = 1024 * 1024 * 1024;

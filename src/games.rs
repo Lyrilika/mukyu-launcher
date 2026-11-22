@@ -70,10 +70,43 @@ pub struct GameEntry {
     pub runner: String,
 }
 
-pub const PROTON_ONLY: bool = cfg!(all(target_os = "linux", target_arch = "aarch64"));
+pub const NO_GE_PROTON: bool = cfg!(any(target_env = "musl", all(target_os = "linux", any(target_arch = "x86", target_arch = "arm"))));
+pub const WINE_LATEST: bool = cfg!(all(target_os = "linux", target_env = "gnu", any(target_arch = "x86", target_arch = "arm")));
+pub const PROTON_ONLY: bool = cfg!(all(target_os = "linux", target_arch = "aarch64", not(target_env = "musl")));
+pub const MANAGED_AVAILABLE: bool = WINE_LATEST || !NO_GE_PROTON;
+pub const MANAGED_RUNNER: &str = if WINE_LATEST { "wine-latest" } else { "ge-proton" };
+pub const MANAGED_NAME: &str = if WINE_LATEST { "Wine" } else { "GE-Proton" };
 
-fn default_runner() -> String {
-    "ge-proton".into()
+pub fn default_runner() -> String {
+    if MANAGED_AVAILABLE { MANAGED_RUNNER.into() } else { "wine".into() }
+}
+
+pub fn managed_installed() -> bool {
+    if WINE_LATEST { managed_wine_path().is_some() } else { ge_proton_installed() }
+}
+
+pub fn install_latest_managed(progress: impl FnMut(Option<u32>)) -> Result<()> {
+    if WINE_LATEST { install_latest_wine(progress) } else { install_latest_ge_proton(progress) }
+}
+
+pub fn wine_build_directory() -> PathBuf {
+    paths::data_dir().join("wine")
+}
+
+pub fn managed_wine_path() -> Option<PathBuf> {
+    let mut best: Option<(Vec<u64>, PathBuf)> = None;
+    for entry in std::fs::read_dir(wine_build_directory()).ok()?.flatten() {
+        let name = entry.file_name().to_string_lossy().to_string();
+        let path = entry.path();
+        if !name.starts_with("wine-") || !paths::is_executable(&path.join("bin/wine")) {
+            continue;
+        }
+        let key = version_key(&name);
+        if best.as_ref().map_or(true, |b| key > b.0) {
+            best = Some((key, path));
+        }
+    }
+    best.map(|(_, p)| p)
 }
 
 pub fn wine_installed() -> bool {
@@ -119,7 +152,10 @@ pub fn installed_protons() -> Vec<(String, PathBuf)> {
 }
 
 pub fn runner_options() -> Vec<(String, String)> {
-    let mut options = vec![("ge-proton".to_string(), "GE-Proton (latest)".to_string())];
+    let mut options = Vec::new();
+    if MANAGED_AVAILABLE {
+        options.push((MANAGED_RUNNER.to_string(), format!("{MANAGED_NAME} (latest)")));
+    }
     if !PROTON_ONLY && wine_installed() {
         options.push(("wine".into(), "Wine".into()));
     }
@@ -131,6 +167,8 @@ pub fn runner_options() -> Vec<(String, String)> {
 
 pub fn effective_runner(runner: &str) -> String {
     match runner {
+        "ge-proton" if NO_GE_PROTON => default_runner(),
+        "wine-latest" if !WINE_LATEST => default_runner(),
         "wine" if PROTON_ONLY || !wine_installed() => default_runner(),
         r if r.strip_prefix("proton:").is_some_and(|p| !is_proton_dir(Path::new(p))) => default_runner(),
         r => r.to_string(),
@@ -168,7 +206,7 @@ pub fn load_config() -> GameConfig {
                 Value::String(s) => GameEntry { exe: Some(s), ..Default::default() },
                 Value::Object(map) => {
                     let mut runner = map.get("runner").and_then(Value::as_str).map(String::from).unwrap_or_else(default_runner);
-                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "dosbox-x") && !runner.starts_with("proton:") {
+                    if !matches!(runner.as_str(), "wine" | "ge-proton" | "wine-latest" | "dosbox-x") && !runner.starts_with("proton:") {
                         runner = default_runner();
                     }
                     GameEntry {
@@ -401,6 +439,78 @@ pub fn install_latest_ge_proton(mut progress: impl FnMut(Option<u32>)) -> Result
     Ok(())
 }
 
+fn install_latest_wine(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
+    use sha2::Digest;
+    let release = github_latest("Kron4ek/Wine-Builds")?;
+    let all = assets(&release);
+    let pattern = regex::Regex::new(r"^wine-[0-9.]+-x86\.tar\.xz$").unwrap();
+    let (tar_name, tar_url) = all
+        .iter()
+        .find(|(n, _)| pattern.is_match(n))
+        .cloned()
+        .ok_or_else(|| anyhow!("Could not find the latest Wine release"))?;
+    let stem = tar_name.trim_end_matches(".tar.xz").to_string();
+    let checksum_url = all.iter().find(|(n, _)| n == "sha256sums.txt").map(|(_, u)| u.clone());
+    let install_dir = wine_build_directory();
+    let target = install_dir.join(&stem);
+    if target.is_dir() {
+        progress(Some(100));
+        return Ok(());
+    }
+    std::fs::create_dir_all(&install_dir)?;
+    let temp = temp_dir("mukyu-wine-", None)?;
+    let result = (|| -> Result<()> {
+        let tar_path = temp.join(&tar_name);
+        progress(Some(0));
+        download_to(&tar_url, &tar_path, &mut progress)?;
+        let url = checksum_url.ok_or_else(|| anyhow!("The Wine release has no checksums"))?;
+        let sum_path = temp.join("sha256sums.txt");
+        download_to(&url, &sum_path, |_| {})?;
+        let expected = read_sha512sum(&std::fs::read_to_string(&sum_path)?, &tar_name)
+            .ok_or_else(|| anyhow!("The Wine release has no checksum for {tar_name}"))?;
+        let mut hasher = sha2::Sha256::new();
+        let mut file = std::fs::File::open(&tar_path)?;
+        std::io::copy(&mut file, &mut hasher)?;
+        if hex::encode(hasher.finalize()) != expected.to_lowercase() {
+            bail!("Wine checksum verification failed");
+        }
+        let staging = temp_dir("wine-install-", Some(&install_dir))?;
+        let unpack = (|| -> Result<()> {
+            let mut xz = std::process::Command::new("xz")
+                .arg("-dc")
+                .arg(&tar_path)
+                .stdout(std::process::Stdio::piped())
+                .spawn()
+                .context("xz is required to unpack Wine")?;
+            let stdout = xz.stdout.take().ok_or_else(|| anyhow!("Could not read the Wine archive"))?;
+            let mut archive = tar::Archive::new(stdout);
+            archive.set_preserve_permissions(true);
+            for entry in archive.entries()? {
+                let mut entry = entry?;
+                let path = entry.path()?.into_owned();
+                if path.is_absolute() || path.components().any(|c| matches!(c, std::path::Component::ParentDir)) {
+                    bail!("Unsafe path found in Wine archive");
+                }
+                entry.unpack_in(&staging)?;
+            }
+            if !xz.wait()?.success() {
+                bail!("The Wine archive could not be unpacked");
+            }
+            let extracted = staging.join(&stem);
+            if !paths::is_executable(&extracted.join("bin/wine")) {
+                bail!("Wine archive did not contain the expected directory");
+            }
+            std::fs::rename(&extracted, &target)?;
+            Ok(())
+        })();
+        let _ = std::fs::remove_dir_all(&staging);
+        unpack
+    })();
+    let _ = std::fs::remove_dir_all(&temp);
+    result?;
+    progress(Some(100));
+    Ok(())
+}
 
 pub fn dosbox_root() -> PathBuf {
     paths::data_dir().join("dosbox-x")
@@ -621,6 +731,14 @@ pub fn build_launch_command(exe: &str, options: &str, runner: &str, key: &str) -
         .ok()
         .and_then(|p| p.parent().map(Path::to_path_buf))
         .unwrap_or_default();
+    if runner == "wine-latest" {
+        let prefix = paths::data_dir().join("prefixes").join(key);
+        let _ = std::fs::create_dir_all(&prefix);
+        let wine = managed_wine_path().ok_or(LaunchError::ProtonMissing)?.join("bin/wine").display().to_string();
+        let base = if cfg!(target_arch = "arm") { vec!["box86".into(), wine, exe.to_string()] } else { vec![wine, exe.to_string()] };
+        let env = vec![("WINEPREFIX".into(), prefix.display().to_string())];
+        return Ok(LaunchPlan { command: wrap(options, base, platform::shell_split), env });
+    }
     if is_proton_runner(runner) {
         let prefix = paths::data_dir().join("prefixes").join(key);
         let _ = std::fs::create_dir_all(&prefix);

@@ -74,6 +74,122 @@ jobs:
         compression-level: 0
         if-no-files-found: error
 
+  linux-32:
+    name: Linux AppImage (${{ matrix.arch }})
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'build'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: i686
+          image: i386/debian:bookworm
+          platform: linux/386
+        - arch: armhf
+          image: arm32v7/ubuntu:22.04
+          platform: linux/arm/v7
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v5
+    - uses: docker/setup-qemu-action@v3
+      if: matrix.arch == 'armhf'
+    - name: Build AppImage in a 32-bit container
+      env:
+        ARCH: ${{ matrix.arch }}
+        IMAGE: ${{ matrix.image }}
+        PLATFORM: ${{ matrix.platform }}
+      run: |
+        docker run --rm --platform "$PLATFORM" -v "$PWD:/src" -w /src -e ARCH -e GITHUB_REPOSITORY -e CARGO_TERM_COLOR "$IMAGE" linux32 bash -euo pipefail -c '
+          export DEBIAN_FRONTEND=noninteractive
+          apt-get update -qq
+          apt-get install -y --no-install-recommends ca-certificates curl git file xz-utils zsync \
+            build-essential cmake flex bison pkg-config desktop-file-utils libasound2-dev libxkbcommon-dev \
+            libfontconfig1-dev libwayland-dev libxcursor-dev libxrandr-dev libxi-dev libgl1-mesa-dev
+          curl -fsSL https://sh.rustup.rs | sh -s -- -y --profile minimal
+          . "$HOME/.cargo/env"
+          git config --global --add safe.directory /src
+          bash scripts/install_thtk.sh --update --yes
+          bash scripts/install_pc98_music.sh --force
+          cargo test --release --locked
+          LIBC=gnu bash packaging/appimage/build_appimage.sh
+          chown -R '"$(id -u):$(id -g)"' dist
+        '
+    - name: Report size
+      env:
+        ARCH: ${{ matrix.arch }}
+      run: du -h "dist/Mukyu_Launcher-$ARCH.AppImage" "dist/Mukyu_Launcher-$ARCH.AppImage.zsync" >> "$GITHUB_STEP_SUMMARY"
+    - uses: actions/upload-artifact@v6
+      with:
+        name: Linux-AppImage-${{ matrix.arch }}
+        path: |
+          dist/Mukyu_Launcher-${{ matrix.arch }}.AppImage
+          dist/Mukyu_Launcher-${{ matrix.arch }}.AppImage.zsync
+          dist/VERSION
+        compression-level: 0
+        if-no-files-found: error
+
+  linux-musl:
+    name: Linux musl AppImage (${{ matrix.arch }})
+    if: github.event_name != 'workflow_dispatch' || inputs.operation == 'build'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - arch: x86_64
+          runner: ubuntu-22.04
+          image: rust:1-alpine
+          platform: linux/amd64
+        - arch: aarch64
+          runner: ubuntu-22.04-arm
+          image: rust:1-alpine
+          platform: linux/arm64
+        - arch: i686
+          runner: ubuntu-22.04
+          image: alpine:latest
+          platform: linux/386
+    runs-on: ${{ matrix.runner }}
+    steps:
+    - uses: actions/checkout@v5
+    - name: Build in Alpine
+      env:
+        ARCH: ${{ matrix.arch }}
+        IMAGE: ${{ matrix.image }}
+        PLATFORM: ${{ matrix.platform }}
+      run: |
+        docker run --rm --platform "$PLATFORM" -v "$PWD:/src" -w /src -e ARCH -e GITHUB_REPOSITORY -e CARGO_TERM_COLOR "$IMAGE" sh -euc '
+          command -v cargo >/dev/null || apk add --no-cache rust cargo
+          apk add --no-cache bash curl git file cmake make build-base flex bison pkgconf musl-dev \
+            alsa-lib-dev libxkbcommon-dev fontconfig-dev wayland-dev libxcursor-dev libxrandr-dev libxi-dev mesa-dev \
+            desktop-file-utils
+          git config --global --add safe.directory /src
+          bash scripts/install_thtk.sh --update --yes
+          bash scripts/install_pc98_music.sh --force
+          cargo test --release --locked
+          LIBC=musl MUKYU_ALLOW_NO_ZSYNC=1 bash packaging/appimage/build_appimage.sh
+          chown -R '"$(id -u):$(id -g)"' dist
+        '
+    - name: Delta update file
+      env:
+        ARCH: ${{ matrix.arch }}
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends zsync
+        cd dist
+        zsyncmake -u "Mukyu_Launcher-$ARCH-musl.AppImage" "Mukyu_Launcher-$ARCH-musl.AppImage"
+        grep -a -q "^Filename: Mukyu_Launcher-$ARCH-musl.AppImage$" "Mukyu_Launcher-$ARCH-musl.AppImage.zsync"
+    - name: Report size
+      env:
+        ARCH: ${{ matrix.arch }}
+      run: du -h "dist/Mukyu_Launcher-$ARCH-musl.AppImage" "dist/Mukyu_Launcher-$ARCH-musl.AppImage.zsync" >> "$GITHUB_STEP_SUMMARY"
+    - uses: actions/upload-artifact@v6
+      with:
+        name: Linux-AppImage-${{ matrix.arch }}-musl
+        path: |
+          dist/Mukyu_Launcher-${{ matrix.arch }}-musl.AppImage
+          dist/Mukyu_Launcher-${{ matrix.arch }}-musl.AppImage.zsync
+          dist/VERSION
+        compression-level: 0
+        if-no-files-found: error
+
   windows-tools:
     name: Windows native tools (${{ matrix.arch }})
     if: github.event_name != 'workflow_dispatch' || inputs.operation == 'build'
@@ -93,6 +209,12 @@ jobs:
           cc: clang
           cxx: clang++
           packages: mingw-w64-clang-aarch64-python mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-ninja mingw-w64-clang-aarch64-zlib
+        - arch: x86
+          runner: windows-latest
+          msystem: MINGW32
+          cc: gcc
+          cxx: g++
+          packages: mingw-w64-i686-python mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-ninja mingw-w64-i686-zlib
     runs-on: ${{ matrix.runner }}
     defaults:
       run:
@@ -134,13 +256,30 @@ jobs:
           runner: windows-latest
         - arch: arm64
           runner: windows-11-arm
+        - arch: x86
+          runner: windows-latest
+          target: i686-pc-windows-msvc
     runs-on: ${{ matrix.runner }}
     steps:
     - uses: actions/checkout@v5
     - uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: ${{ matrix.target }}
     - uses: Swatinem/rust-cache@v2
     - name: Build
-      run: cargo build --release --locked
+      shell: pwsh
+      env:
+        TARGET: ${{ matrix.target }}
+      run: |
+        if ($env:TARGET) {
+          cargo build --release --locked --target $env:TARGET
+          if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
+          New-Item -ItemType Directory -Force target\release | Out-Null
+          Copy-Item "target\$env:TARGET\release\mukyulauncher.exe" target\release\mukyulauncher.exe
+        } else {
+          cargo build --release --locked
+          if ($LASTEXITCODE -ne 0) { throw "cargo build failed" }
+        }
     - name: Check runtime dependencies
       shell: pwsh
       run: |
@@ -186,12 +325,16 @@ jobs:
       with:
         name: win-stage-arm64
         path: build/stage-arm64
+    - uses: actions/download-artifact@v7
+      with:
+        name: win-stage-x86
+        path: build/stage-x86
     - name: Build installers
       shell: pwsh
       run: |
         choco install innosetup -y --no-progress | Out-Null
         $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
-        foreach ($arch in @("x64", "arm64")) {
+        foreach ($arch in @("x64", "arm64", "x86")) {
           Copy-Item "${env:ProgramFiles(x86)}\Inno Setup 6\License.txt" "build\stage-$arch\tools\licenses\Inno-Setup-LICENSE.txt"
           & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" "/DArch=$arch" "/DStage=..\..\build\stage-$arch" packaging\windows\installer.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed for $arch" }
@@ -202,6 +345,7 @@ jobs:
         path: |
           dist/Mukyu_Launcher_Setup.exe
           dist/Mukyu_Launcher_Setup_arm64.exe
+          dist/Mukyu_Launcher_Setup_x86.exe
         compression-level: 0
         if-no-files-found: error
 
@@ -245,8 +389,19 @@ jobs:
           release/Mukyu_Launcher-x86_64.AppImage.zsync
           release/Mukyu_Launcher-aarch64.AppImage
           release/Mukyu_Launcher-aarch64.AppImage.zsync
+          release/Mukyu_Launcher-x86_64-musl.AppImage
+          release/Mukyu_Launcher-x86_64-musl.AppImage.zsync
+          release/Mukyu_Launcher-aarch64-musl.AppImage
+          release/Mukyu_Launcher-aarch64-musl.AppImage.zsync
+          release/Mukyu_Launcher-i686-musl.AppImage
+          release/Mukyu_Launcher-i686-musl.AppImage.zsync
+          release/Mukyu_Launcher-i686.AppImage
+          release/Mukyu_Launcher-i686.AppImage.zsync
+          release/Mukyu_Launcher-armhf.AppImage
+          release/Mukyu_Launcher-armhf.AppImage.zsync
           release/Mukyu_Launcher_Setup.exe
           release/Mukyu_Launcher_Setup_arm64.exe
+          release/Mukyu_Launcher_Setup_x86.exe
         )
         for f in "${files[@]}"; do test -s "$f" || { echo "Missing $f"; exit 1; }; done
         built="$(tr -d '[:space:]' < release/VERSION)"
