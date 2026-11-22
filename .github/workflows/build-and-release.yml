@@ -357,6 +357,7 @@ jobs:
       actions: read
       contents: write
     steps:
+    - uses: actions/checkout@v5
     - name: Validate inputs
       env:
         RUN_ID: ${{ inputs.build_run_id }}
@@ -409,11 +410,16 @@ jobs:
           echo "The tag $TAG does not match the built version $built (Cargo.toml). Bump the version, rebuild, then publish."
           exit 1
         fi
-        notes=(--generate-notes)
-        if [[ -n "$RELEASE_DESCRIPTION" ]]; then
-          notes=(--notes "$RELEASE_DESCRIPTION")
-        fi
-        gh release create "$TAG" --title "$TAG" --draft "${notes[@]}"
+        {
+          if [[ -n "$RELEASE_DESCRIPTION" ]]; then
+            printf '%s\n' "$RELEASE_DESCRIPTION"
+          else
+            gh api "repos/$GH_REPO/releases/generate-notes" -f tag_name="$TAG" -f target_commitish="$GITHUB_SHA" --jq .body
+          fi
+          printf '\n'
+          bash scripts/release_notes.sh "$TAG" "$GH_REPO"
+        } > release-notes.md
+        gh release create "$TAG" --title "$TAG" --target "$GITHUB_SHA" --draft -F release-notes.md
         gh release upload "$TAG" "${files[@]}"
         gh release edit "$TAG" --draft=false
     - name: Refresh README badges

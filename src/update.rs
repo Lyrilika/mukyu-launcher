@@ -295,8 +295,20 @@ pub struct ReleaseNotes {
 pub fn release_notes(version: &str) -> Result<ReleaseNotes> {
     let json = get_json(&format!("{}/tags/v{version}", releases_api()))?;
     let body = json.get("body").and_then(Value::as_str).unwrap_or("");
+    let body = without_packages(body);
     let page_url = safe_page(json.get("html_url").and_then(Value::as_str), format!("https://github.com/{REPO}/releases/tag/v{version}"));
     Ok(ReleaseNotes { text: markdown_to_text(body), page_url })
+}
+
+fn without_packages(body: &str) -> &str {
+    let mut start = 0;
+    for line in body.split_inclusive('\n') {
+        if line.trim_end() == "## Packages" {
+            return body[..start].trim_end();
+        }
+        start += line.len();
+    }
+    body
 }
 
 pub fn markdown_to_text(md: &str) -> String {
