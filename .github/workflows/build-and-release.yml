@@ -118,7 +118,12 @@ jobs:
       if: matrix.arch == 'armhf'
       run: |
         sudo dpkg --add-architecture armhf
-        sudo sed -i -E 's/^deb (https?:)/deb [arch=amd64] \1/' /etc/apt/sources.list
+        for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list; do
+          [ -f "$f" ] && sudo sed -i -E '/^deb /{/arch=/!{s/^deb \[/deb [arch=amd64 /;t;s/^deb /deb [arch=amd64] /}}' "$f"
+        done
+        for f in /etc/apt/sources.list.d/*.sources; do
+          [ -f "$f" ] && ! grep -q '^Architectures:' "$f" && sudo sed -i '/^Types:/a Architectures: amd64' "$f"
+        done
         for suite in jammy jammy-updates jammy-security; do
           echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports $suite main restricted universe multiverse"
         done | sudo tee /etc/apt/sources.list.d/armhf.list
