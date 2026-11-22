@@ -15,7 +15,11 @@ build_thtk() {
         https://github.com/thpatch/thtk.git "$TMP_ROOT/thtk"
     local rev; rev="$(git -C "$TMP_ROOT/thtk" rev-parse --short=12 HEAD)"
     echo "== thdat: building revision $rev..."
-    cmake -S "$TMP_ROOT/thtk" -B "$TMP_ROOT/thtk-build" -G Ninja \
+    local target_args=()
+    case "$("${CC:-cc}" -dumpmachine)" in
+        i?86-*) target_args=(-DCMAKE_SYSTEM_NAME=Windows -DCMAKE_SYSTEM_PROCESSOR=x86) ;;
+    esac
+    cmake -S "$TMP_ROOT/thtk" -B "$TMP_ROOT/thtk-build" -G Ninja "${target_args[@]}" \
         -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF \
         -DWITH_LIBPNG_SOURCE=ON -DWITH_OPENMP=OFF -DCONTRIB_UTHDAT=OFF \
         -DCMAKE_EXE_LINKER_FLAGS="-static" >"$TMP_ROOT/thtk.log" 2>&1 \
