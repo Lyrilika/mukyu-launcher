@@ -19,7 +19,7 @@ mod util;
 slint::include_modules!();
 
 fn main() {
-    #[cfg(target_os = "linux")]
+    #[cfg(all(target_os = "linux", target_env = "gnu"))]
     unsafe {
         libc::mallopt(libc::M_ARENA_MAX, 2);
     }

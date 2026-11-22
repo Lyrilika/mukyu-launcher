@@ -9,7 +9,17 @@ ARCH="${ARCH:-$(uname -m)}"
 case "$ARCH" in
     x86_64|amd64) ARCH=x86_64; PDFIUM_ARCH=x64; ELF_ARCH="x86-64" ;;
     aarch64|arm64) ARCH=aarch64; PDFIUM_ARCH=arm64; ELF_ARCH="aarch64" ;;
+    i686|i386|x86) ARCH=i686; PDFIUM_ARCH=x86; ELF_ARCH="Intel (80386|i386)" ;;
+    armhf|armv7l|armv7|arm) ARCH=armhf; PDFIUM_ARCH=arm; ELF_ARCH="ARM, EABI5" ;;
     *) echo "Unsupported architecture: $ARCH" >&2; exit 1 ;;
+esac
+if [ -z "${LIBC:-}" ]; then
+    if ldd --version 2>&1 | grep -qi musl; then LIBC=musl; else LIBC=gnu; fi
+fi
+case "$LIBC" in
+    gnu|glibc) LIBC=gnu; NAME="Mukyu_Launcher-$ARCH"; PDFIUM_PLATFORM=linux ;;
+    musl) NAME="Mukyu_Launcher-$ARCH-musl"; PDFIUM_PLATFORM=linux-musl ;;
+    *) echo "Unsupported libc: $LIBC" >&2; exit 1 ;;
 esac
 
 rm -rf "$WORK"; mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/lib" "$APPDIR/usr/share/mukyulauncher" "$OUT"
@@ -17,10 +27,13 @@ rm -rf "$WORK"; mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/lib" "$APPDIR/usr/share/
 echo "== Building"
 cargo build --release --locked --manifest-path "$ROOT/Cargo.toml"
 install -m 755 "$ROOT/target/release/mukyulauncher" "$APPDIR/usr/bin/mukyulauncher"
-file -b "$APPDIR/usr/bin/mukyulauncher" | grep -q "$ELF_ARCH" || { echo "mukyulauncher was not built for $ARCH"; exit 1; }
+file -b "$APPDIR/usr/bin/mukyulauncher" | grep -Eq "$ELF_ARCH" || { echo "mukyulauncher was not built for $ARCH"; exit 1; }
+if [ "$LIBC" = musl ]; then
+    file -b "$APPDIR/usr/bin/mukyulauncher" | grep -q "ld-musl" || { echo "mukyulauncher was not built against musl"; exit 1; }
+fi
 
 echo "== PDFium"
-bash "$ROOT/scripts/fetch_pdfium.sh" linux "$APPDIR/usr/lib" "$PDFIUM_ARCH"
+bash "$ROOT/scripts/fetch_pdfium.sh" "$PDFIUM_PLATFORM" "$APPDIR/usr/lib" "$PDFIUM_ARCH"
 
 echo "== Resources"
 APP="$APPDIR/usr/share/mukyulauncher"
@@ -38,8 +51,12 @@ for tool in tools/thtk/bin/thdat tools/pc98/bin/pmd_render tools/pc98/bin/mdt_re
     [ -f "$APP/$tool" ] && chmod +x "$APP/$tool"
 done
 for tool in tools/thtk/bin/thdat tools/pc98/bin/pmd_render tools/pc98/bin/mdt_render; do
-    if [ -f "$APP/$tool" ] && ! file -b "$APP/$tool" | grep -q "$ELF_ARCH"; then
+    if [ -f "$APP/$tool" ] && ! file -b "$APP/$tool" | grep -Eq "$ELF_ARCH"; then
         echo "$tool is not built for $ARCH. Rebuild it with scripts/install_thtk.sh --update and scripts/install_pc98_music.sh --force."
+        exit 1
+    fi
+    if [ -f "$APP/$tool" ] && [ "$LIBC" = musl ] && file -b "$APP/$tool" | grep -q "ld-linux"; then
+        echo "$tool is built against glibc. Rebuild it on musl with scripts/install_thtk.sh --update and scripts/install_pc98_music.sh --force."
         exit 1
     fi
 done
@@ -58,13 +75,13 @@ curl -fsSL -o "$TOOL" "https://github.com/AppImage/appimagetool/releases/downloa
 chmod +x "$TOOL"
 install -m 755 "$ROOT/packaging/appimage/runtime-$ARCH" "$WORK/runtime-$ARCH"
 REPO="${GITHUB_REPOSITORY:-Lyrilika/mukyu-launcher}"
-UPDATE_INFO="gh-releases-zsync|${REPO%%/*}|${REPO##*/}|latest|Mukyu_Launcher-$ARCH.AppImage.zsync"
-rm -f "$OUT/Mukyu_Launcher-$ARCH.AppImage" "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync"
+UPDATE_INFO="gh-releases-zsync|${REPO%%/*}|${REPO##*/}|latest|$NAME.AppImage.zsync"
+rm -f "$OUT/$NAME.AppImage" "$OUT/$NAME.AppImage.zsync"
 (cd "$OUT" && ARCH=$ARCH "$TOOL" --appimage-extract-and-run --no-appstream --runtime-file "$WORK/runtime-$ARCH" \
-    -u "$UPDATE_INFO" "$APPDIR" "Mukyu_Launcher-$ARCH.AppImage")
-if [ ! -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ]; then
+    -u "$UPDATE_INFO" "$APPDIR" "$NAME.AppImage")
+if [ ! -s "$OUT/$NAME.AppImage.zsync" ]; then
     if command -v zsyncmake >/dev/null; then
-        (cd "$OUT" && zsyncmake -u "Mukyu_Launcher-$ARCH.AppImage" "Mukyu_Launcher-$ARCH.AppImage")
+        (cd "$OUT" && zsyncmake -u "$NAME.AppImage" "$NAME.AppImage")
     elif [ -n "${MUKYU_ALLOW_NO_ZSYNC:-}" ]; then
         echo "WARNING: zsyncmake not found, no .zsync file was created"
     else
@@ -72,11 +89,11 @@ if [ ! -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ]; then
         exit 1
     fi
 fi
-if [ -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ]; then
-    grep -a -q "^Filename: Mukyu_Launcher-$ARCH.AppImage$" "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" \
-        || { echo "The .zsync file does not reference Mukyu_Launcher-$ARCH.AppImage"; exit 1; }
+if [ -s "$OUT/$NAME.AppImage.zsync" ]; then
+    grep -a -q "^Filename: $NAME.AppImage$" "$OUT/$NAME.AppImage.zsync" \
+        || { echo "The .zsync file does not reference $NAME.AppImage"; exit 1; }
 fi
 sed -n 's/^version = "\(.*\)"/\1/p' "$ROOT/Cargo.toml" | head -1 > "$OUT/VERSION"
-echo "Built: $OUT/Mukyu_Launcher-$ARCH.AppImage ($(du -h "$OUT/Mukyu_Launcher-$ARCH.AppImage" | cut -f1))"
-[ -s "$OUT/Mukyu_Launcher-$ARCH.AppImage.zsync" ] && echo "Built: $OUT/Mukyu_Launcher-$ARCH.AppImage.zsync"
+echo "Built: $OUT/$NAME.AppImage ($(du -h "$OUT/$NAME.AppImage" | cut -f1))"
+[ -s "$OUT/$NAME.AppImage.zsync" ] && echo "Built: $OUT/$NAME.AppImage.zsync"
 echo "Version: $(cat "$OUT/VERSION")"

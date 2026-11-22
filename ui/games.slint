@@ -27,6 +27,8 @@ export global GamesApi {
     in-out property <string> playtime;
     in-out property <bool> pc98: false;
     in-out property <bool> windows: false;
+    in-out property <bool> ge-available: true;
+    in-out property <string> managed-runner: "GE-Proton";
     in-out property <[MenuItem]> runner-items;
     in-out property <int> runner: 0;
     in-out property <string> ge-status;
@@ -475,18 +477,18 @@ export component GameSettingsPopover inherits Rectangle {
                     min-popup-width: 160px;
                     selected(i) => { GamesApi.runner = i; GamesApi.runner-changed(i); }
                 }
-                WrapText {
+                if GamesApi.ge-available: WrapText {
                     text: GamesApi.ge-status;
                     ink: GamesApi.ge-busy ? Theme.accent : Theme.fg;
                     font-size: Theme.base * 1.1;
                 }
-                Btn {
-                    text: "Download / update GE-Proton";
+                if GamesApi.ge-available: Btn {
+                    text: "Download / update " + GamesApi.managed-runner;
                     font-size: Theme.base * 1.1;
                     enabled: !GamesApi.ge-busy;
                     clicked => { GamesApi.download-ge(); }
                 }
-                if GamesApi.ge-progress-visible: VerticalLayout {
+                if GamesApi.ge-available && GamesApi.ge-progress-visible: VerticalLayout {
                     spacing: 4px;
                     ProgressTrack {
                         value: GamesApi.ge-progress;

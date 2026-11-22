@@ -35,6 +35,9 @@ OutputBaseFilename=Mukyu_Launcher_Setup_arm64
 ArchitecturesAllowed=arm64
 ArchitecturesInstallIn64BitMode=arm64
 MinVersion=10.0.16299
+#elif Arch == "x86"
+OutputBaseFilename=Mukyu_Launcher_Setup_x86
+MinVersion=10.0.14393
 #else
 OutputBaseFilename=Mukyu_Launcher_Setup
 ArchitecturesAllowed=x64compatible

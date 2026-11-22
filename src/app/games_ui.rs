@@ -116,6 +116,8 @@ pub fn setup(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_cards(model);
     api.set_windows(cfg!(windows));
+    api.set_ge_available(games::MANAGED_AVAILABLE);
+    api.set_managed_runner(games::MANAGED_NAME.into());
     refresh_any_unset(c);
 
     let next = Arc::new(std::sync::atomic::AtomicUsize::new(0));
@@ -155,8 +157,8 @@ pub fn setup(c: &Rc<Ctx>) {
         let c = ctx();
         persist(&c);
         let picked = c.games.borrow().runner_ids.get(i as usize).cloned().unwrap_or_default();
-        if picked == "ge-proton" && !games::ge_proton_installed() {
-            c.app.global::<GamesApi>().set_ge_status("GE-Proton is not installed yet.".into());
+        if picked == games::MANAGED_RUNNER && !games::managed_installed() {
+            c.app.global::<GamesApi>().set_ge_status(format!("{} is not installed yet.", games::MANAGED_NAME).into());
         }
     });
     api.on_options_committed(|_| persist(&ctx()));
@@ -207,11 +209,11 @@ pub fn setup(c: &Rc<Ctx>) {
     api.on_stop_game(|| stop_game(&ctx()));
 }
 
-fn ge_status_text() -> &'static str {
-    if games::ge_proton_installed() {
-        "GE-Proton: installed"
+fn ge_status_text() -> String {
+    if games::managed_installed() {
+        format!("{}: installed", games::MANAGED_NAME)
     } else {
-        "GE-Proton: not downloaded"
+        format!("{}: not downloaded", games::MANAGED_NAME)
     }
 }
 
@@ -227,7 +229,10 @@ fn open_settings(c: &Rc<Ctx>, i: usize) {
     let options = games::runner_options();
     let current = games::effective_runner(&entry.runner);
     let index = options.iter().position(|(id, _)| *id == current).unwrap_or(0);
-    let items: Vec<crate::MenuItem> = options.iter().map(|(_, label)| crate::MenuItem { text: label.into(), enabled: true }).collect();
+    let mut items: Vec<crate::MenuItem> = options.iter().map(|(_, label)| crate::MenuItem { text: label.into(), enabled: true }).collect();
+    if items.is_empty() {
+        items.push(crate::MenuItem { text: "No runners installed".into(), enabled: false });
+    }
     api.set_runner_items(ModelRc::new(VecModel::from(items)));
     api.set_runner(index as i32);
     c.games.borrow_mut().runner_ids = options.into_iter().map(|(id, _)| id).collect();
@@ -252,7 +257,7 @@ fn persist(c: &Rc<Ctx>) {
     }
     let key = GAMES[i as usize].key;
     let mut g = c.games.borrow_mut();
-    let runner = g.runner_ids.get(api.get_runner().max(0) as usize).cloned().unwrap_or_else(|| "ge-proton".into());
+    let runner = g.runner_ids.get(api.get_runner().max(0) as usize).cloned().unwrap_or_else(games::default_runner);
     let entry = g.config.entry(key.to_string()).or_default();
     entry.launch_options = api.get_launch_options().to_string();
     entry.runner = runner;
@@ -271,14 +276,14 @@ pub fn close_settings(c: &Rc<Ctx>) {
 fn download_ge(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_ge_busy(true);
-    api.set_ge_status("GE-Proton: checking for latest release…".into());
+    api.set_ge_status(format!("{}: checking for latest release…", games::MANAGED_NAME).into());
     api.set_ge_progress(0.0);
     api.set_ge_progress_text("0%".into());
     api.set_ge_progress_failed(false);
     api.set_ge_progress_visible(true);
     std::thread::spawn(|| {
         let last = Arc::new(Mutex::new(Instant::now() - Duration::from_secs(1)));
-        let result = games::install_latest_ge_proton(move |pct| {
+        let result = games::install_latest_managed(move |pct| {
             let mut l = last.lock().unwrap();
             if pct != Some(100) && pct != Some(0) && l.elapsed() < Duration::from_millis(80) {
                 return;
@@ -288,11 +293,11 @@ fn download_ge(c: &Rc<Ctx>) {
                 let api = c.app.global::<GamesApi>();
                 match pct {
                     None => {
-                        api.set_ge_status("GE-Proton: downloading…".into());
+                        api.set_ge_status(format!("{}: downloading…", games::MANAGED_NAME).into());
                         api.set_ge_progress_text("Downloading…".into());
                     }
                     Some(p) => {
-                        api.set_ge_status(format!("GE-Proton: downloading… {p}%").into());
+                        api.set_ge_status(format!("{}: downloading… {p}%", games::MANAGED_NAME).into());
                         api.set_ge_progress(p as f32 / 100.0);
                         api.set_ge_progress_text(format!("{p}%").into());
                     }
@@ -311,7 +316,7 @@ fn download_ge(c: &Rc<Ctx>) {
                 Err(e) => {
                     api.set_ge_progress_text("Failed".into());
                     api.set_ge_progress_failed(true);
-                    api.set_ge_status(format!("GE-Proton: download failed — {e}").into());
+                    api.set_ge_status(format!("{}: download failed — {e}", games::MANAGED_NAME).into());
                 }
             }
         });
@@ -408,8 +413,8 @@ fn launch(c: &Rc<Ctx>, i: usize) {
     }
     let proton_missing = |c: &Rc<Ctx>| {
         c.dialog(
-            "GE-Proton is not installed",
-            &format!("Download GE-Proton from the settings for {} before launching this game with GE-Proton.", info.title),
+            &format!("{} is not installed", games::MANAGED_NAME),
+            &format!("Download {0} from the settings for {1} before launching this game with {0}.", games::MANAGED_NAME, info.title),
             &[("OK", ACCENT)],
             0,
             None,
@@ -425,7 +430,7 @@ fn launch(c: &Rc<Ctx>, i: usize) {
         )
     };
     let steam_app = if games::is_pc98(info.key) { None } else { games::steam_app_id(Path::new(&exe)) };
-    if steam_app.is_none() && runner == "ge-proton" && !games::ge_proton_installed() {
+    if steam_app.is_none() && runner == games::MANAGED_RUNNER && !games::managed_installed() {
         return proton_missing(c);
     }
     let plan = if let Some(app_id) = steam_app {
