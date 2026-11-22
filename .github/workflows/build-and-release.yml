@@ -211,10 +211,11 @@ jobs:
           packages: mingw-w64-clang-aarch64-python mingw-w64-clang-aarch64-clang mingw-w64-clang-aarch64-cmake mingw-w64-clang-aarch64-ninja mingw-w64-clang-aarch64-zlib
         - arch: x86
           runner: windows-latest
-          msystem: MINGW32
-          cc: gcc
-          cxx: g++
-          packages: mingw-w64-i686-python mingw-w64-i686-gcc mingw-w64-i686-cmake mingw-w64-i686-ninja mingw-w64-i686-zlib
+          msystem: UCRT64
+          cc: i686-w64-mingw32-clang
+          cxx: i686-w64-mingw32-clang++
+          packages: mingw-w64-ucrt-x86_64-python mingw-w64-ucrt-x86_64-cmake mingw-w64-ucrt-x86_64-ninja unzip
+          llvm_mingw: llvm-mingw-20261104-ucrt-x86_64
     runs-on: ${{ matrix.runner }}
     defaults:
       run:
@@ -232,7 +233,21 @@ jobs:
         msystem: ${{ matrix.msystem }}
         update: 'false'
         install: git make flex bison ${{ matrix.packages }}
-    - run: bash ./packaging/windows/build_tools_msys2.sh all
+    - name: llvm-mingw
+      if: matrix.llvm_mingw
+      env:
+        LLVM_MINGW: ${{ matrix.llvm_mingw }}
+      run: |
+        curl -fsSL --retry 3 -o /tmp/llvm-mingw.zip "https://github.com/mstorsjo/llvm-mingw/releases/download/20261104/$LLVM_MINGW.zip"
+        echo "552191b5754c49a5a20723276a6fc56541ea1922c4c50b7b669022333fc1b40f  /tmp/llvm-mingw.zip" | sha256sum -c
+        unzip -q /tmp/llvm-mingw.zip -d /opt
+        rm /tmp/llvm-mingw.zip
+    - name: Build
+      env:
+        LLVM_MINGW: ${{ matrix.llvm_mingw }}
+      run: |
+        if [ -n "$LLVM_MINGW" ]; then export PATH="/opt/$LLVM_MINGW/bin:$PATH"; fi
+        bash ./packaging/windows/build_tools_msys2.sh all
     - uses: actions/upload-artifact@v6
       with:
         name: win-tools-${{ matrix.arch }}
