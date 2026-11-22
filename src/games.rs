@@ -89,13 +89,9 @@ pub fn install_latest_managed(progress: impl FnMut(Option<u32>)) -> Result<()> {
     if WINE_LATEST { install_latest_wine(progress) } else { install_latest_ge_proton(progress) }
 }
 
-pub fn wine_build_directory() -> PathBuf {
-    paths::data_dir().join("wine")
-}
-
 pub fn managed_wine_path() -> Option<PathBuf> {
     let mut best: Option<(Vec<u64>, PathBuf)> = None;
-    for entry in std::fs::read_dir(wine_build_directory()).ok()?.flatten() {
+    for entry in std::fs::read_dir(runner_directory()).ok()?.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
         let path = entry.path();
         if !name.starts_with("wine-") || !paths::is_executable(&path.join("bin/wine")) {
@@ -346,9 +342,9 @@ fn version_key(name: &str) -> Vec<u64> {
 }
 
 pub fn ge_proton_path() -> Option<PathBuf> {
-    let dir = ge_proton_directory();
     let mut best: Option<(Vec<u64>, String, PathBuf)> = None;
-    for entry in std::fs::read_dir(&dir).ok()?.flatten() {
+    let dirs = [runner_directory(), ge_proton_directory()];
+    for entry in dirs.iter().filter_map(|d| std::fs::read_dir(d).ok()).flat_map(|e| e.flatten()) {
         let path = entry.path();
         let name = entry.file_name().to_string_lossy().to_string();
         if !name.starts_with("GE-Proton") || !path.is_dir() {
@@ -402,7 +398,7 @@ pub fn install_latest_ge_proton(mut progress: impl FnMut(Option<u32>)) -> Result
         .ok_or_else(|| anyhow!("Could not find the latest GE-Proton release for this architecture"))?;
     let stem = tar_name.trim_end_matches(".tar.gz").to_string();
     let checksum_url = all.iter().find(|(n, _)| *n == format!("{stem}.sha512sum")).map(|(_, u)| u.clone());
-    let install_dir = ge_proton_directory();
+    let install_dir = runner_directory();
     let target = install_dir.join(&stem);
     if target.is_dir() {
         progress(Some(100));
@@ -467,7 +463,7 @@ fn install_latest_wine(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
         .ok_or_else(|| anyhow!("Could not find the latest Wine release"))?;
     let stem = tar_name.trim_end_matches(".tar.xz").to_string();
     let checksum_url = all.iter().find(|(n, _)| n == "sha256sums.txt").map(|(_, u)| u.clone());
-    let install_dir = wine_build_directory();
+    let install_dir = runner_directory();
     let target = install_dir.join(&stem);
     if target.is_dir() {
         progress(Some(100));
