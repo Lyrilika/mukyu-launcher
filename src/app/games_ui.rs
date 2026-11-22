@@ -116,6 +116,9 @@ pub fn setup(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_cards(model);
     api.set_windows(cfg!(windows));
+    if cfg!(target_os = "linux") && !games::NO_GE_PROTON {
+        let _ = std::fs::create_dir_all(games::runner_directory());
+    }
     api.set_ge_available(games::MANAGED_AVAILABLE);
     api.set_managed_runner(games::MANAGED_NAME.into());
     refresh_any_unset(c);

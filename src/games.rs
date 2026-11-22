@@ -118,6 +118,10 @@ fn is_proton_dir(dir: &Path) -> bool {
     dir.join("proton").is_file() && dir.join("toolmanifest.vdf").is_file()
 }
 
+pub fn runner_directory() -> PathBuf {
+    paths::data_dir().join("compatibilitytools.d")
+}
+
 pub fn installed_protons() -> Vec<(String, PathBuf)> {
     let home = paths::home();
     let steam_roots = [
@@ -128,6 +132,18 @@ pub fn installed_protons() -> Vec<(String, PathBuf)> {
     ];
     let mut seen = std::collections::HashSet::new();
     let mut found = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(runner_directory()) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !is_proton_dir(&path) {
+                continue;
+            }
+            let real = path.canonicalize().unwrap_or(path);
+            if seen.insert(real.clone()) {
+                found.push((entry.file_name().to_string_lossy().to_string(), real));
+            }
+        }
+    }
     for root in &steam_roots {
         for (dir, only_proton) in [(root.join("compatibilitytools.d"), false), (root.join("steamapps/common"), true)] {
             let Ok(entries) = std::fs::read_dir(&dir) else { continue };
