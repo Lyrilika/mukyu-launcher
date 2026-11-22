@@ -37,6 +37,8 @@ export global GamesApi {
     in-out property <float> ge-progress: 0;
     in-out property <string> ge-progress-text;
     in-out property <bool> ge-progress-failed: false;
+    in-out property <bool> ge-show-bar: true;
+    in-out property <bool> ge-pulse: false;
     in-out property <bool> exe-set: false;
     in-out property <bool> exe-exists: false;
     in-out property <string> launch-options;
@@ -490,9 +492,9 @@ export component GameSettingsPopover inherits Rectangle {
                 }
                 if GamesApi.ge-available && GamesApi.ge-progress-visible: VerticalLayout {
                     spacing: 4px;
-                    ProgressTrack {
+                    if GamesApi.ge-show-bar: ProgressTrack {
                         value: GamesApi.ge-progress;
-                        pulse: GamesApi.ge-busy && GamesApi.ge-progress-text == "Downloading…";
+                        pulse: GamesApi.ge-busy && GamesApi.ge-pulse;
                     }
                     Text {
                         text: GamesApi.ge-progress-text;

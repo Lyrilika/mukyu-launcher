@@ -276,47 +276,92 @@ pub fn close_settings(c: &Rc<Ctx>) {
     api.set_settings_open(false);
 }
 
+fn download_speed_text(bytes_per_sec: u64) -> String {
+    if bytes_per_sec >= 1024 * 1024 {
+        format!("{:.1} MB/s", bytes_per_sec as f64 / (1024.0 * 1024.0))
+    } else {
+        format!("{} KB/s", bytes_per_sec / 1024)
+    }
+}
+
 fn download_ge(c: &Rc<Ctx>) {
     let api = c.app.global::<GamesApi>();
     api.set_ge_busy(true);
-    api.set_ge_status(format!("{}: checking for latest release…", games::MANAGED_NAME).into());
+    api.set_ge_status(format!("{}: checking for updates…", games::MANAGED_NAME).into());
     api.set_ge_progress(0.0);
-    api.set_ge_progress_text("0%".into());
+    api.set_ge_progress_text("Checking for updates…".into());
     api.set_ge_progress_failed(false);
+    api.set_ge_show_bar(true);
+    api.set_ge_pulse(true);
     api.set_ge_progress_visible(true);
     std::thread::spawn(|| {
         let last = Arc::new(Mutex::new(Instant::now() - Duration::from_secs(1)));
-        let result = games::install_latest_managed(move |pct| {
-            let mut l = last.lock().unwrap();
-            if pct != Some(100) && pct != Some(0) && l.elapsed() < Duration::from_millis(80) {
-                return;
+        let up_to_date = Arc::new(Mutex::new(false));
+        let seen = up_to_date.clone();
+        let result = games::install_latest_managed(move |step| {
+            if let games::InstallStep::Downloading { percent, .. } = step {
+                let mut l = last.lock().unwrap();
+                if percent != Some(100) && percent != Some(0) && l.elapsed() < Duration::from_millis(80) {
+                    return;
+                }
+                *l = Instant::now();
             }
-            *l = Instant::now();
+            if matches!(step, games::InstallStep::UpToDate) {
+                *seen.lock().unwrap() = true;
+            }
             post(move |c| {
                 let api = c.app.global::<GamesApi>();
-                match pct {
-                    None => {
-                        api.set_ge_status(format!("{}: downloading…", games::MANAGED_NAME).into());
-                        api.set_ge_progress_text("Downloading…".into());
+                let name = games::MANAGED_NAME;
+                match step {
+                    games::InstallStep::Checking => {
+                        api.set_ge_status(format!("{name}: checking for updates…").into());
+                        api.set_ge_progress_text("Checking for updates…".into());
+                        api.set_ge_show_bar(true);
+                        api.set_ge_pulse(true);
                     }
-                    Some(p) => {
-                        api.set_ge_status(format!("{}: downloading… {p}%", games::MANAGED_NAME).into());
+                    games::InstallStep::UpToDate => {
+                        api.set_ge_status(format!("{name}: up to date").into());
+                        api.set_ge_progress_text("Up to date".into());
+                        api.set_ge_show_bar(false);
+                        api.set_ge_pulse(false);
+                    }
+                    games::InstallStep::Downloading { percent: None, bytes_per_sec } => {
+                        api.set_ge_status(format!("{name}: downloading…").into());
+                        api.set_ge_progress_text(format!("Downloading…  {}", download_speed_text(bytes_per_sec)).into());
+                        api.set_ge_show_bar(true);
+                        api.set_ge_pulse(true);
+                    }
+                    games::InstallStep::Downloading { percent: Some(p), bytes_per_sec } => {
+                        api.set_ge_status(format!("{name}: downloading… {p}%").into());
                         api.set_ge_progress(p as f32 / 100.0);
-                        api.set_ge_progress_text(format!("{p}%").into());
+                        let text = if bytes_per_sec > 0 { format!("{p}%  ·  {}", download_speed_text(bytes_per_sec)) } else { format!("{p}%") };
+                        api.set_ge_progress_text(text.into());
+                        api.set_ge_show_bar(true);
+                        api.set_ge_pulse(false);
+                    }
+                    games::InstallStep::Extracting => {
+                        api.set_ge_status(format!("{name}: extracting…").into());
+                        api.set_ge_progress_text("Extracting…".into());
+                        api.set_ge_show_bar(true);
+                        api.set_ge_pulse(true);
                     }
                 }
             });
         });
+        let up_to_date = *up_to_date.lock().unwrap();
         post(move |c| {
             let api = c.app.global::<GamesApi>();
             api.set_ge_busy(false);
+            api.set_ge_pulse(false);
             match result {
+                Ok(()) if up_to_date => {}
                 Ok(()) => {
                     api.set_ge_progress(1.0);
                     api.set_ge_progress_text("100%".into());
                     api.set_ge_status(ge_status_text().into());
                 }
                 Err(e) => {
+                    api.set_ge_show_bar(true);
                     api.set_ge_progress_text("Failed".into());
                     api.set_ge_progress_failed(true);
                     api.set_ge_status(format!("{}: download failed — {e}", games::MANAGED_NAME).into());

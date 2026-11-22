@@ -85,7 +85,14 @@ pub fn managed_installed() -> bool {
     if WINE_LATEST { managed_wine_path().is_some() } else { ge_proton_installed() }
 }
 
-pub fn install_latest_managed(progress: impl FnMut(Option<u32>)) -> Result<()> {
+pub enum InstallStep {
+    Checking,
+    UpToDate,
+    Downloading { percent: Option<u32>, bytes_per_sec: u64 },
+    Extracting,
+}
+
+pub fn install_latest_managed(progress: impl FnMut(InstallStep)) -> Result<()> {
     if WINE_LATEST { install_latest_wine(progress) } else { install_latest_ge_proton(progress) }
 }
 
@@ -128,7 +135,12 @@ pub fn installed_protons() -> Vec<(String, PathBuf)> {
     ];
     let mut seen = std::collections::HashSet::new();
     let mut found = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(runner_directory()) {
+    let tool_dirs = [
+        runner_directory(),
+        PathBuf::from("/usr/share/steam/compatibilitytools.d"),
+        PathBuf::from("/usr/local/share/steam/compatibilitytools.d"),
+    ];
+    for entries in tool_dirs.iter().filter_map(|d| std::fs::read_dir(d).ok()) {
         for entry in entries.flatten() {
             let path = entry.path();
             if !is_proton_dir(&path) {
@@ -278,6 +290,10 @@ fn github_latest(repo: &str) -> Result<Value> {
 }
 
 fn download_to(url: &str, dest: &Path, mut progress: impl FnMut(Option<u32>)) -> Result<()> {
+    download_with_speed(url, dest, |p, _| progress(p))
+}
+
+fn download_with_speed(url: &str, dest: &Path, mut progress: impl FnMut(Option<u32>, u64)) -> Result<()> {
     let resp = crate::util::http_agent().get(url).set("User-Agent", UA).call()?;
     let total: u64 = resp.header("Content-Length").and_then(|v| v.trim().parse().ok()).unwrap_or(0);
     let mut reader = resp.into_reader();
@@ -285,6 +301,9 @@ fn download_to(url: &str, dest: &Path, mut progress: impl FnMut(Option<u32>)) ->
     let mut buf = vec![0u8; 256 * 1024];
     let mut done: u64 = 0;
     let mut last = u32::MAX;
+    let mut window_start = std::time::Instant::now();
+    let mut window_bytes: u64 = 0;
+    let mut speed: u64 = 0;
     loop {
         let n = reader.read(&mut buf)?;
         if n == 0 {
@@ -292,14 +311,22 @@ fn download_to(url: &str, dest: &Path, mut progress: impl FnMut(Option<u32>)) ->
         }
         out.write_all(&buf[..n])?;
         done += n as u64;
+        window_bytes += n as u64;
+        let elapsed = window_start.elapsed();
+        let speed_changed = elapsed >= std::time::Duration::from_millis(500);
+        if speed_changed {
+            speed = (window_bytes as f64 / elapsed.as_secs_f64()) as u64;
+            window_start = std::time::Instant::now();
+            window_bytes = 0;
+        }
         if total > 0 {
             let pct = ((done * 100) / total).min(100) as u32;
-            if pct != last {
+            if pct != last || speed_changed {
                 last = pct;
-                progress(Some(pct));
+                progress(Some(pct), speed);
             }
         } else {
-            progress(None);
+            progress(None, speed);
         }
     }
     out.flush()?;
@@ -381,8 +408,9 @@ fn read_sha512sum(text: &str, tarball: &str) -> Option<String> {
         .map(String::from)
 }
 
-pub fn install_latest_ge_proton(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
+pub fn install_latest_ge_proton(mut progress: impl FnMut(InstallStep)) -> Result<()> {
     use sha2::Digest;
+    progress(InstallStep::Checking);
     let release = github_latest("GloriousEggroll/proton-ge-custom")?;
     let suffix = match std::env::consts::ARCH {
         "x86_64" => "-x86_64.tar.gz",
@@ -401,15 +429,16 @@ pub fn install_latest_ge_proton(mut progress: impl FnMut(Option<u32>)) -> Result
     let install_dir = runner_directory();
     let target = install_dir.join(&stem);
     if target.is_dir() {
-        progress(Some(100));
+        progress(InstallStep::UpToDate);
         return Ok(());
     }
     std::fs::create_dir_all(&install_dir)?;
     let temp = temp_dir("mukyu-ge-proton-", None)?;
     let result = (|| -> Result<()> {
         let tar_path = temp.join(&tar_name);
-        progress(Some(0));
-        download_to(&tar_url, &tar_path, &mut progress)?;
+        progress(InstallStep::Downloading { percent: Some(0), bytes_per_sec: 0 });
+        download_with_speed(&tar_url, &tar_path, |percent, bytes_per_sec| progress(InstallStep::Downloading { percent, bytes_per_sec }))?;
+        progress(InstallStep::Extracting);
         if let Some(url) = checksum_url {
             let sum_path = temp.join(format!("{tar_name}.sha512sum"));
             download_to(&url, &sum_path, |_| {})?;
@@ -447,12 +476,12 @@ pub fn install_latest_ge_proton(mut progress: impl FnMut(Option<u32>)) -> Result
     })();
     let _ = std::fs::remove_dir_all(&temp);
     result?;
-    progress(Some(100));
     Ok(())
 }
 
-fn install_latest_wine(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
+fn install_latest_wine(mut progress: impl FnMut(InstallStep)) -> Result<()> {
     use sha2::Digest;
+    progress(InstallStep::Checking);
     let release = github_latest("Kron4ek/Wine-Builds")?;
     let all = assets(&release);
     let pattern = regex::Regex::new(r"^wine-[0-9.]+-x86\.tar\.xz$").unwrap();
@@ -466,15 +495,16 @@ fn install_latest_wine(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
     let install_dir = runner_directory();
     let target = install_dir.join(&stem);
     if target.is_dir() {
-        progress(Some(100));
+        progress(InstallStep::UpToDate);
         return Ok(());
     }
     std::fs::create_dir_all(&install_dir)?;
     let temp = temp_dir("mukyu-wine-", None)?;
     let result = (|| -> Result<()> {
         let tar_path = temp.join(&tar_name);
-        progress(Some(0));
-        download_to(&tar_url, &tar_path, &mut progress)?;
+        progress(InstallStep::Downloading { percent: Some(0), bytes_per_sec: 0 });
+        download_with_speed(&tar_url, &tar_path, |percent, bytes_per_sec| progress(InstallStep::Downloading { percent, bytes_per_sec }))?;
+        progress(InstallStep::Extracting);
         let url = checksum_url.ok_or_else(|| anyhow!("The Wine release has no checksums"))?;
         let sum_path = temp.join("sha256sums.txt");
         download_to(&url, &sum_path, |_| {})?;
@@ -520,7 +550,6 @@ fn install_latest_wine(mut progress: impl FnMut(Option<u32>)) -> Result<()> {
     })();
     let _ = std::fs::remove_dir_all(&temp);
     result?;
-    progress(Some(100));
     Ok(())
 }
 
