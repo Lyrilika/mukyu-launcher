@@ -26,7 +26,7 @@ rm -rf "$WORK"; mkdir -p "$APPDIR/usr/bin" "$APPDIR/usr/lib" "$APPDIR/usr/share/
 
 echo "== Building"
 cargo build --release --locked --manifest-path "$ROOT/Cargo.toml"
-install -m 755 "$ROOT/target/release/mukyulauncher" "$APPDIR/usr/bin/mukyulauncher"
+install -m 755 "$ROOT/target/${CARGO_BUILD_TARGET:+$CARGO_BUILD_TARGET/}release/mukyulauncher" "$APPDIR/usr/bin/mukyulauncher"
 file -b "$APPDIR/usr/bin/mukyulauncher" | grep -Eq "$ELF_ARCH" || { echo "mukyulauncher was not built for $ARCH"; exit 1; }
 if [ "$LIBC" = musl ]; then
     file -b "$APPDIR/usr/bin/mukyulauncher" | grep -q "ld-musl" || { echo "mukyulauncher was not built against musl"; exit 1; }
@@ -71,7 +71,14 @@ MUKYU_ROOT="$APP" MUKYU_PDFIUM="$APPDIR/usr/lib/libpdfium.so" "$APPDIR/usr/bin/m
 
 echo "== Packing"
 TOOL="$WORK/appimagetool"
-curl -fsSL -o "$TOOL" "https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-$ARCH.AppImage"
+case "$(uname -m)" in
+    x86_64|amd64) TOOL_ARCH=x86_64 ;;
+    aarch64|arm64) TOOL_ARCH=aarch64 ;;
+    i?86) TOOL_ARCH=i686 ;;
+    armv7*|armhf) TOOL_ARCH=armhf ;;
+    *) TOOL_ARCH=$ARCH ;;
+esac
+curl -fsSL -o "$TOOL" "https://github.com/AppImage/appimagetool/releases/download/1.9.0/appimagetool-$TOOL_ARCH.AppImage"
 chmod +x "$TOOL"
 install -m 755 "$ROOT/packaging/appimage/runtime-$ARCH" "$WORK/runtime-$ARCH"
 REPO="${GITHUB_REPOSITORY:-Lyrilika/mukyu-launcher}"

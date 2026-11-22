@@ -82,23 +82,16 @@ jobs:
       matrix:
         include:
         - arch: i686
-          image: i386/debian:bookworm
-          platform: linux/386
         - arch: armhf
-          image: arm32v7/ubuntu:22.04
-          platform: linux/arm/v7
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v5
-    - uses: docker/setup-qemu-action@v3
-      if: matrix.arch == 'armhf'
     - name: Build AppImage in a 32-bit container
+      if: matrix.arch == 'i686'
       env:
         ARCH: ${{ matrix.arch }}
-        IMAGE: ${{ matrix.image }}
-        PLATFORM: ${{ matrix.platform }}
       run: |
-        docker run --rm --platform "$PLATFORM" -v "$PWD:/src" -w /src -e ARCH -e GITHUB_REPOSITORY -e CARGO_TERM_COLOR "$IMAGE" linux32 bash -euo pipefail -c '
+        docker run --rm --platform linux/386 -v "$PWD:/src" -w /src -e ARCH -e GITHUB_REPOSITORY -e CARGO_TERM_COLOR i386/debian:bookworm linux32 bash -euo pipefail -c '
           export DEBIAN_FRONTEND=noninteractive
           apt-get update -qq
           apt-get install -y --no-install-recommends ca-certificates curl git file xz-utils zsync \
@@ -113,6 +106,42 @@ jobs:
           LIBC=gnu bash packaging/appimage/build_appimage.sh
           chown -R '"$(id -u):$(id -g)"' dist
         '
+    - uses: docker/setup-qemu-action@v3
+      if: matrix.arch == 'armhf'
+      with:
+        platforms: arm
+    - uses: dtolnay/rust-toolchain@stable
+      if: matrix.arch == 'armhf'
+      with:
+        targets: armv7-unknown-linux-gnueabihf
+    - name: armhf cross toolchain and libraries
+      if: matrix.arch == 'armhf'
+      run: |
+        sudo dpkg --add-architecture armhf
+        sudo sed -i -E 's/^deb (https?:)/deb [arch=amd64] \1/' /etc/apt/sources.list
+        for suite in jammy jammy-updates jammy-security; do
+          echo "deb [arch=armhf] http://ports.ubuntu.com/ubuntu-ports $suite main restricted universe multiverse"
+        done | sudo tee /etc/apt/sources.list.d/armhf.list
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf \
+          file zsync desktop-file-utils cmake flex bison pkg-config \
+          libasound2-dev:armhf libxkbcommon-dev:armhf libfontconfig1-dev:armhf libwayland-dev:armhf \
+          libxcursor-dev:armhf libxrandr-dev:armhf libxi-dev:armhf libgl1-mesa-dev:armhf
+    - name: Cross-compile AppImage
+      if: matrix.arch == 'armhf'
+      env:
+        ARCH: armhf
+        CARGO_BUILD_TARGET: armv7-unknown-linux-gnueabihf
+        CARGO_TARGET_ARMV7_UNKNOWN_LINUX_GNUEABIHF_LINKER: arm-linux-gnueabihf-gcc
+        CC_armv7_unknown_linux_gnueabihf: arm-linux-gnueabihf-gcc
+        CXX_armv7_unknown_linux_gnueabihf: arm-linux-gnueabihf-g++
+        PKG_CONFIG_ALLOW_CROSS: '1'
+        PKG_CONFIG_LIBDIR: /usr/lib/arm-linux-gnueabihf/pkgconfig:/usr/share/pkgconfig
+      run: |
+        CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ bash scripts/install_thtk.sh --update --yes
+        CC=arm-linux-gnueabihf-gcc CXX=arm-linux-gnueabihf-g++ bash scripts/install_pc98_music.sh --force
+        cargo test --release --locked
+        LIBC=gnu bash packaging/appimage/build_appimage.sh
     - name: Report size
       env:
         ARCH: ${{ matrix.arch }}

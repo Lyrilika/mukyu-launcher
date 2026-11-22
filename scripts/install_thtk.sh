@@ -167,7 +167,13 @@ git clone \
 REVISION="$(git -C "$SOURCE_DIR" rev-parse --short=12 HEAD)"
 echo "Building thtk revision $REVISION..."
 
-cmake -S "$SOURCE_DIR" -B "$BUILD_DIR" \
+CMAKE_TARGET_ARGS=()
+case "$(uname -m)/$("${CC:-cc}" -dumpmachine 2>/dev/null)" in
+    arm*/*) ;;
+    */arm*-linux-gnueabihf) CMAKE_TARGET_ARGS=(-DCMAKE_SYSTEM_NAME=Linux -DCMAKE_SYSTEM_PROCESSOR=arm) ;;
+esac
+
+cmake -S "$SOURCE_DIR" -B "$BUILD_DIR" "${CMAKE_TARGET_ARGS[@]}" \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DWITH_LIBPNG_SOURCE=ON \
