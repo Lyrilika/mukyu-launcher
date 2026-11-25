@@ -17,6 +17,8 @@ export global SettingsApi {
     in-out property <float> val: 0.85;
     in-out property <string> hex-text: "#d96bc8";
     in-out property <bool> picker-open: false;
+    in-out property <bool> system-title-bar: false;
+    callback set-system-title-bar(bool);
     in-out property <bool> auto-update: true;
     callback set-auto-update(bool);
     in-out property <bool> show-changelog: true;
@@ -514,6 +516,20 @@ export component SettingsDialog inherits Rectangle {
                     font-size: Theme.px(21px);
                     font-weight: 800;
                     color: Theme.fg;
+                }
+                Section {
+                    title: "Window";
+                    Row {
+                        title: "Use system title bar";
+                        Switch {
+                            accessible-role: switch;
+                            accessible-label: "Use system title bar";
+                            accessible-checked: SettingsApi.system-title-bar;
+                            accessible-action-default => { SettingsApi.set-system-title-bar(!SettingsApi.system-title-bar); }
+                            checked <=> SettingsApi.system-title-bar;
+                            toggled(on) => { SettingsApi.set-system-title-bar(on); }
+                        }
+                    }
                 }
                 Section {
                     title: "Updates";

@@ -222,6 +222,14 @@ fn setup_settings(c: &Rc<Ctx>) {
     }
     s.set_build_arch(std::env::consts::ARCH.into());
     s.set_version(env!("CARGO_PKG_VERSION").into());
+    s.set_system_title_bar(c.theme.borrow().system_title_bar);
+    s.on_set_system_title_bar(|enabled| {
+        let c = ctx();
+        c.app.global::<SettingsApi>().set_system_title_bar(enabled);
+        let mut settings = c.theme.borrow_mut();
+        settings.system_title_bar = enabled;
+        settings.save();
+    });
     c.sync_picker();
 
     s.on_hsv_color(|h, sat, v| color(hsv_to_rgb(h as f64, sat as f64, v as f64)));
@@ -274,7 +282,35 @@ fn setup_settings(c: &Rc<Ctx>) {
 }
 
 fn setup_app_api(c: &Rc<Ctx>) {
+    use slint::winit_030::{winit::event::WindowEvent, EventResult, WinitWindowAccessor};
+
     let a = c.app.global::<AppApi>();
+    a.on_minimize_window(|| ctx().app.window().set_minimized(true));
+    a.on_toggle_window_maximized(|| {
+        let c = ctx();
+        let window = c.app.window();
+        if window.is_fullscreen() {
+            window.set_fullscreen(false);
+        } else {
+            window.set_maximized(!window.is_maximized());
+        }
+    });
+    a.on_close_window(|| {
+        ctx().app.window().dispatch_event(slint::platform::WindowEvent::CloseRequested);
+    });
+    let app = c.app.as_weak();
+    c.app.window().on_winit_window_event(move |window, event| {
+        if matches!(event, WindowEvent::RedrawRequested | WindowEvent::Resized(_) | WindowEvent::Focused(_)) {
+            if let Some(app) = app.upgrade() {
+                if let Some(expanded) = window.with_winit_window(|native| {
+                    native.fullscreen().is_some() || native.is_maximized()
+                }) {
+                    app.global::<AppApi>().set_window_expanded(expanded);
+                }
+            }
+        }
+        EventResult::Propagate
+    });
     a.on_tab_changed(|tab| {
         let c = ctx();
         if tab == 1 {
@@ -414,8 +450,6 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
     c.app.show()?;
     #[cfg(target_os = "linux")]
     {
-        // Slint 1.18 can retain a deferred window-creation error until the winit loop exits.
-        // Check for the native window, so a minimized or occluded window is still valid.
         let _ = slint::winit_030::invoke_from_active_event_loop(|_| after(5000, || {
             use slint::winit_030::WinitWindowAccessor;
             let c = ctx();

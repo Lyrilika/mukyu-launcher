@@ -15,6 +15,8 @@ pub struct ThemeSettings {
     pub mode: String,
     #[serde(default = "default_accent")]
     pub accent_color: String,
+    #[serde(default)]
+    pub system_title_bar: bool,
 }
 
 fn default_mode() -> String {
@@ -26,7 +28,11 @@ fn default_accent() -> String {
 
 impl Default for ThemeSettings {
     fn default() -> Self {
-        ThemeSettings { mode: default_mode(), accent_color: default_accent() }
+        ThemeSettings {
+            mode: default_mode(),
+            accent_color: default_accent(),
+            system_title_bar: false,
+        }
     }
 }
 

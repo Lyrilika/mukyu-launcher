@@ -732,7 +732,6 @@ fn active_display_device(drm: &Path) -> Option<PathBuf> {
         }
         let device = drm.join(card).join("device");
         if active_card.as_ref().is_some_and(|previous| previous != &device) {
-            // Multiple scan-out devices: let the display server route the window.
             return None;
         }
         active_card = Some(device);
@@ -773,7 +772,6 @@ fn egl_vendor_files(nvidia: bool) -> Vec<String> {
 
 #[cfg(target_os = "linux")]
 pub fn pick_egl_vendor() {
-    // A forwarded X display may use entirely different hardware from local DRM.
     if std::env::var_os("WAYLAND_DISPLAY").is_none() && std::env::var_os("WAYLAND_SOCKET").is_none() {
         let display = std::env::var("DISPLAY").unwrap_or_default();
         if !display.starts_with(':') && !display.starts_with("unix:") {
