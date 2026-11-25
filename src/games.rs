@@ -830,6 +830,36 @@ mod tests {
         assert_eq!(cmd, vec!["mangohud", "wine", "a.exe", "-fast"]);
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn steam_flatpak_is_used_only_when_native_steam_is_missing() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let url = "steam://rungameid/123456";
+        let desktop_launch = vec!["xdg-open", url];
+        let native = linux_steam_launch_command(url.into(), |name| {
+            assert_eq!(name, "steam");
+            Some(PathBuf::from("steam"))
+        });
+        assert_eq!(native, desktop_launch);
+        assert_eq!(linux_steam_launch_command(url.into(), |_| None), desktop_launch);
+
+        let flatpak = std::env::temp_dir().join(format!("mukyu-flatpak-test-{:016x}", rand::random::<u64>()));
+        let find_flatpak = |name: &str| (name == "flatpak").then(|| flatpak.clone());
+        std::fs::write(&flatpak, "#!/bin/sh\n[ \"$1\" = info ] && [ \"$2\" = com.valvesoftware.Steam ]\n").unwrap();
+        std::fs::set_permissions(&flatpak, std::fs::Permissions::from_mode(0o700)).unwrap();
+        let installed = linux_steam_launch_command(url.into(), find_flatpak);
+        std::fs::write(&flatpak, "#!/bin/sh\nexit 1\n").unwrap();
+        let missing = linux_steam_launch_command(url.into(), find_flatpak);
+        std::fs::remove_file(&flatpak).unwrap();
+
+        assert_eq!(
+            installed,
+            vec![flatpak.to_str().unwrap(), "run", "com.valvesoftware.Steam", url],
+        );
+        assert_eq!(missing, desktop_launch);
+    }
+
     #[test]
     fn sha512_lookup() {
         let text = format!("{}  GE-Proton9-1.tar.gz\n", "a".repeat(128));
@@ -868,6 +898,37 @@ pub fn steam_launch_command(app_id: u32) -> Vec<String> {
     if cfg!(windows) {
         vec!["cmd".into(), "/C".into(), "start".into(), String::new(), url]
     } else {
+        #[cfg(target_os = "linux")]
+        return linux_steam_launch_command(url, paths::which);
+        #[cfg(not(target_os = "linux"))]
         vec!["xdg-open".into(), url]
     }
+}
+
+#[cfg(target_os = "linux")]
+fn linux_steam_launch_command(url: String, which: impl Fn(&str) -> Option<PathBuf>) -> Vec<String> {
+    const STEAM_FLATPAK: &str = "com.valvesoftware.Steam";
+
+    if which("steam").is_none() {
+        if let Some(flatpak) = which("flatpak").and_then(|path| std::path::absolute(path).ok()) {
+            let installed = std::process::Command::new(&flatpak)
+                .args(["info", STEAM_FLATPAK])
+                .env_clear()
+                .envs(platform::host_env())
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::null())
+                .stderr(std::process::Stdio::null())
+                .status()
+                .is_ok_and(|status| status.success());
+            if installed {
+                return vec![
+                    flatpak.to_string_lossy().into_owned(),
+                    "run".into(),
+                    STEAM_FLATPAK.into(),
+                    url,
+                ];
+            }
+        }
+    }
+    vec!["xdg-open".into(), url]
 }
