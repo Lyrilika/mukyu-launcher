@@ -25,68 +25,116 @@ export global AppApi {
 }
 
 component TabSwitcher inherits Rectangle {
-    property <[string]> labels: ["Games", "Music", "Print Works"];
-    property <length> pad: 24px;
-    property <length> w0: t0.preferred-width + 2 * pad;
-    property <length> w1: t1.preferred-width + 2 * pad;
-    property <length> w2: t2.preferred-width + 2 * pad;
-    property <length> btn-h: 30px;
-    width: x2 + w2 + 6px;
-    height: btn-h + 10px;
-    border-radius: self.height / 2;
-    background: Theme.alpha(Theme.fg, 0.06);
-    border-width: 1px;
-    border-color: Theme.alpha(Theme.fg, 0.08);
-    animate background, border-color { duration: 300ms; }
+    in property <bool> enabled: true;
+    private property <[string]> labels: ["Games", "Music", "Print Works"];
+    private property <length> tab-width: 122px;
+    private property <length> selected-center: (AppApi.tab + 0.5) * tab-width;
+    private property <length> leading-center: selected-center;
+    private property <length> trailing-center: selected-center;
+    private property <length> underline-width: AppApi.tab == 2 ? 88px : 56px;
 
-    property <length> x0: 6px;
-    property <length> x1: x0 + w0 + 4px;
-    property <length> x2: x1 + w1 + 4px;
+    animate leading-center { duration: 250ms; easing: cubic-bezier(0.18, 0.78, 0.3, 1); }
+    animate trailing-center { duration: 250ms; easing: cubic-bezier(0.32, 0.12, 0.28, 1); }
+    animate underline-width { duration: 250ms; easing: Ease.standard; }
 
-    pill := Rectangle {
-        y: 5px;
-        height: root.btn-h;
-        x: AppApi.tab == 0 ? root.x0 : AppApi.tab == 1 ? root.x1 : root.x2;
-        width: AppApi.tab == 0 ? root.w0 : AppApi.tab == 1 ? root.w1 : root.w2;
-        border-radius: self.height / 2;
-        background: Theme.accent;
-        animate x, width { duration: 320ms; easing: Ease.soft-spring; }
-        animate background { duration: 300ms; }
+    width: labels.length * tab-width;
+    height: 48px;
+    forward-focus: keyboard;
+
+    accessible-role: tab-list;
+    accessible-enabled: enabled;
+    accessible-orientation: Orientation.horizontal;
+    accessible-item-count: labels.length;
+    accessible-delegate-focus: AppApi.tab;
+
+    function select-tab(index: int) {
+        if root.enabled && index != AppApi.tab {
+            AppApi.tab = index;
+            AppApi.tab-changed(index);
+        }
     }
 
     for label[i] in labels: Rectangle {
-        y: 5px;
-        height: root.btn-h;
-        x: i == 0 ? root.x0 : i == 1 ? root.x1 : root.x2;
-        width: i == 0 ? root.w0 : i == 1 ? root.w1 : root.w2;
-        border-radius: self.height / 2;
-        property <bool> active: AppApi.tab == i;
-        background: !active && ta.pressed ? Theme.alpha(Theme.fg, 0.12) : !active && ta.has-hover ? Theme.alpha(Theme.fg, 0.07) : transparent;
-        transform-scale: ta.pressed ? 0.95 : 1;
-        animate background { duration: 180ms; }
-        animate transform-scale { duration: 140ms; }
-        Text {
-            text: label;
-            font-weight: 700;
-            font-size: Theme.base;
-            color: active ? (Theme.dark ? Theme.on-accent : #000000) : Theme.fg;
-            opacity: active || ta.has-hover ? 1 : 0.72;
-            animate color { duration: 200ms; }
-            animate opacity { duration: 180ms; }
+        property <bool> selected: AppApi.tab == i;
+        property <bool> focused: selected && root.enabled && keyboard.has-focus;
+        x: i * root.tab-width;
+        width: root.tab-width;
+        height: parent.height;
+
+        accessible-role: tab;
+        accessible-enabled: root.enabled;
+        accessible-label: label;
+        accessible-item-index: i;
+        accessible-item-selectable: true;
+        accessible-item-selected: self.selected;
+        accessible-action-default => { root.select-tab(i); }
+
+        Rectangle {
+            x: 7px;
+            y: 4px;
+            width: parent.width - 2 * self.x;
+            height: parent.height - 12px;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: Theme.alpha(Theme.accent, parent.focused ? 0.72 : 0);
+            background: Theme.alpha(Theme.accent, touch.pressed ? 0.18 : touch.has-hover ? 0.10 : 0);
+            animate background { duration: touch.pressed ? 85ms : 150ms; easing: Ease.standard; }
+            animate border-color { duration: 150ms; easing: Ease.standard; }
         }
-        ta := TouchArea {
+
+        Text {
+            width: parent.width;
+            height: parent.height - 4px;
+            text: label;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            font-size: Theme.base + 2px;
+            font-weight: 600;
+            color: parent.selected || touch.has-hover ? Theme.fg : Theme.fg-dim;
+            accessible-role: none;
+            animate color { duration: 150ms; easing: Ease.standard; }
+        }
+
+        touch := TouchArea {
+            enabled: root.enabled;
             mouse-cursor: pointer;
-            clicked => {
-                if AppApi.tab != i {
-                    AppApi.tab = i;
-                    AppApi.tab-changed(i);
-                }
-            }
+            clicked => { root.select-tab(i); }
         }
     }
-    t0 := Text { visible: false; text: "Games"; font-weight: 700; font-size: Theme.base; }
-    t1 := Text { visible: false; text: "Music"; font-weight: 700; font-size: Theme.base; }
-    t2 := Text { visible: false; text: "Print Works"; font-weight: 700; font-size: Theme.base; }
+
+    Rectangle {
+        x: min(root.leading-center, root.trailing-center) - root.underline-width / 2;
+        y: parent.height - self.height;
+        width: root.underline-width + abs(root.leading-center - root.trailing-center);
+        height: 3px;
+        border-radius: self.height / 2;
+        background: Theme.accent;
+        animate background { duration: 180ms; easing: Ease.standard; }
+    }
+
+    keyboard := FocusScope {
+        width: 0px;
+        enabled: root.enabled;
+        key-pressed(event) => {
+            if event.text == Key.LeftArrow {
+                root.select-tab(mod(AppApi.tab + root.labels.length - 1, root.labels.length));
+                return accept;
+            }
+            if event.text == Key.RightArrow {
+                root.select-tab(mod(AppApi.tab + 1, root.labels.length));
+                return accept;
+            }
+            if event.text == Key.Home {
+                root.select-tab(0);
+                return accept;
+            }
+            if event.text == Key.End {
+                root.select-tab(root.labels.length - 1);
+                return accept;
+            }
+            reject
+        }
+    }
 }
 
 component GearButton inherits Rectangle {
@@ -147,7 +195,7 @@ export component AppWindow inherits Window {
     property <length> content-height: self.height - title-bar-height;
     property <bool> any-overlay: GamesApi.settings-open || SettingsApi.open || DialogApi.open || DownloadApi.open;
     property <float> page-pos: AppApi.tab;
-    animate page-pos { duration: 280ms; easing: cubic-bezier(0.33, 1, 0.68, 1); }
+    animate page-pos { duration: 260ms; easing: Ease.emphasized; }
 
     keys := FocusScope {
         key-pressed(e) => {
@@ -163,9 +211,16 @@ export component AppWindow inherits Window {
         header := Rectangle {
             y: root.title-bar-height;
             height: 58px;
+            Rectangle {
+                y: parent.height - self.height;
+                height: 1px;
+                background: Theme.alpha(Theme.fg, 0.08);
+                animate background { duration: 180ms; easing: Ease.standard; }
+            }
             TabSwitcher {
                 x: round((parent.width - self.width) / 2px) * 1px;
                 y: 10px;
+                enabled: !root.any-overlay && !UpdateApi.open && !ChangelogApi.open;
             }
             GearButton {
                 x: parent.width - self.width - 12px;
