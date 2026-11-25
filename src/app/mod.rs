@@ -355,7 +355,7 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
     if software_renderer {
         selector = selector.backend_name("winit".into()).renderer_name("software".into());
     }
-    let _ = selector
+    selector
         .with_winit_window_attributes_hook(|attrs| {
             #[cfg(target_os = "linux")]
             {
@@ -366,7 +366,7 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
             #[allow(unreachable_code)]
             attrs
         })
-        .select();
+        .select()?;
     let app = AppWindow::new()?;
     let settings = ThemeSettings::load();
     let c = Rc::new(Ctx {
@@ -412,6 +412,18 @@ pub fn run(software_renderer: bool) -> anyhow::Result<()> {
     #[cfg(windows)]
     crate::platform::vsync_off_while(c.app.window(), reader_ui::any_open);
     c.app.show()?;
+    #[cfg(target_os = "linux")]
+    {
+        // Slint 1.18 can retain a deferred window-creation error until the winit loop exits.
+        // Check for the native window, so a minimized or occluded window is still valid.
+        let _ = slint::winit_030::invoke_from_active_event_loop(|_| after(5000, || {
+            use slint::winit_030::WinitWindowAccessor;
+            let c = ctx();
+            if c.app.window().is_visible() && !c.app.window().has_winit_window() {
+                let _ = slint::quit_event_loop();
+            }
+        }));
+    }
     music_ui::attach_media(&c);
     update_ui::setup(&c);
     debug_hooks();

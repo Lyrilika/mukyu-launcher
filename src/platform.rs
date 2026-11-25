@@ -7,7 +7,10 @@ pub const EGL_PICK_MARK: &str = "MUKYU_EGL_PICKED";
 
 pub fn host_env() -> HashMap<String, String> {
     let mut env = host_env_unfiltered();
-    if env.remove(EGL_PICK_MARK).is_some() {
+    if let Some(pick) = env.remove(EGL_PICK_MARK) {
+        if pick == "mesa-pci" {
+            env.remove("DRI_PRIME");
+        }
         env.remove("__EGL_VENDOR_LIBRARY_FILENAMES");
     }
     env
@@ -654,6 +657,26 @@ pub fn trim_memory() {
 mod tests {
     use super::*;
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn only_a_single_active_display_card_can_be_pinned() {
+        let drm = std::env::temp_dir().join(format!("mukyu-drm-test-{:016x}", rand::random::<u64>()));
+        let set_output = |name: &str, status: &str, enabled: &str| {
+            let output = drm.join(name);
+            std::fs::create_dir_all(&output).unwrap();
+            std::fs::write(output.join("status"), status).unwrap();
+            std::fs::write(output.join("enabled"), enabled).unwrap();
+        };
+        set_output("card0-HDMI-A-1", "connected", "disabled");
+        assert_eq!(active_display_device(&drm), None);
+        set_output("card1-DP-1", "connected", "enabled");
+        set_output("card1-DP-2", "connected", "enabled");
+        assert_eq!(active_display_device(&drm), Some(drm.join("card1/device")));
+        set_output("card0-HDMI-A-1", "connected", "enabled");
+        assert_eq!(active_display_device(&drm), None);
+        std::fs::remove_dir_all(drm).unwrap();
+    }
+
     #[test]
     fn windows_split() {
         assert_eq!(split_launch_options(r#"-a "b c" 'd'"#), vec!["-a", "b c", "d"]);
@@ -690,31 +713,31 @@ pub fn vsync_off_while(window: &slint::Window, condition: fn() -> bool) {
 }
 
 #[cfg(target_os = "linux")]
-fn display_uses_nvidia() -> Option<bool> {
-    let mut kinds = std::collections::HashSet::new();
-    for entry in std::fs::read_dir("/sys/class/drm").ok()?.flatten() {
-        let name = entry.file_name().to_string_lossy().to_string();
-        let Some((card, _)) = name.split_once('-') else { continue };
+fn active_display_device(drm: &Path) -> Option<PathBuf> {
+    let mut active_card = None;
+    for entry in std::fs::read_dir(drm).ok()? {
+        let entry = entry.ok()?;
+        let name = entry.file_name();
+        let Some((card, _)) = name.to_str()?.split_once('-') else { continue };
         if !card.starts_with("card") {
             continue;
         }
-        let connected = std::fs::read_to_string(entry.path().join("status")).map_or(false, |s| s.trim() == "connected");
-        if !connected {
+        let status = std::fs::read_to_string(entry.path().join("status")).ok()?;
+        if status.trim() != "connected" {
             continue;
         }
-        let driver = std::fs::read_link(format!("/sys/class/drm/{card}/device/driver")).ok()?;
-        let nvidia = match driver.file_name()?.to_str()? {
-            "nvidia" => true,
-            "amdgpu" | "radeon" | "i915" | "xe" | "nouveau" => false,
-            _ => return None,
-        };
-        kinds.insert(nvidia);
+        let enabled = std::fs::read_to_string(entry.path().join("enabled")).ok()?;
+        if enabled.trim() != "enabled" {
+            continue;
+        }
+        let device = drm.join(card).join("device");
+        if active_card.as_ref().is_some_and(|previous| previous != &device) {
+            // Multiple scan-out devices: let the display server route the window.
+            return None;
+        }
+        active_card = Some(device);
     }
-    if kinds.len() == 1 {
-        kinds.into_iter().next()
-    } else {
-        None
-    }
+    active_card
 }
 
 #[cfg(target_os = "linux")]
@@ -749,19 +772,41 @@ fn egl_vendor_files(nvidia: bool) -> Vec<String> {
 }
 
 #[cfg(target_os = "linux")]
-pub fn pick_egl_vendor() -> bool {
-    let user_set = ["__EGL_VENDOR_LIBRARY_FILENAMES", "__EGL_VENDOR_LIBRARY_DIRS", "MUKYU_GPU_PICK"]
-        .iter()
-        .any(|k| std::env::var_os(k).is_some());
-    if user_set {
-        return false;
+pub fn pick_egl_vendor() {
+    // A forwarded X display may use entirely different hardware from local DRM.
+    if std::env::var_os("WAYLAND_DISPLAY").is_none() && std::env::var_os("WAYLAND_SOCKET").is_none() {
+        let display = std::env::var("DISPLAY").unwrap_or_default();
+        if !display.starts_with(':') && !display.starts_with("unix:") {
+            return;
+        }
     }
-    let Some(nvidia) = display_uses_nvidia() else { return false };
+    let user_set = [
+        "__EGL_VENDOR_LIBRARY_FILENAMES", "__EGL_VENDOR_LIBRARY_DIRS", "MUKYU_GPU_PICK",
+        "DRI_PRIME", "__NV_PRIME_RENDER_OFFLOAD", "__NV_PRIME_RENDER_OFFLOAD_PROVIDER",
+    ].iter().any(|k| std::env::var_os(k).is_some());
+    if user_set {
+        return;
+    }
+    let Some(device) = active_display_device(Path::new("/sys/class/drm")) else { return };
+    let Ok(driver) = std::fs::read_link(device.join("driver")) else { return };
+    let nvidia = match driver.file_name().and_then(|name| name.to_str()) {
+        Some("nvidia") => true,
+        Some("amdgpu" | "radeon" | "i915" | "xe" | "nouveau") => false,
+        _ => return,
+    };
     let files = egl_vendor_files(nvidia);
     if files.is_empty() {
-        return false;
+        return;
+    }
+    let mut mark = "1";
+    if !nvidia {
+        if let Ok(info) = std::fs::read_to_string(device.join("uevent")) {
+            if let Some(slot) = info.lines().find_map(|line| line.strip_prefix("PCI_SLOT_NAME=")) {
+                std::env::set_var("DRI_PRIME", format!("pci-{}", slot.replace([':', '.'], "_")));
+                mark = "mesa-pci";
+            }
+        }
     }
     std::env::set_var("__EGL_VENDOR_LIBRARY_FILENAMES", files.join(":"));
-    std::env::set_var(EGL_PICK_MARK, "1");
-    true
+    std::env::set_var(EGL_PICK_MARK, mark);
 }
