@@ -19,6 +19,8 @@ export global SettingsApi {
     in-out property <bool> picker-open: false;
     in-out property <bool> system-title-bar: false;
     callback set-system-title-bar(bool);
+    in-out property <bool> hide-library-view-button: false;
+    callback set-hide-library-view-button(bool);
     in-out property <bool> auto-update: true;
     callback set-auto-update(bool);
     in-out property <bool> show-changelog: true;
@@ -518,7 +520,7 @@ export component SettingsDialog inherits Rectangle {
                     color: Theme.fg;
                 }
                 Section {
-                    title: "Window";
+                    title: "Interface";
                     Row {
                         title: "Use system title bar";
                         Switch {
@@ -528,6 +530,18 @@ export component SettingsDialog inherits Rectangle {
                             accessible-action-default => { SettingsApi.set-system-title-bar(!SettingsApi.system-title-bar); }
                             checked <=> SettingsApi.system-title-bar;
                             toggled(on) => { SettingsApi.set-system-title-bar(on); }
+                        }
+                    }
+                    Sep { }
+                    Row {
+                        title: "Hide Game Library view button";
+                        Switch {
+                            accessible-role: switch;
+                            accessible-label: "Hide Game Library view button";
+                            accessible-checked: SettingsApi.hide-library-view-button;
+                            accessible-action-default => { SettingsApi.set-hide-library-view-button(!SettingsApi.hide-library-view-button); }
+                            checked <=> SettingsApi.hide-library-view-button;
+                            toggled(on) => { SettingsApi.set-hide-library-view-button(on); }
                         }
                     }
                 }

@@ -1,5 +1,4 @@
 import { Theme, Ease, Icons } from "theme.slint";
-import { ScrollView } from "std-widgets.slint";
 
 export component Ico inherits Image {
     in property <color> color: Theme.fg;
@@ -359,72 +358,15 @@ export struct MenuItem {
     enabled: bool,
 }
 
-export component ScrollBox inherits Rectangle {
-    in property <length> content-height;
-    in-out property <length> offset: 0px;
-    out property <length> max-offset: max(0px, content-height - self.height);
-    in property <color> bar-color: Theme.fg;
-    property <bool> dragging: false;
-    property <length> drag-start-offset;
-    clip: true;
+export component ScrollBox inherits Flickable {
+    out property <length> offset: -self.content-y;
+    out property <length> max-offset: max(0px, self.content-height - self.height);
+
+    content-width: self.width;
+    mouse-drag-pan-enabled: true;
 
     public function scroll-to(y: length) {
-        root.offset = max(0px, min(root.max-offset, y));
-    }
-
-    changed max-offset => {
-        if root.offset > root.max-offset { root.offset = root.max-offset; }
-    }
-    property <bool> smooth: false;
-    animate offset { duration: root.dragging || !root.smooth ? 0ms : 160ms; easing: ease-out; }
-
-    wheel := TouchArea {
-        scroll-event(e) => {
-            if root.max-offset <= 0 { return reject; }
-            if abs(e.delta-y) >= 59px && Math.mod(Math.round(abs(e.delta-y) / 1px), 60) == 0 {
-                root.smooth = true;
-                root.offset = max(0px, min(root.max-offset, root.offset - e.delta-y * 2.2));
-            } else {
-                root.smooth = false;
-                root.offset = max(0px, min(root.max-offset, root.offset - e.delta-y * 1.4));
-            }
-            accept
-        }
-        Rectangle {
-            x: 0;
-            y: -root.offset;
-            width: root.width;
-            height: max(root.height, root.content-height);
-            @children
-        }
-    }
-    bar := Rectangle {
-        property <float> ratio: root.height / max(1px, root.content-height);
-        visible: root.max-offset > 0;
-        x: root.width - self.width - 3px;
-        width: bta.has-hover || root.dragging ? 8px : 5px;
-        height: max(32px, root.height * ratio);
-        y: root.max-offset > 0 ? (root.height - self.height) * (root.offset / root.max-offset) : 0;
-        border-radius: self.width / 2;
-        background: Theme.alpha(root.bar-color, bta.has-hover || root.dragging ? 0.45 : (wheel.has-hover ? 0.22 : 0.0));
-        animate background, width { duration: 200ms; }
-        bta := TouchArea {
-            mouse-cursor: default;
-            pointer-event(e) => {
-                if e.kind == PointerEventKind.down {
-                    root.dragging = true;
-                    root.drag-start-offset = root.offset;
-                } else if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
-                    root.dragging = false;
-                }
-            }
-            moved => {
-                if root.dragging {
-                    root.offset = max(0px, min(root.max-offset,
-                        root.drag-start-offset + (self.mouse-y - self.pressed-y) * root.max-offset / max(1px, root.height - bar.height)));
-                }
-            }
-        }
+        self.content-y = -clamp(y, 0px, self.max-offset);
     }
 }
 
@@ -553,13 +495,19 @@ export component Dropdown inherits Rectangle {
             scroll-event(e) => { accept }
         }
         init => {
-            list-scroll.content-y = -max(0px, min(list-scroll.content-height - list-scroll.visible-height, root.current * 44px - 120px));
+            list-scroll.scroll-to(root.current * 44px - 120px);
         }
         pfs := FocusScope {
-            x: root.absolute-position.x;
-            y: root.absolute-position.y + root.height + 6px;
-            width: max(root.min-popup-width, root.width);
-            height: min(list.preferred-height, root.max-popup-height);
+            private property <length> anchor-y: root.absolute-position.y;
+            private property <length> below-y: anchor-y + root.height + 6px;
+            private property <length> room-below: max(0px, WindowInfo.height - below-y - 6px);
+            private property <length> room-above: max(0px, anchor-y - 12px);
+            private property <length> desired-height: min(list.preferred-height, root.max-popup-height);
+            private property <bool> below: room-below >= desired-height || room-below >= room-above;
+            x: clamp(root.absolute-position.x, 6px, max(6px, WindowInfo.width - self.width - 6px));
+            y: below ? below-y : anchor-y - self.height - 6px;
+            width: min(max(0px, WindowInfo.width - 12px), max(root.min-popup-width, root.width));
+            height: min(desired-height, below ? room-below : room-above);
             key-pressed(e) => {
                 if e.text == Key.Escape { root.close-animated(); return accept; }
                 reject
@@ -578,14 +526,15 @@ export component Dropdown inherits Rectangle {
                 animate height { duration: root.reveal ? 320ms : 180ms; easing: root.reveal ? cubic-bezier(0.2, 0.9, 0.25, 1.04) : cubic-bezier(0.4, 0, 1, 1); }
                 animate opacity { duration: root.reveal ? 90ms : 80ms; delay: root.reveal ? 0ms : 110ms; }
                 clip: true;
-                list-scroll := ScrollView {
+                list-scroll := ScrollBox {
+                    x: 0px;
+                    y: 0px;
                     width: parent.width;
                     height: pfs.height;
-                    content-width: self.visible-width;
                     content-height: list.preferred-height;
-                    horizontal-scrollbar-policy: always-off;
+                    interactive: root.reveal;
                     list := VerticalLayout {
-                        width: list-scroll.visible-width;
+                        width: list-scroll.width;
                         height: self.preferred-height;
                         padding: 6px;
                         spacing: 4px;

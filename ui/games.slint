@@ -1,20 +1,26 @@
 import { Theme, Ease, Icons } from "theme.slint";
-import { Ico, Btn, Field, ProgressTrack, ScrollBox, Dropdown, MenuItem, WrapText } from "widgets.slint";
+import { Ico, Btn, Field, ProgressTrack, ScrollBox, Dropdown, MenuItem, WrapText, WindowInfo } from "widgets.slint";
+import { SettingsApi } from "settings.slint";
 
 export struct GameCardData {
     key: string,
     title: string,
+    icon: image,
     cover: image,
     gray: image,
     loaded: bool,
     has-exe: bool,
 }
 
+export enum LibraryMode { grid, split, carousel }
+
 export global GamesApi {
     in-out property <[GameCardData]> cards;
     in-out property <bool> appeared: false;
     in-out property <string> running-key;
     in-out property <bool> any-unset: true;
+    in-out property <LibraryMode> initial-library-mode: LibraryMode.grid;
+    callback library-mode-changed(LibraryMode);
 
     in-out property <bool> running-visible: false;
     in-out property <string> running-title;
@@ -45,6 +51,7 @@ export global GamesApi {
     in-out property <string> dosbox-status;
     in-out property <length> anchor-x;
     in-out property <length> anchor-y;
+    in-out property <length> anchor-width: 210px;
 
     callback card-clicked(int);
     callback open-settings(int);
@@ -61,13 +68,18 @@ component SettingsCog inherits Rectangle {
     in property <bool> card-hover;
     in property <bool> open;
     in property <bool> blocked;
+    in property <bool> always-visible: false;
     callback clicked();
     out property <bool> hovered: ta.has-hover;
-    property <bool> shown: ((card-hover || ta.has-hover) && !blocked) || open;
+    property <bool> shown: always-visible || ((card-hover || ta.has-hover) && !blocked) || open;
     width: 34px;
     height: 34px;
-    border-radius: open ? 10px : 17px;
-    background: open ? Theme.accent : ta.has-hover ? #000000b8 : #00000080;
+    border-radius: open ? 10px : self.width / 2;
+    border-width: always-visible || keys.has-focus ? 1px : 0px;
+    border-color: keys.has-focus ? Theme.accent : Theme.alpha(Theme.fg, 0.14);
+    background: open ? Theme.accent
+        : always-visible ? Theme.alpha(Theme.fg, ta.pressed ? 0.15 : ta.has-hover ? 0.11 : 0.06)
+        : ta.has-hover ? #000000b8 : #00000080;
     opacity: shown ? 1 : 0;
     transform-scale: !shown ? 0.5 : ta.pressed ? 0.86 : ta.has-hover ? 1.1 : 1.0;
     transform-origin: { x: self.width / 2, y: self.height / 2 };
@@ -75,17 +87,29 @@ component SettingsCog inherits Rectangle {
     animate background { duration: 220ms; }
     animate border-radius { duration: 280ms; easing: Ease.standard; }
     animate transform-scale { duration: 420ms; easing: Ease.spring; }
+    forward-focus: keys;
+
     Ico {
         source: Icons.gear;
-        size: 16px;
-        color: root.open ? Theme.on-accent : white;
+        size: root.always-visible ? 19px : 16px;
+        color: root.open ? Theme.on-accent : root.always-visible ? Theme.fg : white;
         transform-rotation: root.open ? 180deg : ta.pressed ? 90deg : ta.has-hover ? 60deg : 0deg;
         transform-scale: ta.pressed && !root.open ? 0.85 : 1;
         transform-origin: { x: self.width / 2, y: self.height / 2 };
         animate transform-rotation, transform-scale { duration: 560ms; easing: Ease.standard; }
     }
+    keys := FocusScope {
+        enabled: root.always-visible && !root.blocked;
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space {
+                if !event.repeat { root.clicked(); }
+                return accept;
+            }
+            reject
+        }
+    }
     ta := TouchArea {
-        enabled: root.shown;
+        enabled: root.shown && (!root.always-visible || !root.blocked);
         mouse-cursor: pointer;
         clicked => { root.clicked(); }
     }
@@ -111,6 +135,7 @@ component PulseDot inherits Rectangle {
 }
 
 export component GameCard inherits Rectangle {
+    in property <bool> enabled: true;
     in property <GameCardData> data;
     in property <int> index;
     in property <bool> running;
@@ -222,6 +247,7 @@ export component GameCard inherits Rectangle {
             }
 
             ta := TouchArea {
+                enabled: root.enabled;
                 mouse-cursor: pointer;
                 pointer-event(e) => {
                     if e.kind == PointerEventKind.down && e.button == PointerEventButton.left {
@@ -295,6 +321,7 @@ export component GameCard inherits Rectangle {
 
 component RunningBar inherits Rectangle {
     in property <bool> shown;
+    in property <bool> slide-as-unit;
     in property <string> title;
     in property <string> time;
     callback stop();
@@ -309,7 +336,7 @@ component RunningBar inherits Rectangle {
     opacity: shown ? 1 : 0;
     transform-scale: shown ? 1 : 0.96;
     transform-origin: { x: self.width / 2, y: self.height };
-    property <length> lift: shown ? 0px : 28px;
+    property <length> lift: shown || slide-as-unit ? 0px : 28px;
     animate opacity { duration: 260ms; easing: ease; }
     animate transform-scale, lift { duration: 480ms; easing: Ease.soft-spring; }
     HorizontalLayout {
@@ -530,7 +557,1030 @@ export component GameSettingsPopover inherits Rectangle {
     }
 }
 
+component LibraryViewButton inherits Rectangle {
+    in property <LibraryMode> current;
+    in property <bool> enabled;
+    callback selected(LibraryMode);
+
+    private property <[{ mode: LibraryMode, label: string }]> choices: [
+        { mode: LibraryMode.grid, label: "Grid" },
+        { mode: LibraryMode.split, label: "Split view" },
+        { mode: LibraryMode.carousel, label: "Carousel" },
+    ];
+    private property <int> current-index: current == LibraryMode.grid ? 0 : current == LibraryMode.split ? 1 : 2;
+    private property <int> keyboard-index: -1;
+    private property <bool> open: false;
+    private property <bool> reveal: false;
+    private property <bool> restore-keyboard-focus: false;
+    private property <length> window-width: WindowInfo.width;
+    private property <length> window-height: WindowInfo.height;
+
+    width: 38px;
+    height: 36px;
+
+    forward-focus: keys;
+    accessible-role: button;
+    accessible-enabled: enabled;
+    accessible-label: "Library view";
+    accessible-description: choices[current-index].label + " selected";
+    accessible-expanded: open;
+    accessible-action-default => { root.show-menu(true); }
+    if enabled && !open: Tooltip { text: @markdown("Library view"); }
+
+    function show-menu(from-keyboard: bool) {
+        if !root.enabled || popup.is-open { return; }
+        root.keyboard-index = from-keyboard ? root.current-index : -1;
+        root.open = true;
+        popup.show();
+        opener.start();
+    }
+
+    function dismiss(from-keyboard: bool) {
+        if !root.open { return; }
+        root.restore-keyboard-focus = from-keyboard;
+        root.open = false;
+        root.reveal = false;
+        opener.stop();
+        closer.start();
+    }
+
+    function close-immediately() {
+        if !popup.is-open { return; }
+        opener.stop();
+        closer.stop();
+        root.open = false;
+        root.reveal = false;
+        popup.close();
+        keys.clear-focus();
+    }
+
+    function choose(index: int, from-keyboard: bool) {
+        if !root.open { return; }
+        root.dismiss(from-keyboard);
+        root.selected(root.choices[index].mode);
+    }
+
+    changed enabled => { if !root.enabled { root.close-immediately(); } }
+    changed window-width => { root.close-immediately(); }
+    changed window-height => { root.close-immediately(); }
+
+    opener := Timer {
+        interval: 16ms;
+        running: false;
+        triggered => {
+            self.stop();
+            root.reveal = true;
+        }
+    }
+    closer := Timer {
+        interval: 195ms;
+        running: false;
+        triggered => {
+            self.stop();
+            popup.close();
+            if root.enabled && root.restore-keyboard-focus {
+                keys.focus();
+            } else {
+                keys.clear-focus();
+            }
+        }
+    }
+
+    Ico {
+        source: Icons.chevron-down;
+        size: 18px;
+        color: root.open || keys.has-focus ? Theme.accent : Theme.alpha(Theme.fg, pointer.has-hover ? 0.94 : 0.68);
+        opacity: root.enabled ? 1 : 0.45;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        transform-rotation: root.open ? 180deg : 0deg;
+        transform-scale: pointer.pressed ? 0.83 : pointer.has-hover || keys.has-focus ? 1.13 : 1;
+        animate color, opacity { duration: 155ms; easing: Ease.standard; }
+        animate transform-rotation { duration: 220ms; easing: cubic-bezier(0.2, 0, 0, 1); }
+        animate transform-scale { duration: pointer.pressed ? 85ms : 210ms; easing: Ease.standard; }
+    }
+
+    keys := FocusScope {
+        enabled: root.enabled;
+        focus-on-click: false;
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space || event.text == Key.DownArrow {
+                if !event.repeat { root.show-menu(true); }
+                return accept;
+            }
+            reject
+        }
+        pointer := TouchArea {
+            enabled: root.enabled;
+            mouse-cursor: MouseCursor.pointer;
+            clicked => { root.show-menu(false); }
+        }
+    }
+
+    popup := PopupWindow {
+        x: -root.absolute-position.x;
+        y: -root.absolute-position.y;
+        width: root.window-width;
+        height: root.window-height;
+        close-policy: no-auto-close;
+        forward-focus: menu;
+        init => { menu.focus(); }
+
+        TouchArea {
+            clicked => { root.dismiss(false); }
+            scroll-event(event) => { accept }
+        }
+
+        menu := FocusScope {
+            x: clamp(root.absolute-position.x, 8px, max(8px, root.window-width - self.width - 8px));
+            y: root.absolute-position.y + root.height + 6px;
+            width: 166px;
+            height: 136px;
+            accessible-role: radio-group;
+            accessible-label: "Library views";
+
+            key-pressed(event) => {
+                if event.text == Key.Escape { root.dismiss(true); return accept; }
+                if !root.open { return reject; }
+                if event.text == Key.DownArrow {
+                    root.keyboard-index = root.keyboard-index < 0 ? root.current-index : mod(root.keyboard-index + 1, root.choices.length);
+                    return accept;
+                }
+                if event.text == Key.UpArrow {
+                    root.keyboard-index = root.keyboard-index < 0 ? root.current-index : mod(root.keyboard-index - 1, root.choices.length);
+                    return accept;
+                }
+                if event.text == Key.Return || event.text == Key.Space {
+                    if !event.repeat { root.choose(root.keyboard-index < 0 ? root.current-index : root.keyboard-index, true); }
+                    return accept;
+                }
+                reject
+            }
+
+            Rectangle {
+                x: 0px;
+                y: 0px;
+                width: parent.width;
+                height: root.reveal ? parent.height : 0px;
+                border-radius: 15px;
+                border-width: 1px;
+                border-color: Theme.alpha(Theme.fg, 0.13);
+                background: Theme.popover;
+                drop-shadow-blur: 22px;
+                drop-shadow-offset-y: 8px;
+                drop-shadow-color: Theme.alpha(black, Theme.dark ? 0.37 : 0.20);
+                opacity: root.reveal ? 1 : 0;
+                animate height {
+                    duration: root.reveal ? 320ms : 180ms;
+                    easing: root.reveal ? cubic-bezier(0.2, 0.9, 0.25, 1.04) : cubic-bezier(0.4, 0, 1, 1);
+                }
+                animate opacity { duration: root.reveal ? 90ms : 80ms; delay: root.reveal ? 0ms : 110ms; }
+                clip: true;
+
+                for choice[i] in root.choices: Rectangle {
+                    property <bool> checked: root.current == choice.mode;
+                    property <bool> highlighted: root.keyboard-index == i;
+                    x: 6px;
+                    y: 6px + 42px * i;
+                    width: parent.width - 12px;
+                    height: 40px;
+                    accessible-role: radio-button;
+                    accessible-checkable: true;
+                    accessible-checked: checked;
+                    accessible-label: choice.label;
+                    accessible-enabled: root.open;
+                    accessible-action-default => { root.choose(i, true); }
+
+                    Rectangle {
+                        width: parent.width;
+                        height: parent.height;
+                        border-radius: option-pointer.pressed ? 9px : 11px;
+                        background: parent.checked
+                            ? Theme.alpha(Theme.accent, option-pointer.pressed ? 0.26 : option-pointer.has-hover ? 0.21 : 0.15)
+                            : Theme.alpha(Theme.fg, option-pointer.pressed ? 0.13 : option-pointer.has-hover ? 0.075 : 0);
+                        border-width: 1px;
+                        border-color: Theme.alpha(Theme.accent, parent.highlighted ? 0.50 : 0);
+                        opacity: root.reveal ? 1 : 0;
+                        transform-scale: root.reveal ? 1 : 0.92;
+                        transform-origin: { x: self.width / 2, y: 0px };
+                        animate opacity {
+                            duration: root.reveal ? 200ms : 90ms;
+                            delay: root.reveal ? 65ms + i * 26ms : 0ms;
+                            easing: ease-out;
+                        }
+                        animate transform-scale {
+                            duration: root.reveal ? 340ms : 90ms;
+                            delay: root.reveal ? 65ms + i * 26ms : 0ms;
+                            easing: root.reveal ? cubic-bezier(0.34, 1.56, 0.64, 1) : ease-in;
+                        }
+                        animate background, border-radius, border-color { duration: 145ms; easing: Ease.standard; }
+
+                        Text {
+                            x: 12px;
+                            width: parent.width - 24px;
+                            height: parent.height;
+                            text: choice.label;
+                            color: root.enabled ? Theme.fg : Theme.fg-dim;
+                            font-size: max(13px, Theme.base);
+                            font-weight: checked-label ? 700 : 550;
+                            private property <bool> checked-label: root.current == choice.mode;
+                            vertical-alignment: center;
+                            accessible-role: none;
+                        }
+                    }
+
+                    option-pointer := TouchArea {
+                        enabled: root.open;
+                        mouse-cursor: MouseCursor.pointer;
+                        clicked => { root.choose(i, false); }
+                    }
+                }
+            }
+        }
+    }
+}
+
+component LibraryLaunchButton inherits Rectangle {
+    in property <string> text;
+    in property <image> icon: Icons.play;
+    in property <bool> enabled;
+    callback clicked();
+
+    private property <bool> hot: enabled && (pointer.has-hover || keys.has-focus);
+    private property <bool> down: enabled && pointer.pressed;
+    private property <{ x: length, y: length }> strike;
+    private property <float> ripple: 1;
+    animate ripple { duration: ripple-kick.running ? 0ms : 420ms; easing: Ease.standard; }
+
+    width: max(132px, label.preferred-width + 76px);
+    height: 44px;
+    horizontal-stretch: 0;
+    vertical-stretch: 0;
+    forward-focus: keys;
+    accessible-role: button;
+    accessible-enabled: enabled;
+    accessible-label: text;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
+
+    function pulse(x: length, y: length) {
+        root.strike = { x: x, y: y };
+        ripple-kick.start();
+        ripple-kick.restart();
+        root.ripple = 0;
+    }
+
+    ripple-kick := Timer {
+        interval: 16ms;
+        running: false;
+        triggered => {
+            self.stop();
+            root.ripple = 1;
+        }
+    }
+
+    surface := Rectangle {
+        y: root.hot && !root.down ? -1px : 0px;
+        width: parent.width;
+        height: parent.height;
+        border-radius: root.down ? 15px : 22px;
+        border-width: 1px;
+        border-color: Theme.alpha(Theme.accent, keys.has-focus ? 1 : root.hot ? 0.70 : 0.36);
+        background: root.hot ? Theme.accent : Theme.alpha(Theme.accent, 0.18);
+        opacity: root.enabled ? 1 : 0.58;
+        transform-scale: root.down ? 0.95 : 1;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        clip: true;
+
+        animate background, border-color, opacity { duration: 150ms; easing: Ease.standard; }
+        animate border-radius, transform-scale, y {
+            duration: root.down ? 85ms : 310ms;
+            easing: root.down ? Ease.standard : spring(0.72);
+        }
+
+        Rectangle {
+            background: Theme.on-accent;
+            opacity: root.down ? 0.12 : 0;
+            animate opacity { duration: root.down ? 65ms : 160ms; easing: Ease.standard; }
+        }
+        Rectangle {
+            x: root.strike.x - self.width / 2;
+            y: root.strike.y - self.height / 2;
+            width: 2.3 * surface.width * root.ripple;
+            height: self.width;
+            border-radius: self.width / 2;
+            background: Theme.on-accent;
+            opacity: 0.25 * (1 - root.ripple);
+        }
+        glyph := Ico {
+            x: (parent.width - label.preferred-width - 24px) / 2 - (root.hot ? 8px : 0px);
+            source: root.icon;
+            size: 16px;
+            color: root.hot ? Theme.on-accent : Theme.accent;
+            accessible-role: none;
+            animate x { duration: 220ms; easing: Ease.emphasized; }
+            animate color { duration: 150ms; easing: Ease.standard; }
+        }
+        label := Text {
+            x: glyph.x + 24px;
+            width: self.preferred-width;
+            height: parent.height;
+            text: root.text;
+            color: root.hot ? Theme.on-accent : Theme.fg;
+            font-size: Theme.base;
+            font-weight: 700;
+            vertical-alignment: center;
+            accessible-role: none;
+            animate color { duration: 150ms; easing: Ease.standard; }
+        }
+        Ico {
+            x: label.x + label.width + (root.hot ? 9px : 2px);
+            source: Icons.arrow-right;
+            size: 15px;
+            color: Theme.on-accent;
+            opacity: root.hot ? 1 : 0;
+            accessible-role: none;
+            animate x { duration: 230ms; easing: Ease.emphasized; }
+            animate opacity { duration: root.hot ? 170ms : 85ms; easing: Ease.standard; }
+        }
+    }
+
+    keys := FocusScope {
+        enabled: root.enabled;
+        key-pressed(event) => {
+            if event.text == Key.Return || event.text == Key.Space {
+                if !event.repeat {
+                    root.pulse(root.width / 2, root.height / 2);
+                    root.clicked();
+                }
+                return accept;
+            }
+            reject
+        }
+        pointer := TouchArea {
+            width: parent.width;
+            height: parent.height;
+            enabled: root.enabled;
+            mouse-cursor: MouseCursor.pointer;
+            pointer-event(event) => {
+                if event.kind == PointerEventKind.down && event.button == PointerEventButton.left {
+                    root.pulse(self.mouse-x, self.mouse-y);
+                }
+            }
+            clicked => { root.clicked(); }
+        }
+    }
+}
+
+component LibrarySelectionMotion {
+    in property <int> index;
+    out property <float> progress: 1;
+    out property <float> direction: 1;
+    private property <int> previous: 0;
+
+    init => { previous = index; }
+    animate progress { duration: kick.running ? 0ms : 260ms; easing: Ease.emphasized; }
+    changed index => {
+        direction = index < previous ? -1 : 1;
+        previous = index;
+        kick.start();
+        kick.restart();
+        progress = 0;
+    }
+    kick := Timer {
+        interval: 16ms;
+        running: false;
+        triggered => {
+            self.stop();
+            root.progress = 1;
+        }
+    }
+}
+
+component LibrarySettingsButton inherits SettingsCog {
+    in property <bool> enabled;
+
+    width: 44px;
+    height: 44px;
+    always-visible: true;
+    blocked: !enabled;
+    accessible-role: button;
+    accessible-label: "Game settings";
+    accessible-enabled: enabled;
+    accessible-action-default => { if root.enabled { root.clicked(); } }
+    if enabled: Tooltip { text: @markdown("Game settings"); }
+}
+
+component LibraryRow inherits Rectangle {
+    in property <image> game-icon;
+    in property <string> name;
+    in property <string> full-title;
+    in property <bool> selected;
+    in property <bool> running;
+    in property <bool> enabled;
+    in property <int> index;
+    callback select();
+
+    border-radius: pointer.pressed ? 10px : 14px;
+    background: Theme.alpha(Theme.fg, pointer.pressed ? 0.11 : pointer.has-hover ? 0.055 : 0);
+    animate background, border-radius { duration: pointer.pressed ? 85ms : 185ms; easing: Ease.standard; }
+
+    accessible-role: list-item;
+    accessible-label: full-title;
+    accessible-enabled: enabled;
+    accessible-item-index: index;
+    accessible-item-selectable: true;
+    accessible-item-selected: selected;
+    accessible-action-default => { if root.enabled { root.select(); } }
+
+    Image {
+        x: pointer.has-hover && !pointer.pressed ? 13px : 11px;
+        y: (parent.height - self.height) / 2;
+        width: 28px;
+        height: 28px;
+        source: root.game-icon;
+        image-fit: ImageFit.contain;
+        accessible-role: none;
+        animate x { duration: 185ms; easing: Ease.standard; }
+    }
+    Text {
+        x: 50px;
+        width: parent.width - self.x - (root.running ? 30px : 12px);
+        height: parent.height;
+        text: root.name;
+        color: root.selected || pointer.has-hover ? Theme.fg : Theme.mix(Theme.fg, Theme.fg-dim, 0.56);
+        font-size: Theme.base + 1px;
+        font-weight: 600;
+        vertical-alignment: center;
+        wrap: word-wrap;
+        overflow: elide;
+        accessible-role: none;
+        animate color { duration: 160ms; easing: Ease.standard; }
+    }
+    if running: PulseDot {
+        x: parent.width - 20px;
+        y: (parent.height - self.height) / 2;
+    }
+
+    pointer := TouchArea {
+        enabled: root.enabled;
+        mouse-cursor: MouseCursor.pointer;
+        clicked => { root.select(); }
+    }
+}
+
+component LibraryDetails inherits Rectangle {
+    in property <GameCardData> game;
+    in property <string> number;
+    in property <string> name;
+    in property <int> selection;
+    in property <bool> enabled;
+    in property <bool> running;
+    in property <bool> settings-open;
+    callback play-or-setup();
+    callback settings(length, length, length);
+
+    private property <length> inset: clamp(self.width * 0.028, 12px, 26px);
+    private property <bool> side-by-side: content.width >= 410px;
+    private property <length> spacing: side-by-side ? clamp(content.width * 0.04, 16px, 36px) : 14px;
+    private property <length> summary-width: side-by-side
+        ? clamp(content.width * 0.29, 172px, 300px) : content.width;
+
+    border-radius: 22px;
+    border-width: 1px;
+    border-color: Theme.alpha(Theme.fg, 0.07);
+    background: Theme.mix(Theme.bg, Theme.surface, 0.48);
+    animate background, border-color { duration: 260ms; easing: Ease.standard; }
+
+    selection-motion := LibrarySelectionMotion { index: root.selection; }
+
+    content := Rectangle {
+        x: (parent.width - self.width) / 2;
+        y: root.inset;
+        width: min(1100px, parent.width - 2 * root.inset);
+        height: max(0px, parent.height - 2 * root.inset);
+
+        cover := Rectangle {
+            private property <float> aspect: root.game.cover.width > 0
+                ? root.game.cover.width / max(1, root.game.cover.height) : 1;
+            private property <length> space-width: root.side-by-side
+                ? parent.width - root.summary-width - root.spacing : parent.width;
+            private property <length> space-height: root.side-by-side
+                ? parent.height : max(0px, parent.height - summary.height - root.spacing);
+            x: (parent.width - self.width - (root.side-by-side ? root.summary-width + root.spacing : 0px)) / 2;
+            y: root.side-by-side
+                ? (parent.height - self.height) / 2
+                : (parent.height - self.height - root.spacing - summary.height) / 2;
+            width: max(0px, min(680px, space-width, space-height * aspect));
+            height: self.width / aspect;
+            visible: self.width > 0px;
+            border-radius: 20px;
+            background: Theme.surface-alt;
+            drop-shadow-blur: 28px;
+            drop-shadow-offset-y: 8px;
+            drop-shadow-color: Theme.alpha(black, Theme.dark ? 0.32 : 0.15);
+
+            Rectangle {
+                width: parent.width;
+                height: parent.height;
+                border-radius: cover.border-radius;
+                clip: true;
+
+                Rectangle {
+                    x: 9px * selection-motion.direction * (1 - selection-motion.progress);
+                    width: parent.width;
+                    height: parent.height;
+                    opacity: 0.34 + 0.66 * selection-motion.progress;
+                    transform-scale: 1 + 0.055 * (1 - selection-motion.progress);
+                    transform-origin: { x: self.width / 2, y: self.height / 2 };
+
+                    Image {
+                        width: parent.width;
+                        height: parent.height;
+                        source: root.game.cover;
+                        image-fit: ImageFit.cover;
+                        image-rendering: smooth;
+                        opacity: root.game.loaded ? 1 : 0;
+                        animate opacity { duration: 155ms; easing: Ease.standard; }
+                    }
+                }
+                if !root.game.loaded: Text {
+                    text: "Touhou " + root.number;
+                    color: Theme.fg-dim;
+                    font-size: Theme.base * 1.25;
+                    font-weight: 600;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    width: parent.width;
+                    height: parent.height;
+                    accessible-role: none;
+                }
+            }
+        }
+
+        title-metrics := Text {
+            visible: false;
+            text: root.name;
+            font-weight: 800;
+            font-size: clamp(root.summary-width * 0.13, 22px, 39px);
+            wrap: word-wrap;
+            overflow: clip;
+        }
+
+        summary := VerticalLayout {
+            x: root.side-by-side ? cover.x + cover.width + root.spacing : 0px;
+            y: root.side-by-side ? (parent.height - self.height) / 2 : cover.y + cover.height + root.spacing;
+            width: root.summary-width;
+            height: self.preferred-height;
+            spacing: 10px;
+
+            Text {
+                text: "TOUHOU " + root.number;
+                color: Theme.fg-dim;
+                font-size: max(11px, Theme.base * 0.9);
+                font-weight: 650;
+                letter-spacing: 1.6px;
+            }
+            Rectangle {
+                height: detail-title.preferred-height;
+
+                detail-title := Text {
+                    x: 7px * selection-motion.direction * (1 - selection-motion.progress);
+                    width: max(1px, parent.width - 8px);
+                    height: self.preferred-height;
+                    text: root.name;
+                    font-weight: title-metrics.font-weight;
+                    font-size: title-metrics.font-size * min(1, max(1px, self.width - 2px) / max(1px, title-metrics.min-width));
+                    color: Theme.fg;
+                    wrap: word-wrap;
+                    overflow: clip;
+                    opacity: 0.55 + 0.45 * selection-motion.progress;
+                }
+            }
+            VerticalLayout {
+                spacing: 0px;
+                Rectangle {
+                    private property <float> reveal: root.running || !root.game.has-exe ? 1 : 0;
+                    height: (status.preferred-height + 10px) * reveal;
+                    opacity: reveal;
+                    visible: reveal > 0;
+                    clip: true;
+                    animate reveal { duration: root.running ? 320ms : 260ms; easing: Ease.standard; }
+
+                    status := Text {
+                        x: 0px;
+                        y: 0px;
+                        height: self.preferred-height;
+                        text: root.running || root.game.has-exe ? "Playing" : "Game file not set";
+                        color: Theme.fg-dim;
+                        font-size: max(12px, Theme.base);
+                    }
+                }
+                HorizontalLayout {
+                    padding-top: 8px;
+                    spacing: 10px;
+                    alignment: start;
+                    LibraryLaunchButton {
+                        text: root.game.has-exe ? "Play" : "Set game file";
+                        icon: root.game.has-exe ? Icons.play : Icons.folder;
+                        enabled: root.enabled && !root.running;
+                        clicked => { root.play-or-setup(); }
+                    }
+                    LibrarySettingsButton {
+                        enabled: root.enabled;
+                        open: root.settings-open;
+                        clicked => { root.settings(self.absolute-position.x, self.absolute-position.y, self.width); }
+                    }
+                }
+            }
+        }
+    }
+}
+
+component GameLibrarySplitView inherits Rectangle {
+    in property <bool> enabled;
+    callback settings(int, length, length, length);
+
+    private property <int> selection: 0;
+    private property <duration> selection-duration: 230ms;
+    private property <bool> keyboard-selection: false;
+    private property <length> row-height: 49px;
+    private property <length> list-inset: 8px;
+    private property <bool> has-games: GamesApi.cards.length > 0;
+
+    function pick(index: int, from-keyboard: bool) {
+        if root.enabled && root.has-games {
+            let next = clamp(index, 0, GamesApi.cards.length - 1);
+            root.keyboard-selection = from-keyboard;
+            if next != root.selection {
+                let distance = abs(next - root.selection);
+                root.selection-duration = 80ms + 150ms / (1 + 0.30 * (distance - 1));
+                root.selection = next;
+            }
+            let row-top = root.list-inset + root.selection * root.row-height;
+            if row-top < list.offset {
+                list.scroll-to(row-top - root.list-inset);
+            } else if row-top + root.row-height > list.offset + list.height {
+                list.scroll-to(row-top + root.row-height + root.list-inset - list.height);
+            }
+        }
+    }
+
+    pure function number(key: string) -> string {
+        return key.replace-all("th", "");
+    }
+
+    pure function name(game: GameCardData) -> string {
+        return game.title.replace-all("Touhou " + root.number(game.key) + ": ", "");
+    }
+
+    list-surface := Rectangle {
+        x: 0px;
+        width: clamp(root.width * 0.26, 202px, 286px);
+        height: parent.height;
+        border-radius: 18px;
+        clip: true;
+        border-width: 1px;
+        border-color: Theme.alpha(Theme.fg, 0.09);
+        background: Theme.surface;
+        animate background, border-color { duration: 260ms; easing: Ease.standard; }
+
+        accessible-role: AccessibleRole.list;
+        accessible-label: "Games";
+        accessible-enabled: root.enabled;
+        accessible-item-count: GamesApi.cards.length;
+        accessible-delegate-focus: root.selection;
+        forward-focus: keys;
+
+        keys := FocusScope {
+            enabled: root.enabled && root.has-games;
+            key-pressed(event) => {
+                if event.text == Key.UpArrow { root.pick(root.selection - 1, true); return accept; }
+                if event.text == Key.DownArrow { root.pick(root.selection + 1, true); return accept; }
+                if event.text == Key.Home { root.pick(0, true); return accept; }
+                if event.text == Key.End { root.pick(GamesApi.cards.length - 1, true); return accept; }
+                reject
+            }
+        }
+
+        list := ScrollBox {
+            x: 1px;
+            y: 1px;
+            width: parent.width - 2px;
+            height: parent.height - 2px;
+            content-height: 2 * root.list-inset + root.row-height * GamesApi.cards.length;
+            interactive: root.enabled;
+
+            Rectangle {
+                x: root.list-inset;
+                y: root.list-inset + root.selection * root.row-height;
+                width: parent.width - 2 * root.list-inset;
+                height: root.row-height - 3px;
+                border-radius: 14px;
+                border-width: 1px;
+                border-color: Theme.alpha(Theme.accent, keys.has-focus && root.keyboard-selection ? 0.55 : 0.16);
+                background: Theme.mix(Theme.surface, Theme.accent, Theme.dark ? 0.18 : 0.12);
+                visible: root.has-games;
+                animate y { duration: root.selection-duration; easing: Ease.emphasized; }
+                animate background, border-color { duration: 175ms; easing: Ease.standard; }
+            }
+            for game[i] in GamesApi.cards: LibraryRow {
+                x: root.list-inset;
+                y: root.list-inset + i * root.row-height;
+                width: parent.width - 2 * root.list-inset;
+                height: root.row-height - 3px;
+                game-icon: game.icon.width > 0 ? game.icon : game.cover;
+                name: root.name(game);
+                full-title: game.title;
+                index: i;
+                selected: i == root.selection;
+                enabled: root.enabled;
+                running: GamesApi.running-visible && GamesApi.running-key == game.key;
+                select => { keys.focus(); root.pick(i, false); }
+            }
+        }
+    }
+
+    if has-games: LibraryDetails {
+        x: list-surface.width + 18px;
+        width: parent.width - self.x;
+        height: parent.height;
+        game: GamesApi.cards[root.selection];
+        number: root.number(self.game.key);
+        name: root.name(self.game);
+        selection: root.selection;
+        enabled: root.enabled;
+        running: GamesApi.running-visible && GamesApi.running-key == self.game.key;
+        settings-open: GamesApi.settings-open && GamesApi.settings-index == root.selection;
+        play-or-setup => { GamesApi.card-clicked(root.selection); }
+        settings(x, y, width) => { root.settings(root.selection, x, y, width); }
+    }
+}
+
+component CarouselCover inherits Rectangle {
+    in property <GameCardData> game;
+    in property <float> distance;
+    in property <bool> selected;
+    in property <bool> enabled;
+    in property <int> index;
+    callback select();
+
+    private property <float> center-weight: max(0, 1 - abs(distance));
+    private property <float> emphasis: center-weight * center-weight * (3 - 2 * center-weight);
+    opacity: (0.62 + 0.38 * emphasis) * clamp((2.65 - abs(distance)) / 1.50, 0, 1);
+    accessible-role: list-item;
+    accessible-label: game.title;
+    accessible-enabled: enabled;
+    accessible-item-index: index;
+    accessible-item-selectable: true;
+    accessible-item-selected: selected;
+    accessible-action-default => { if root.enabled { root.select(); } }
+
+    surface := Rectangle {
+        y: pointer.pressed ? 0px : pointer.has-hover ? -3px : 0px;
+        width: parent.width;
+        height: parent.height;
+        border-radius: clamp(self.width * 0.047, 9px, 21px);
+        background: Theme.surface-high;
+        clip: true;
+        transform-scale: pointer.pressed ? 0.975 : 1;
+        transform-origin: { x: self.width / 2, y: self.height / 2 };
+        animate y, transform-scale { duration: pointer.pressed ? 80ms : 240ms; easing: Ease.standard; }
+
+        Image {
+            width: parent.width;
+            height: parent.height;
+            source: root.game.cover;
+            image-fit: ImageFit.contain;
+            image-rendering: smooth;
+            opacity: root.game.loaded ? 1 : 0;
+            accessible-role: none;
+            animate opacity { duration: 140ms; easing: Ease.standard; }
+        }
+        if !game.loaded: Image {
+            width: min(44px, parent.width * 0.24);
+            height: self.width;
+            source: root.game.icon;
+            image-fit: ImageFit.contain;
+            accessible-role: none;
+        }
+
+        Rectangle {
+            border-radius: surface.border-radius;
+            border-width: 2px;
+            border-color: Theme.alpha(Theme.accent, root.emphasis * 0.94);
+            background: Theme.alpha(Theme.bg, (1 - root.emphasis) * (pointer.has-hover ? 0.04 : 0.18));
+            animate background { duration: 150ms; easing: Ease.standard; }
+        }
+    }
+    pointer := TouchArea {
+        enabled: root.enabled && !root.selected;
+        mouse-cursor: MouseCursor.pointer;
+        clicked => { root.select(); }
+    }
+}
+
+component GameLibraryCarousel inherits Rectangle {
+    in property <bool> enabled;
+    in property <length> content-offset;
+    in property <length> top-inset;
+    in property <length> bottom-inset;
+    callback settings(int, length, length, length);
+
+    private property <int> count: GamesApi.cards.length;
+    private property <int> turn: 0;
+    private property <int> selected: mod(turn, max(1, count));
+    private property <GameCardData> game: count > 0 ? GamesApi.cards[selected] : {};
+    private property <bool> running: GamesApi.running-visible && GamesApi.running-key == game.key;
+    private property <float> position: 0;
+    private property <bool> dragging: false;
+    private property <float> drag-start: 0;
+    private property <length> wheel-distance: 0px;
+    private property <length> available-height: max(0px, self.height - top-inset - bottom-inset);
+    private property <length> vertical-padding: clamp(available-height * 0.035, 8px, 28px);
+    private property <length> stage-height: max(0px, available-height - 2 * vertical-padding);
+    private property <length> details-gap: clamp(stage-height * 0.036, 12px, 24px);
+    private property <length> rail-padding: 6px;
+    private property <length> cover-size: max(0px, min(540px, self.width * 0.40, stage-height - info.height - details-gap - 2 * rail-padding));
+    private property <length> stack-height: rail.height + details-gap + info.height;
+    private property <length> spacing: cover-size * 0.89 + 16px;
+    private property <float> distance-to-center: abs(position - turn);
+    animate position { duration: dragging ? 0ms : 330ms; easing: cubic-bezier(0.24, 0.72, 0.24, 1); }
+
+    function select(next: int) {
+        if root.count > 1 {
+            root.turn = next;
+            root.position = next;
+        }
+    }
+
+    pure function relative-position(index: int) -> float {
+        let length = max(1, root.count);
+        return mod(index - root.position + length / 2.0, length) - length / 2.0;
+    }
+
+    selection-motion := LibrarySelectionMotion { index: root.turn; }
+
+    wheel-reset := Timer {
+        interval: 170ms;
+        running: false;
+        triggered => {
+            root.wheel-distance = 0px;
+            self.stop();
+        }
+    }
+
+    Rectangle {
+        width: parent.width;
+        height: parent.height;
+        background: @radial-gradient(circle, Theme.alpha(Theme.accent, Theme.dark ? 0.23 : 0.15), Theme.alpha(Theme.accent, 0.03) 56%, transparent 85%);
+    }
+    Rectangle {
+        y: 0px;
+        height: root.top-inset + 42px;
+        background: @linear-gradient(180deg, Theme.bg, Theme.alpha(Theme.bg, 0.35) 42%, transparent);
+    }
+
+    rail := FocusScope {
+        y: root.top-inset + root.vertical-padding + max(0px, root.stage-height - root.stack-height) * 0.44 + root.content-offset;
+        width: parent.width;
+        height: root.cover-size + 2 * root.rail-padding;
+        enabled: root.enabled && root.count > 0;
+        accessible-role: list;
+        accessible-label: "Games carousel";
+        accessible-item-count: root.count;
+        accessible-delegate-focus: root.selected;
+        key-pressed(event) => {
+            if !root.dragging && event.text == Key.LeftArrow { root.select(root.turn - 1); return accept; }
+            if !root.dragging && event.text == Key.RightArrow { root.select(root.turn + 1); return accept; }
+            reject
+        }
+
+        Rectangle {
+            clip: true;
+            SwipeGestureHandler {
+                enabled: root.enabled && root.count > 1;
+                handle-swipe-left: true;
+                handle-swipe-right: true;
+                moved => {
+                    if self.swiping {
+                        if !root.dragging {
+                            root.drag-start = root.position;
+                            root.dragging = true;
+                        }
+                        root.position = root.drag-start + (self.pressed-position.x - self.current-position.x) / root.spacing;
+                    }
+                }
+                swiped => {
+                    let target = root.drag-start + (self.pressed-position.x - self.current-position.x) / root.spacing;
+                    root.dragging = false;
+                    root.select(round(target));
+                }
+                cancelled => {
+                    root.dragging = false;
+                    root.position = root.turn;
+                }
+
+                TouchArea {
+                    enabled: root.enabled;
+                    scroll-event(event) => {
+                        if root.count < 2 || root.dragging { return reject; }
+                        let delta = abs(event.delta-x) > abs(event.delta-y) ? event.delta-x : event.delta-y;
+                        if delta == 0px { return reject; }
+                        if (delta < 0px) != (root.wheel-distance < 0px) { root.wheel-distance = 0px; }
+                        root.wheel-distance += delta;
+                        wheel-reset.start();
+                        wheel-reset.restart();
+                        if abs(root.wheel-distance) >= 46px {
+                            root.select(root.turn + (root.wheel-distance < 0px ? 1 : -1));
+                            root.wheel-distance = 0px;
+                        }
+                        accept
+                    }
+                    for game[i] in GamesApi.cards: CarouselCover {
+                        distance: root.relative-position(i);
+                        x: (parent.width - self.width) / 2 + self.distance * root.spacing;
+                        y: (parent.height - self.height) / 2 + 8px * min(1, abs(self.distance));
+                        width: root.cover-size * (1 - 0.27 * min(1, abs(self.distance)));
+                        height: self.width;
+                        visible: abs(self.distance) < 2.65 && self.width > 0px;
+                        game: game;
+                        index: i;
+                        selected: i == root.selected;
+                        enabled: root.enabled && !root.dragging && self.visible;
+                        select => {
+                            rail.focus();
+                            root.select(round(root.position + self.distance));
+                        }
+                    }
+                }
+            }
+        }
+
+        if self.has-focus: Rectangle {
+            x: (parent.width - self.width) / 2;
+            y: (parent.height - self.height) / 2;
+            width: root.cover-size + 8px;
+            height: self.width;
+            border-radius: clamp(root.cover-size * 0.047, 9px, 21px) + 4px;
+            border-width: 1px;
+            border-color: Theme.alpha(Theme.accent, 0.46);
+            opacity: clamp(1 - root.distance-to-center, 0, 1);
+        }
+    }
+
+    info := VerticalLayout {
+        private property <bool> available: root.enabled && !root.dragging;
+        x: 30px;
+        y: rail.y + rail.height + root.details-gap;
+        width: parent.width - 60px;
+        height: self.preferred-height;
+        spacing: clamp(root.stage-height * 0.021, 7px, 12px);
+        visible: root.count > 0;
+
+        Rectangle {
+            height: title.preferred-height;
+
+            title := Text {
+                x: 14px * selection-motion.direction * (1 - selection-motion.progress);
+                y: 0px;
+                width: parent.width;
+                height: self.preferred-height;
+                text: root.game.title;
+                color: Theme.fg;
+                font-weight: 800;
+                font-size: clamp(min(root.width * 0.031, root.stage-height * 0.072), 20px, 38px);
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                overflow: elide;
+                opacity: 0.55 + 0.45 * selection-motion.progress;
+            }
+        }
+        HorizontalLayout {
+            alignment: center;
+            spacing: 10px;
+            LibraryLaunchButton {
+                text: root.running ? "Playing" : root.game.has-exe ? "Play" : "Set game file";
+                icon: root.game.has-exe ? Icons.play : Icons.folder;
+                enabled: info.available && !root.running;
+                clicked => { GamesApi.card-clicked(root.selected); }
+            }
+            LibrarySettingsButton {
+                enabled: info.available;
+                open: GamesApi.settings-open && GamesApi.settings-index == root.selected;
+                clicked => { root.settings(root.selected, self.absolute-position.x, self.absolute-position.y, self.width); }
+            }
+        }
+    }
+}
+
+component LibraryViewTransition {
+    in property <bool> active;
+    out property <float> progress: active ? 1 : 0;
+    out property <length> offset: 10px * (1 - progress);
+    animate progress { duration: 275ms; easing: cubic-bezier(0.22, 0.65, 0.25, 1); }
+}
+
 export component GamesPage inherits Rectangle {
+    in property <bool> enabled: true;
     background: Theme.bg;
     animate background { duration: 300ms; }
     property <length> side-pad: 30px;
@@ -540,6 +1590,39 @@ export component GamesPage inherits Rectangle {
     property <length> cell-w: (avail - (cols - 1) * gap) / cols;
     property <int> rows: ceil(GamesApi.cards.length / cols);
     property <length> row-h: GamesApi.any-unset ? 270px : 250px;
+
+    private property <LibraryMode> mode: GamesApi.initial-library-mode;
+    private property <bool> split-opened: GamesApi.initial-library-mode == LibraryMode.split;
+    private property <bool> carousel-opened: GamesApi.initial-library-mode == LibraryMode.carousel;
+    private property <length> content-top: header.y + header.preferred-height + 4px;
+    private property <length> running-bar-margin: 14px;
+    private property <length> running-bar-footprint: running-bar.height + running-bar-margin;
+    private property <float> running-bar-progress: GamesApi.running-visible ? 1 : 0;
+    animate running-bar-progress { duration: GamesApi.running-visible ? 320ms : 260ms; easing: Ease.standard; }
+    grid-transition := LibraryViewTransition { active: root.mode == LibraryMode.grid; }
+    split-transition := LibraryViewTransition { active: root.mode == LibraryMode.split; }
+    carousel-transition := LibraryViewTransition { active: root.mode == LibraryMode.carousel; }
+
+    function open-game-settings(index: int, x: length, y: length, width: length) {
+        GamesApi.anchor-x = x - root.absolute-position.x;
+        GamesApi.anchor-y = y - root.absolute-position.y;
+        GamesApi.anchor-width = width;
+        GamesApi.open-settings(index);
+    }
+
+    if carousel-opened || carousel-transition.progress > 0: GameLibraryCarousel {
+        x: 0px;
+        y: 0px;
+        width: parent.width;
+        height: parent.height;
+        top-inset: root.content-top;
+        bottom-inset: root.running-bar-footprint + 10px;
+        content-offset: carousel-transition.offset;
+        opacity: carousel-transition.progress;
+        visible: self.opacity > 0;
+        enabled: root.enabled && carousel-transition.active && self.visible;
+        settings(index, x, y, width) => { root.open-game-settings(index, x, y, width); }
+    }
 
     header := Text {
         x: 30px;
@@ -551,9 +1634,28 @@ export component GamesPage inherits Rectangle {
         animate color { duration: 300ms; }
     }
 
+    LibraryViewButton {
+        x: header.x + header.preferred-width + 6px;
+        y: header.y + (header.preferred-height - self.height) / 2;
+        current: root.mode;
+        visible: !SettingsApi.hide-library-view-button;
+        enabled: root.enabled && self.visible;
+        selected(view) => {
+            if view != root.mode {
+                root.mode = view;
+                if view == LibraryMode.split { root.split-opened = true; }
+                if view == LibraryMode.carousel { root.carousel-opened = true; }
+                GamesApi.library-mode-changed(view);
+            }
+        }
+    }
+
     scroller := ScrollBox {
-        y: header.y + header.preferred-height + 4px;
-        height: root.height - self.y;
+        y: root.content-top + grid-transition.offset;
+        height: root.height - root.content-top;
+        opacity: grid-transition.progress;
+        visible: self.opacity > 0;
+        interactive: root.enabled && grid-transition.active;
         content-height: 14px + rows * row-h + (rows - 1) * gap + 96px;
         for card[i] in GamesApi.cards: GameCard {
             data: card;
@@ -562,7 +1664,8 @@ export component GamesPage inherits Rectangle {
             y: 14px + floor(i / root.cols) * (root.row-h + root.gap);
             running: GamesApi.running-key == card.key && GamesApi.running-visible;
             settings-active: GamesApi.settings-open && GamesApi.settings-index == i;
-            blocked: GamesApi.settings-open;
+            enabled: root.enabled && grid-transition.active;
+            blocked: !self.enabled || GamesApi.settings-open;
             clicked => { GamesApi.card-clicked(i); }
             cog-clicked => {
                 if GamesApi.settings-open && GamesApi.settings-index == i {
@@ -570,17 +1673,30 @@ export component GamesPage inherits Rectangle {
                 } else {
                     GamesApi.anchor-x = self.x + scroller.x;
                     GamesApi.anchor-y = self.y + scroller.y - scroller.offset;
+                    GamesApi.anchor-width = self.width;
                     GamesApi.open-settings(i);
                 }
             }
         }
     }
 
-    RunningBar {
+    if split-opened || split-transition.progress > 0: GameLibrarySplitView {
+        x: root.side-pad;
+        y: root.content-top + 14px + split-transition.offset;
+        width: parent.width - 2 * self.x;
+        height: max(0px, parent.height - root.content-top - 30px - (running-bar.height + 10px) * root.running-bar-progress);
+        opacity: split-transition.progress;
+        visible: self.opacity > 0;
+        enabled: root.enabled && split-transition.active && self.visible;
+        settings(index, x, y, width) => { root.open-game-settings(index, x, y, width); }
+    }
+
+    running-bar := RunningBar {
         x: 30px;
         width: root.width - 60px;
-        y: root.height - self.height - 14px;
+        y: root.height - root.running-bar-footprint * (self.slide-as-unit ? root.running-bar-progress : 1);
         shown: GamesApi.running-visible;
+        slide-as-unit: split-transition.active;
         title: GamesApi.running-title;
         time: GamesApi.running-time;
         visible: self.opacity > 0.01;

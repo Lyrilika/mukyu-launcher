@@ -637,7 +637,6 @@ component TrackPanel inherits Rectangle {
             if MusicApi.list-state == 0: ScrollBox {
                 y: list.rise;
                 height: list.height;
-                bar-color: Theme.mu-text;
                 content-height: MusicApi.tracks.length * 52px;
                 for row[i] in MusicApi.tracks: TrackRowItem {
                     y: i * 52px + 2px;

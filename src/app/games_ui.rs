@@ -11,7 +11,8 @@ use super::{ctx, post, Ctx, ACCENT, NEUTRAL};
 use crate::filepicker::{self, Picked};
 use crate::games::{self, GameConfig, GameEntry, LaunchError, GAMES};
 use crate::platform::{self, GameProcess};
-use crate::{GameCardData, GamesApi};
+use crate::theme::LibraryView;
+use crate::{GameCardData, GamesApi, LibraryMode};
 
 pub struct Running {
     proc: GameProcess,
@@ -95,11 +96,15 @@ fn index_of(key: &str) -> Option<usize> {
 
 pub fn setup(c: &Rc<Ctx>) {
     let config = games::load_config();
+    let icon_dir = crate::paths::assets_dir().join("game_icons");
     let data: Vec<GameCardData> = GAMES
         .iter()
         .map(|g| GameCardData {
             key: g.key.into(),
             title: g.title.into(),
+            icon: decode_scaled(&icon_dir.join(format!("{}.png", g.key)), 32)
+                .map(|icon| Image::from_rgba8(to_pixels(&icon)))
+                .unwrap_or_default(),
             cover: Image::default(),
             gray: Image::default(),
             loaded: false,
@@ -114,6 +119,21 @@ pub fn setup(c: &Rc<Ctx>) {
         g.cards = Some(model.clone());
     }
     let api = c.app.global::<GamesApi>();
+    api.set_initial_library_mode(match c.theme.borrow().library_view {
+        LibraryView::Grid => LibraryMode::Grid,
+        LibraryView::Split => LibraryMode::Split,
+        LibraryView::Carousel => LibraryMode::Carousel,
+    });
+    api.on_library_mode_changed(|mode| {
+        let c = ctx();
+        let mut settings = c.theme.borrow_mut();
+        settings.library_view = match mode {
+            LibraryMode::Grid => LibraryView::Grid,
+            LibraryMode::Split => LibraryView::Split,
+            LibraryMode::Carousel => LibraryView::Carousel,
+        };
+        settings.save();
+    });
     api.set_cards(model);
     api.set_windows(cfg!(windows));
     if cfg!(target_os = "linux") && !games::NO_GE_PROTON {

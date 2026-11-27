@@ -86,15 +86,27 @@ export component ReaderWindow inherits Window {
                 image-fit: ImageFit.contain;
                 visible: root.has-page;
             }
-            pic-ta := TouchArea {
-                mouse-cursor: root.ui-visible ? default : none;
+            SwipeGestureHandler {
+                enabled: root.count > 1;
+                handle-swipe-up: true;
+                handle-swipe-down: true;
                 moved => { root.poke(); }
-                changed mouse-x => { root.poke(); }
-                changed mouse-y => { root.poke(); }
-                clicked => { root.picture-clicked(self.mouse-x, self.width); }
-                scroll-event(e) => {
-                    root.scrolled(e.delta-y);
-                    accept
+                swiped => {
+                    let distance = self.current-position.y - self.pressed-position.y;
+                    if distance <= -40px { root.next(); }
+                    else if distance >= 40px { root.prev(); }
+                }
+
+                TouchArea {
+                    mouse-cursor: root.ui-visible ? default : none;
+                    moved => { root.poke(); }
+                    changed mouse-x => { root.poke(); }
+                    changed mouse-y => { root.poke(); }
+                    clicked => { root.picture-clicked(self.mouse-x, self.width); }
+                    scroll-event(e) => {
+                        root.scrolled(e.delta-y);
+                        accept
+                    }
                 }
             }
         }

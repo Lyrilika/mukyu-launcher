@@ -230,6 +230,14 @@ fn setup_settings(c: &Rc<Ctx>) {
         settings.system_title_bar = enabled;
         settings.save();
     });
+    s.set_hide_library_view_button(c.theme.borrow().hide_library_view_button);
+    s.on_set_hide_library_view_button(|hidden| {
+        let c = ctx();
+        c.app.global::<SettingsApi>().set_hide_library_view_button(hidden);
+        let mut settings = c.theme.borrow_mut();
+        settings.hide_library_view_button = hidden;
+        settings.save();
+    });
     c.sync_picker();
 
     s.on_hsv_color(|h, sat, v| color(hsv_to_rgb(h as f64, sat as f64, v as f64)));

@@ -9,6 +9,16 @@ pub type Rgb = [f64; 3];
 
 pub const DEFAULT_ACCENT: &str = "#d96bc8";
 
+#[derive(Clone, Copy, Debug, Default, Deserialize, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LibraryView {
+    Split,
+    Carousel,
+    #[default]
+    #[serde(other)]
+    Grid,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ThemeSettings {
     #[serde(default = "default_mode")]
@@ -17,6 +27,10 @@ pub struct ThemeSettings {
     pub accent_color: String,
     #[serde(default)]
     pub system_title_bar: bool,
+    #[serde(default)]
+    pub library_view: LibraryView,
+    #[serde(default)]
+    pub hide_library_view_button: bool,
 }
 
 fn default_mode() -> String {
@@ -32,6 +46,8 @@ impl Default for ThemeSettings {
             mode: default_mode(),
             accent_color: default_accent(),
             system_title_bar: false,
+            library_view: LibraryView::default(),
+            hide_library_view_button: false,
         }
     }
 }

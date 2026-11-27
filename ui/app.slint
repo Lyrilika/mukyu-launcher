@@ -1,7 +1,7 @@
 import "fonts/Rubik.ttf";
 import { Theme, Ease, Icons } from "theme.slint";
 import { Ico, Scrim, MenuItem, WindowInfo } from "widgets.slint";
-import { GamesPage, GamesApi, GameCardData, GameSettingsPopover } from "games.slint";
+import { GamesPage, GamesApi, GameCardData, GameSettingsPopover, LibraryMode } from "games.slint";
 import { MusicPage, MusicApi, TrackRow } from "music.slint";
 import { PrintWorksPage, PrintApi, PrintWorkData } from "printworks.slint";
 import { SettingsDialog, SettingsApi } from "settings.slint";
@@ -10,7 +10,7 @@ import { MessageDialog, DownloadDialog, DialogApi, DownloadApi, DialogButton } f
 import { ReaderWindow } from "reader.slint";
 import { UpdateDialog, UpdateApi, ChangelogDialog, ChangelogApi } from "update.slint";
 
-export { Theme, GamesApi, GameCardData, MusicApi, TrackRow, MenuItem, PrintApi, PrintWorkData, SettingsApi, DialogApi, DownloadApi, DialogButton, ReaderWindow, UpdateApi, ChangelogApi }
+export { Theme, GamesApi, GameCardData, LibraryMode, MusicApi, TrackRow, MenuItem, PrintApi, PrintWorkData, SettingsApi, DialogApi, DownloadApi, DialogButton, ReaderWindow, UpdateApi, ChangelogApi }
 
 export global AppApi {
     in-out property <int> tab: 0;
@@ -234,6 +234,7 @@ export component AppWindow inherits Window {
             height: root.height - self.y;
             clip: true;
             GamesPage {
+                enabled: AppApi.tab == 0 && abs(root.page-pos) < 0.01 && !root.any-overlay && !UpdateApi.open && !ChangelogApi.open;
                 x: (0 - root.page-pos) * parent.width;
                 width: parent.width;
                 height: parent.height;
@@ -265,7 +266,7 @@ export component AppWindow inherits Window {
 
         popover := GameSettingsPopover {
             shown: GamesApi.settings-open;
-            property <length> right-x: GamesApi.anchor-x + 210px + 12px;
+            property <length> right-x: GamesApi.anchor-x + GamesApi.anchor-width + 12px;
             property <length> left-x: GamesApi.anchor-x - self.width - 12px;
             property <bool> on-right: right-x + self.width <= root.width - 10px;
             x: round((on-right ? right-x : max(10px, left-x)) / 1px) * 1px;
